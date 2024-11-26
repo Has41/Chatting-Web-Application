@@ -1,0 +1,12 @@
+{
+  "overrides": [
+    {
+      "files": ["*.jsx", "*.js"],
+      "options": {
+        "semi": false,
+        "printWidth": 130,
+        "trailingComma": "none"
+      }
+    }
+  ]
+}
