@@ -4,6 +4,7 @@ import Home from "./pages/Home"
 // import PrivateTest from "./pages/PrivateTest"
 // import GroupTest from "./pages/GroupTest"
 import GetStarted from "./pages/GetStarted"
+import ChatArea from "./pages/ChatArea"
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
         {/* <Route index element={<PrivateTest />} /> */}
         {/* <Route index element={<GroupTest />} /> */}
         <Route path="/auth" element={<GetStarted />} />
+        <Route path="/chat" element={<ChatArea />} />
       </Routes>
     </>
   )

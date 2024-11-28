@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import Login from "../components/Login"
-import Register from "../components/Register"
+import Login from "../components/Auth/Login"
+import Register from "../components/Auth/Register"
 
 const GetStarted = () => {
   const [currentForm, setCurrentForm] = useState("Register")
@@ -36,10 +36,7 @@ const GetStarted = () => {
         .to(greenSectionRef.current, {
           width: "100%",
           duration: 1,
-          ease: "power2.inOut",
-          onStart: () => {
-            greenSectionRef.current.style.left = "0" // Ensure initial position
-          }
+          ease: "power2.inOut"
         })
         .set(greenSectionTextRef.current, { opacity: 1, duration: 2, paddingBottom: "10%", ease: "power2.inOut" })
         .to(greenSectionRef.current, {
@@ -76,22 +73,22 @@ const GetStarted = () => {
           width: "100%",
           duration: 1,
           left: "-50%",
-          borderBottomRightRadius: "9999px",
           borderTopLeftRadius: "0px",
+          borderBottomRightRadius: "0px",
           ease: "power2.inOut"
         })
-        .set(greenSectionTextRef.current, { duration: 2, opacity: 1, paddingBottom: "25%", ease: "power2.inOut" })
+        .to(greenSectionTextRef.current, { duration: 0, opacity: 1, paddingBottom: "25%", ease: "power2.inOut" })
         .to(
           subGreenSectionRef.current,
           {
-            borderBottomRightRadius: "9999px",
+            borderBottomRightRadius: "0px",
             borderTopLeftRadius: "0px",
             left: 0,
             bottom: 0,
             duration: 1,
             ease: "power2.inOut"
           },
-          "-=2"
+          "-=1"
         )
         .to(greenSectionRef.current, {
           width: "34%",
@@ -100,8 +97,18 @@ const GetStarted = () => {
           bottom: 0,
           top: 0,
           duration: 1,
+          borderBottomRightRadius: "9999px",
           ease: "power2.inOut"
         })
+        .to(
+          subGreenSectionRef.current,
+          {
+            borderBottomRightRadius: "9999px",
+            duration: 1,
+            ease: "power2.inOut"
+          },
+          "-=1"
+        )
         .set(formContainerRef.current, { opacity: 0, duration: 2, ease: "power2.inOut" }, "-=2")
         .set(formContainerRef.current, { opacity: 1, duration: 2, ease: "power2.inOut" })
         .to(formContainerRef.current, { marginLeft: "55%", duration: 1 }, "-=1")

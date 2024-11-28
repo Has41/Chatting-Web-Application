@@ -34,14 +34,14 @@ const Home = () => {
 
   return (
     <main>
-      {/* Eagerly-loaded components */}
+      {/* Early-loaded components */}
       <div className="h-screen">
         <Navbar />
         <HeroComponent />
       </div>
 
       {/* Lazy-loaded components with fixed-height placeholders */}
-      <div ref={introSectionRef} style={{ minHeight: "500px" }}>
+      <div ref={introSectionRef} style={{ minHeight: "500px", textAlign: "center" }}>
         {isIntroSectionVisible ? (
           <Suspense fallback={<div>Loading Intro Section...</div>}>
             <IntroSection />
@@ -51,7 +51,7 @@ const Home = () => {
         )}
       </div>
 
-      <div ref={appBenefitsRef} style={{ minHeight: "500px" }}>
+      <div ref={appBenefitsRef} style={{ minHeight: "500px", textAlign: "center" }}>
         {isAppBenefitsVisible ? (
           <Suspense fallback={<div>Loading App Benefits...</div>}>
             <AppBenefits />
@@ -61,7 +61,7 @@ const Home = () => {
         )}
       </div>
 
-      <div ref={whyChooseUsRef} style={{ minHeight: "500px" }}>
+      <div ref={whyChooseUsRef} style={{ minHeight: "500px", textAlign: "center" }}>
         {isWhyChooseUsVisible ? (
           <Suspense fallback={<div>Loading Why Choose Us...</div>}>
             <WhyChooseUs />
@@ -71,7 +71,7 @@ const Home = () => {
         )}
       </div>
 
-      <div ref={trustedByPeopleRef} style={{ minHeight: "400px" }}>
+      <div ref={trustedByPeopleRef} style={{ minHeight: "400px", textAlign: "center" }}>
         {isTrustedByPeopleVisible ? (
           <Suspense fallback={<div>Loading Trusted By People...</div>}>
             <TrustedByPeople />
@@ -81,7 +81,7 @@ const Home = () => {
         )}
       </div>
 
-      <div ref={connectSectionRef} style={{ minHeight: "400px" }}>
+      <div ref={connectSectionRef} style={{ minHeight: "400px", textAlign: "center" }}>
         {isConnectSectionVisible ? (
           <Suspense fallback={<div>Loading Connect Section...</div>}>
             <ConnectSection />
