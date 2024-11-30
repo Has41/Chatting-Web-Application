@@ -6,7 +6,7 @@ const Sidebar = () => {
 
   return (
     <nav
-      className={`h-screen font-poppins flex flex-col items-center justify-between border-r border-r-slate-100 bg-white ${
+      className={`h-screen font-poppins flex flex-col items-center justify-between bg-white ${
         isHovered ? "w-[12%]" : "w-[6%]"
       } transition-all duration-500`}
       onMouseEnter={() => setIsHovered(true)}
@@ -77,8 +77,8 @@ const Sidebar = () => {
           {isHovered && <span className="ml-1 text-sm text-gray-600">Settings</span>}
         </div>
         <div className="flex items-center">
-          <div>
-            <img className="size-10 bg-slate-300 cursor-pointer rounded-full" src="" alt="User Profile" />
+          <div className="size-10 bg-slate-300 cursor-pointer rounded-full">
+            {/* <img className="" src="" alt="User Profile" /> */}
           </div>
           {isHovered && <div className="ml-2 text-sm text-gray-600">Profile</div>}
         </div>

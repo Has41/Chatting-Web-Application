@@ -10,7 +10,6 @@ const useIntersectionObserver = (ref, options = { root: null, rootMargin: "0px",
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIsVisible(true)
-        // Disconnect the observer to stop observing this element after it becomes visible
         observer.disconnect()
       }
     }, options)

@@ -3,7 +3,10 @@ import onlineUser from "../../assets/man.jpg"
 
 const ChatList = () => {
   return (
-    <aside className="w-1/4 h-screen bg-gray-50 border-r border-r-slate-50 font-poppins" aria-label="Chat List">
+    <aside
+      className="w-1/4 h-screen bg-gray-50 border-l border-l-slate-200 border-r border-r-slate-200 font-poppins"
+      aria-label="Chat List"
+    >
       <section className="p-4">
         <h2 className="text-xl text-black/80 font-semibold mb-4">Chats</h2>
         <div className="mb-4 relative w-11/12 mx-auto">
@@ -34,32 +37,38 @@ const ChatList = () => {
         <div className="my-8">
           <div className="w-[5rem] h-14 bg-slate-100 shadow-sm rounded-lg relative flex flex-col items-center justify-center">
             <div className="relative">
-              <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" />
+              <div className="cursor-pointer size-12 mb-1 rounded-full -mt-5 bg-green-200"></div>
+              {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}
               <span className="absolute bottom-1 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
             </div>
             <p className="text-sm text-black/80 font-semibold">User</p>
           </div>
         </div>
-        <div>
+        <div className="max-w-full">
           <div>
             <h1 className="text-black/80 font-semibold mb-4">Recent</h1>
           </div>
-          <div className="my-4">
+          <div className="my-4 w-full">
             <ul className="space-y-4">
-              <li className="flex items-center p-2 rounded hover:bg-gray-100 rounded-md transition-all duration-500 cursor-pointer">
+              <li className="flex items-center p-2 rounded hover:bg-gray-100 transition-all duration-500 cursor-pointer">
                 {/* Profile Image Div */}
                 <div className="w-12 h-12 rounded-full bg-slate-200 mr-3">
                   {/* <img className="w-full h-full" src="profileImageURL" alt="User" /> */}
                 </div>
-
                 {/* Chat Details Div (Username and Recent Message) */}
                 <div className="flex-1">
                   <div className="font-semibold text-gray-800">John Doe</div>
                   <div className="text-sm text-gray-600 truncate">Hey, how's it going?</div>
                 </div>
-
                 {/* Time Div (Separated) */}
-                <div className="text-sm text-gray-500">10:30 AM</div>
+                <div className="text-xs flex flex-col gap-y-2 text-gray-500">
+                  <div>
+                    <p>10:00 pm</p>
+                  </div>
+                  <div className="size-6 rounded-full ml-auto flex items-center justify-center text-center text-green-500 bg-green-100">
+                    <p>5</p>
+                  </div>
+                </div>
               </li>
             </ul>
           </div>

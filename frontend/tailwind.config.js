@@ -37,6 +37,10 @@ export default {
       },
       animation: {
         "ping-slow": "ping-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+      },
+      borderRadius: {
+        sent: "18px 18px 0 18px",
+        recieved: "18px 18px 18px 0"
       }
     }
   },
