@@ -2,6 +2,7 @@ import { Server } from "socket.io"
 import userSocketMap from "./utils/socketMap.js"
 import { sendMessage, markMessageAsSeen } from "./handlers/messageHandlers.js"
 import joinGroup from "./handlers/groupHandlers.js"
+import validateSocketData from "./utils/socketValidator.js"
 
 let io
 
@@ -28,14 +29,17 @@ const setupSocket = (server) => {
 
   const setupSocketEvents = (socket) => {
     socket.on("sendMessage", async (messageData, fileData) => {
+      if (!validateSocketData(socket, socket.handshake.query, "sendMessage")) return
       await sendMessage(messageData, fileData)
     })
 
     socket.on("markMessageAsSeen", async (conversationId, userId, conversationType) => {
+      if (!validateSocketData(socket, socket.handshake.query, "markMessageAsSeen")) return
       await markMessageAsSeen(conversationId, userId, conversationType)
     })
 
     socket.on("join-group", async (conversationId, userId) => {
+      if (!validateSocketData(socket, socket.handshake.query, "join-group")) return
       await joinGroup(socket, conversationId, userId)
     })
   }

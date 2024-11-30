@@ -32,7 +32,7 @@ const conversationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: function () {
-        return this.conversationType === "group"
+        return this.conversationType === "group" || this.conversationType === "channel"
       },
     },
     createdAt: {

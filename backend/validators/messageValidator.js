@@ -34,4 +34,9 @@ const validateBothId = [
     .withMessage("Invalid recipient ID format."),
 ]
 
-export { validateMessageId, editMessageValidator, addReactionValidator, validateBothId }
+const validateSendMessage = [
+  body("messageData").isObject().withMessage("Message data must be an object!"),
+  body("fileData").optional().isObject().withMessage("File data must be an object if provided"),
+]
+
+export { validateMessageId, editMessageValidator, addReactionValidator, validateBothId, validateSendMessage }
