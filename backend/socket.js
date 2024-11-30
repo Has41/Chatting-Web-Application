@@ -54,6 +54,11 @@ const setupSocket = (server) => {
     //* Event Handlers
     setupSocketEvents(socket)
 
+    socket.on("checkIfOnline", (userId, callback) => {
+      const isOnline = userSocketMap.has(userId)
+      callback(isOnline)
+    })
+
     socket.on("disconnect", () => disconnect(socket))
   })
 }
