@@ -1,6 +1,6 @@
 import React from "react"
 import chatVideo from "../../assets/sectionVid.mp4"
-import { trustIcons } from "../../utils/DynamicData"
+import { trustIcons } from "../../utils/dynamicData"
 
 const WhyChooseUs = () => {
   return (

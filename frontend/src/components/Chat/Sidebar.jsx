@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { navOptions } from "../../utils/DynamicData"
+import { navOptions } from "../../utils/dynamicData"
 
 const Sidebar = () => {
   const [isHovered, setIsHovered] = useState(false)

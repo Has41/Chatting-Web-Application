@@ -1,5 +1,5 @@
 import React from "react"
-import { chatOptions } from "../../utils/DynamicData"
+import { chatOptions } from "../../utils/dynamicData"
 
 const Chatbox = () => {
   return (

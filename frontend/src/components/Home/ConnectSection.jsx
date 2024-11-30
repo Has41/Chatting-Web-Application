@@ -5,7 +5,7 @@ import firstOperator from "../../assets/operator1.jpg"
 import secondOperator from "../../assets/operator2.jpg"
 import thirdOperator from "../../assets/operator3.jpg"
 import fourthOperator from "../../assets/operator4.jpg"
-import { connectIcons } from "../../utils/DynamicData"
+import { connectIcons } from "../../utils/dynamicData"
 
 const ConnectSection = () => {
   const firstImgRef = useRef(null)

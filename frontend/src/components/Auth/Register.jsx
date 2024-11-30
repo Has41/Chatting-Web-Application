@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { firstStepRegister, secondStepRegister } from "../../utils/DynamicData"
+import { firstStepRegister, secondStepRegister } from "../../utils/dynamicData"
 
 const Register = ({ onButtonClick }) => {
   const [step, setStep] = useState(1)
