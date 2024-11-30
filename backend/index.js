@@ -5,7 +5,7 @@ import helmet from "helmet"
 import morgan from "morgan"
 import cors from "cors"
 import allRoutes from "./routes/index.js"
-import setupSocket from "./socket.js"
+import { setupSocket } from "./socket.js"
 
 const app = express()
 const PORT = process.env.PORT

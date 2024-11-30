@@ -1,5 +1,5 @@
 import React from "react"
-import onlineUser from "../../assets/man.jpg"
+// import onlineUser from "../../assets/man.jpg"
 
 const ChatList = () => {
   return (
