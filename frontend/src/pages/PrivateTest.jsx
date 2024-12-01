@@ -18,20 +18,19 @@ const PrivateTest = () => {
   // Refs for IntersectionObserver
   const messageRefs = useRef({})
 
-  // prettier-ignore
-  const { data: conversationData, isLoading, isError, error } = useFetch({
+  const { data: conversationData } = useFetch({
     endpoint: `/api/conversations/get-current-convo/66cc3ebfc635677da688854a`,
     method: "GET",
     queryOptions: {
       onError: (error) => {
         console.error("Custom error handling:", error.message)
       },
-      staleTime: 1000 * 60 * 5,
-    },
-  });
+      staleTime: 1000 * 60 * 5
+    }
+  })
 
   // prettier-ignore
-  const { mutate, data: fileData, isLoading: isUploading, isError: uploadError, isSuccess: uploadSuccess } = useFetch({
+  const { mutate, isError: uploadError, isSuccess: uploadSuccess } = useFetch({
     endpoint: "/api/files/upload-files",
     method: "POST",
     body: null, // Initial empty body, updated in handleFileUpload
@@ -228,7 +227,11 @@ const PrivateTest = () => {
                   <strong>{message?.sender?.username}:</strong>
                   {message?.messageType === "file" ? (
                     <div>
-                      <img src={message?.media?.mediaUrl} alt="Uploaded file" style={{ maxWidth: "200px", maxHeight: "200px" }} />
+                      <img
+                        src={message?.media?.mediaUrl}
+                        alt="Uploaded file"
+                        style={{ maxWidth: "200px", maxHeight: "200px" }}
+                      />
                     </div>
                   ) : (
                     <span>{message?.content}</span>

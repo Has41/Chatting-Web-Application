@@ -170,26 +170,6 @@ const toggleDarkMode = async (req, res, next) => {
   }
 }
 
-const toggleSidebarLock = async (req, res, next) => {
-  try {
-    const userId = req.params.userId
-
-    const user = await User.findOneAndUpdate(
-      { _id: userId },
-      { $bit: { toggleSidebarLock: { $not: "$toggleSidebarLock" } } },
-      { new: true }
-    )
-
-    if (!user) {
-      return next(errorHandler(404, "User not found."))
-    }
-
-    return res.status(200).json({ message: "Sidelock updated successfully!" })
-  } catch (err) {
-    return next(errorHandler(500, err.message))
-  }
-}
-
 const sendFriendRequest = async (req, res, next) => {
   try {
     const senderId = req.user.id
@@ -349,7 +329,6 @@ export {
   addUserInterest,
   removeUserInterest,
   toggleDarkMode,
-  toggleSidebarLock,
   sendFriendRequest,
   respondFriendRequest,
   getFriendsAndRequests,

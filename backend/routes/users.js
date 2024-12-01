@@ -11,7 +11,6 @@ import {
   searchUsersAndContent,
   sendFriendRequest,
   toggleDarkMode,
-  toggleSidebarLock,
 } from "../controllers/users.js"
 import { deleteImage, uploadProfilePicture } from "../middlewares/uploads.js"
 import {
@@ -44,8 +43,6 @@ router.post("/add-interests/:userId", addInterestValidator, validateApiData, add
 router.delete("/remove-interests/:userId/:interest", removeInterestValidator, validateApiData, removeUserInterest)
 
 router.patch("/toggle-darkmode/:userId", validateUserId, validateApiData, toggleDarkMode)
-
-router.patch("/toggle-sidebar/:userId", validateUserId, validateApiData, toggleSidebarLock)
 
 router.post("/send-friend-request/:userId", validateUserId, validateApiData, sendFriendRequest)
 
