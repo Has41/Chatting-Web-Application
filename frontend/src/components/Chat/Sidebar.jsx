@@ -1,13 +1,13 @@
 import React from "react"
 import { NavLink } from "react-router-dom"
 import { navOptions } from "../../utils/dynamicData"
-import ProfileDropdown from "./ChatUtils/ProfileDropdown"
+import ProfileDropdown from "../Shared/ProfileDropdown"
 
 const Sidebar = () => {
   return (
-    <nav className="h-screen font-poppins w-[6%] flex flex-col items-center justify-between bg-white transition-all duration-500">
+    <nav className="flex h-screen w-[6%] flex-col items-center justify-between bg-white font-poppins transition-all duration-500">
       {/* Logo */}
-      <div className="flex justify-center mt-5">
+      <div className="mt-5 flex justify-center">
         <svg
           fill="#96E6A1"
           className="size-11"
@@ -34,7 +34,7 @@ const Sidebar = () => {
           <li key={index}>
             <NavLink
               to={option.link}
-              className="flex items-center p-3 cursor-pointer hover:bg-slate-100 transition-all duration-500 rounded-lg"
+              className="flex cursor-pointer items-center rounded-lg p-3 transition-all duration-500 hover:bg-slate-100"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +42,7 @@ const Sidebar = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-6 h-6 text-gray-700"
+                className="h-6 w-6 text-gray-700"
                 aria-label={option.name}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d={option.path} />
@@ -54,7 +54,7 @@ const Sidebar = () => {
 
       {/* Profile and Settings */}
       <div className="flex flex-col items-center gap-y-6 pb-6">
-        <div className="flex items-center p-3 cursor-pointer hover:bg-slate-200 transition-all duration-500 rounded-md">
+        <div className="flex cursor-pointer items-center rounded-md p-3 transition-all duration-500 hover:bg-slate-200">
           <NavLink to={"/chat/settings"}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +62,7 @@ const Sidebar = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6 text-gray-700"
+              className="h-6 w-6 text-gray-700"
               aria-label="Settings"
             >
               <path

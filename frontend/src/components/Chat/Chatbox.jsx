@@ -3,14 +3,14 @@ import { chatOptions } from "../../utils/dynamicData"
 
 const Chatbox = () => {
   return (
-    <section className="w-[69%] h-screen flex flex-col font-poppins">
+    <section className="flex h-screen w-[69%] flex-col font-poppins">
       {/* Top Navigation Bar */}
-      <nav className="flex items-center justify-between py-3 px-4 text-black/80 border-b">
+      <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
         <div className="flex items-center gap-x-3">
           <div className="size-10 rounded-full bg-slate-200"></div>
           <div className="flex items-center gap-x-2">
-            <h1 className="font-semibold mb-[0.1rem]">Username</h1>
-            <div className="size-[0.6rem] bg-custom-green rounded-full"></div>
+            <h1 className="mb-[0.1rem] font-semibold">Username</h1>
+            <div className="size-[0.6rem] rounded-full bg-custom-green"></div>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -32,24 +32,24 @@ const Chatbox = () => {
       </nav>
 
       {/* Main Chat Area */}
-      <div className="flex-grow overflow-y-auto p-4 bg-gray-100">
+      <div className="flex-grow overflow-y-auto bg-gray-100 p-4">
         {/* Example Messages */}
-        <div className="flex flex-col gap-6 max-w-full">
+        <div className="flex max-w-full flex-col gap-6">
           {/* Received Message */}
-          <div className="self-start min-w-[10%] max-w-[50%]">
+          <div className="min-w-[10%] max-w-[50%] self-start">
             {/* Message Bubble */}
-            <div className="bg-white px-4 py-2 shadow rounded-tl-xl ml-8 rounded-recieved inline-block ">
+            <div className="ml-8 inline-block rounded-recieved rounded-tl-xl bg-white px-4 py-2 shadow">
               Hello, how may I help you?
             </div>
             {/* PFP and Name */}
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-8 h-8 rounded-full bg-slate-200"></div> {/* Placeholder for Profile Picture */}
+            <div className="mt-2 flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-slate-200"></div> {/* Placeholder for Profile Picture */}
             </div>
           </div>
 
           {/* Sent Message */}
-          <div className="self-end min-w-[10%] max-w-[50%]">
-            <div className="bg-custom-green text-white px-4 py-2 shadow rounded-sent inline-block ">
+          <div className="min-w-[10%] max-w-[50%] self-end">
+            <div className="inline-block rounded-sent bg-custom-green px-4 py-2 text-white shadow">
               I was wondering about the status of my order.
             </div>
           </div>
@@ -57,9 +57,9 @@ const Chatbox = () => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t flex items-center gap-3 max-w-full">
+      <div className="flex max-w-full items-center gap-3 border-t p-4">
         <div className="w-[5%]">
-          <button className="text-black/80 p-3 rounded-full hover:text-custom-text transition-all duration-500">
+          <button className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -79,10 +79,10 @@ const Chatbox = () => {
         <input
           type="text"
           placeholder="Type a message..."
-          className="w-3/4 p-3 border border-slate-200 rounded-md focus:outline-none"
+          className="w-3/4 rounded-md border border-slate-200 p-3 focus:outline-none"
         />
         <div className="flex w-[15%] gap-x-1">
-          <button className="text-black/80 p-3 rounded-full hover:text-custom-text transition-all duration-500">
+          <button className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -98,7 +98,7 @@ const Chatbox = () => {
               />
             </svg>
           </button>
-          <button className="text-black/80 p-3 rounded-full hover:text-custom-text transition-all duration-500">
+          <button className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -114,7 +114,7 @@ const Chatbox = () => {
               />
             </svg>
           </button>
-          <button className="bg-custom-green text-white p-3 rounded-full hover:bg-green-400 transition-all duration-500">
+          <button className="rounded-full bg-custom-green p-3 text-white transition-all duration-500 hover:bg-green-400">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

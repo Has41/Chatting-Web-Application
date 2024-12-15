@@ -6,14 +6,18 @@ import sectionImage from "../../assets/whiteBG.jpeg"
 import { IntroCard } from "../../utils/Cards"
 
 const IntroSection = () => {
-  const introRef = useRef()
-  const textRef = useRef()
-  const titleRef = useRef()
-  const mainImageRef = useRef()
-  const card1Ref = useRef()
-  const card2Ref = useRef()
-  const card3Ref = useRef()
-  const card4Ref = useRef()
+  const imgRefs = {
+    introRef: useRef(null),
+    textRef: useRef(null),
+    titleRef: useRef(null),
+    mainImageRef: useRef(null),
+    card1Ref: useRef(null),
+    card2Ref: useRef(null),
+    card3Ref: useRef(null),
+    card4Ref: useRef(null)
+  }
+
+  const { introRef, textRef, titleRef, mainImageRef, card1Ref, card2Ref, card3Ref, card4Ref } = imgRefs
 
   gsap.registerPlugin(ScrollTrigger)
 
@@ -96,23 +100,23 @@ const IntroSection = () => {
   })
 
   return (
-    <section className="font-poppins mb-8 flex flex-col items-center justify-center w-full h-[80vh] m-auto bg-slate-50">
+    <section className="m-auto mb-8 flex h-[80vh] w-full flex-col items-center justify-center bg-slate-50 font-poppins">
       <div ref={introRef}>
-        <h3 className="text-2xl max-w-[700px]">
-          Stay connected <span className="bg-green-200 px-1 rounded-xl">with friends and family</span>
+        <h3 className="max-w-[700px] text-2xl">
+          Stay connected <span className="rounded-xl bg-green-200 px-1">with friends and family</span>
           anytime, anywhere. Chat, share, and express yourself effortlessly
         </h3>
       </div>
       <div ref={textRef}>
         <p className="max-w-[800px] text-xl tracking-wide">
-          ChatConnect is designed to make communication seamless and fun. Whether you're catching up with old friends or making
-          new ones, our app provides a <span className="bg-green-200 px-1 rounded-xl">secure and user-friendly platform</span> to
-          stay connected!
+          ChatConnect is designed to make communication seamless and fun. Whether you're catching up with old friends or
+          making new ones, our app provides a{" "}
+          <span className="rounded-xl bg-green-200 px-1">secure and user-friendly platform</span> to stay connected!
         </p>
       </div>
       <div ref={titleRef}>
         <h1 className="text-4xl">
-          Introducing The <span className="bg-green-200 px-1 rounded-xl">Chat Connect</span> Of The Future!
+          Introducing The <span className="rounded-xl bg-green-200 px-1">Chat Connect</span> Of The Future!
         </h1>
       </div>
       <div className="flex items-center justify-center gap-x-5 font-poppins">

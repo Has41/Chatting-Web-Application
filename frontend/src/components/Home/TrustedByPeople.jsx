@@ -7,17 +7,33 @@ import tempImg2 from "../../assets/female.jpg"
 import { CustomerCard } from "../../utils/Cards"
 
 const TrustedByPeople = () => {
-  const temp1Ref = useRef()
-  const temp2Ref = useRef()
-  let temp2TitleRef = useRef()
-  let temp2DetailRef = useRef()
-  let temp2NameRef = useRef()
-  let temp2PostRef = useRef()
-  const temp3Ref = useRef()
-  let temp3TitleRef = useRef()
-  let temp3DetailRef = useRef()
-  let temp3NameRef = useRef()
-  let temp3PostRef = useRef()
+  const tempRefs = {
+    temp1Ref: useRef(null),
+    temp2Ref: useRef(null),
+    temp2TitleRef: useRef(null),
+    temp2DetailRef: useRef(null),
+    temp2NameRef: useRef(null),
+    temp2PostRef: useRef(null),
+    temp3Ref: useRef(null),
+    temp3TitleRef: useRef(null),
+    temp3DetailRef: useRef(null),
+    temp3NameRef: useRef(null),
+    temp3PostRef: useRef(null)
+  }
+
+  const {
+    temp1Ref,
+    temp2Ref,
+    temp2TitleRef,
+    temp2DetailRef,
+    temp2NameRef,
+    temp2PostRef,
+    temp3Ref,
+    temp3TitleRef,
+    temp3DetailRef,
+    temp3NameRef,
+    temp3PostRef
+  } = tempRefs
 
   useGSAP(() => {
     const timeLine = gsap.timeline({ repeat: -1, repeatDelay: 1 })
@@ -109,12 +125,12 @@ const TrustedByPeople = () => {
   })
 
   return (
-    <section className="flex flex-col items-center justify-center mx-auto min-h-screen bg-gray-50 mt-36 py-20">
-      <h1 className="text-5xl text-center tracking-wide text-black/80 relative after:rounded-md after:block after:mt-2 after:w-[50%] after:h-1 after:bg-green-300 after:absolute after:left-1/2 after:transform after:-translate-x-1/2 after:bottom-[-18px]">
+    <section className="mx-auto mt-36 flex min-h-screen flex-col items-center justify-center bg-gray-50 py-20">
+      <h1 className="relative text-center text-5xl tracking-wide text-black/80 after:absolute after:bottom-[-18px] after:left-1/2 after:mt-2 after:block after:h-1 after:w-[50%] after:-translate-x-1/2 after:transform after:rounded-md after:bg-green-300">
         Trusted By People
       </h1>
 
-      <div className="mt-20 w-4/5 h-[400px] mx-auto relative flex flex-col gap-y-4">
+      <div className="relative mx-auto mt-20 flex h-[400px] w-4/5 flex-col gap-y-4">
         <CustomerCard tempRef={temp1Ref} tempImg={tempImg} tempTopic={"Customer Stories"} tempName={"Elaira Steele"} />
         <CustomerCard
           tempRef={temp2Ref}

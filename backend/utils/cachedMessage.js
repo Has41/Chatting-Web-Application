@@ -1,4 +1,31 @@
 import redis from "../redis.js"
+import Message from "../models/Message.js"
+import Conversation from "../models/Conversation.js"
+
+const validateConvoType = async (messageId, conversationType) => {
+  try {
+    let messageData
+
+    if (conversationType === "group") {
+      messageData = await Message.findById(messageId)
+        .populate("sender", "id username displayName profilePicture")
+        .exec()
+    } else if (conversationType === "private") {
+      messageData = await Message.findById(messageId)
+        .populate("sender recipient", "id username displayName profilePicture")
+        .exec()
+    } else {
+      throw errorHandler(400, "Invalid conversation type")
+    }
+
+    if (!messageData) throw errorHandler(404, "Message not found!")
+
+    return messageData
+  } catch (err) {
+    console.error(err)
+    throw errorHandler(500, `Failed to validate convo: ${err?.message}`)
+  }
+}
 
 const cacheMessage = async (messageId, conversationId, conversationType) => {
   try {
@@ -8,25 +35,7 @@ const cacheMessage = async (messageId, conversationId, conversationType) => {
     if (cachedMessageData) {
       return JSON.parse(cachedMessageData)
     } else {
-      let messageData
-
-      if (conversationType === "private") {
-        messageData = await Message.findById(messageId)
-          .populate({
-            path: "sender recipient",
-            select: "id username displayName profilePicture",
-          })
-          .exec()
-      } else if (conversationType === "group") {
-        messageData = await Message.findById(messageId)
-          .populate("sender", "id email username displayName profilePicture")
-          .exec()
-      } else {
-        throw errorHandler(400, "Invalid conversation type")
-      }
-
-      if (!messageData) throw errorHandler(404, "Message not found!")
-
+      const messageData = await validateConvoType(messageId, conversationType)
       cachedMessageData = messageData.toJSON()
       cachedMessageData.conversation = conversationId
       await redis.set(messageCacheKey, JSON.stringify(cachedMessageData), { ex: 3600 })
@@ -35,8 +44,43 @@ const cacheMessage = async (messageId, conversationId, conversationType) => {
     }
   } catch (err) {
     console.error(err)
-    throw errorHandler(500, err.message)
+    throw errorHandler(500, `Failed to cache message: ${err?.message}`)
   }
 }
 
-export default cacheMessage
+const validateUserParticipation = (conversation, userId) => {
+  const isParticipant = conversation.participants.some((participant) => participant.toString() === userId.toString())
+
+  if (!isParticipant) {
+    const isGroupOwner = conversation.groupOwner?.toString() === userId.toString()
+    if (!isGroupOwner) {
+      throw errorHandler(403, "User is neither a participant nor the owner of this conversation.")
+    }
+  }
+}
+
+const cacheConvoData = async (conversationId, userId) => {
+  try {
+    const convoCacheKey = `conversation:${conversationId}`
+    let cachedConvoData = await redis.get(convoCacheKey)
+    if (cachedConvoData) {
+      return JSON.parse(cachedConvoData)
+    } else {
+      const convoData = await Conversation.findById(conversationId).select("participants groupOwner lastMessage")
+
+      if (!convoData) throw errorHandler(404, "Conversation not found")
+
+      validateUserParticipation(convoData, userId)
+
+      const convoDataToCache = convoData.toJSON()
+      await redis.set(convoCacheKey, JSON.stringify(convoDataToCache), { ex: 3600 })
+
+      return convoDataToCache
+    }
+  } catch (err) {
+    console.error(err)
+    throw errorHandler(500, `Failed to cache conversation: ${err?.message}`)
+  }
+}
+
+export { cacheMessage, cacheConvoData }

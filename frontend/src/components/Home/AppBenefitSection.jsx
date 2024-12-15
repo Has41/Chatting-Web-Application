@@ -5,19 +5,37 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { SlidingCard } from "../../utils/Cards"
 
 const AppBenefits = () => {
-  const containerRef = useRef()
-  const tile1Ref = useRef()
-  let subTileLogo1Ref = useRef()
-  let subTileSection1Ref = useRef()
-  const tile2Ref = useRef()
-  let subTileLogo2Ref = useRef()
-  let subTileSection2Ref = useRef()
-  const tile3Ref = useRef()
-  let subTileLogo3Ref = useRef()
-  let subTileSection3Ref = useRef()
-  const tile4Ref = useRef()
-  let subTileLogo4Ref = useRef()
-  let subTileSection4Ref = useRef()
+  const tileRefs = {
+    containerRef: useRef(null),
+    tile1Ref: useRef(null),
+    subTileLogo1Ref: useRef(null),
+    subTileSection1Ref: useRef(null),
+    tile2Ref: useRef(null),
+    subTileLogo2Ref: useRef(null),
+    subTileSection2Ref: useRef(null),
+    tile3Ref: useRef(null),
+    subTileLogo3Ref: useRef(null),
+    subTileSection3Ref: useRef(null),
+    tile4Ref: useRef(null),
+    subTileLogo4Ref: useRef(null),
+    subTileSection4Ref: useRef(null)
+  }
+
+  const {
+    containerRef,
+    tile1Ref,
+    subTileLogo1Ref,
+    subTileSection1Ref,
+    tile2Ref,
+    subTileLogo2Ref,
+    subTileSection2Ref,
+    tile3Ref,
+    subTileLogo3Ref,
+    subTileSection3Ref,
+    tile4Ref,
+    subTileLogo4Ref,
+    subTileSection4Ref
+  } = tileRefs
 
   gsap.registerPlugin(ScrollTrigger)
 
@@ -26,8 +44,7 @@ const AppBenefits = () => {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 50%",
-        end: () =>
-          `bottom+=${tile4Ref.current.offsetTop + tile4Ref.current.offsetHeight - containerRef.current.offsetTop}`,
+        end: () => `bottom+=${tile4Ref.current.offsetTop + tile4Ref.current.offsetHeight - containerRef.current.offsetTop}`,
         once: true
         // markers: true
       }
@@ -62,11 +79,11 @@ const AppBenefits = () => {
   return (
     <section className="py-20">
       <div ref={containerRef} className="mb-14">
-        <h1 className="text-5xl text-center tracking-wide text-black/80 relative after:content-[''] after:w-[200px] after:block after:h-1 after:rounded-2xl after:bg-green-300 after:absolute after:left-1/2 after:transform after:-translate-x-1/2 after:bottom-[-15px]">
+        <h1 className="relative text-center text-5xl tracking-wide text-black/80 after:absolute after:bottom-[-15px] after:left-1/2 after:block after:h-1 after:w-[200px] after:-translate-x-1/2 after:transform after:rounded-2xl after:bg-green-300 after:content-['']">
           Our Benefits
         </h1>
       </div>
-      <div className="flex flex-col gap-y-14 max-w-full">
+      <div className="flex max-w-full flex-col gap-y-14">
         <SlidingCard
           tileRef={tile1Ref}
           subTileSectionRef={subTileSection1Ref}

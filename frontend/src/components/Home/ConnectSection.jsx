@@ -8,10 +8,14 @@ import fourthOperator from "../../assets/operator4.jpg"
 import { connectIcons } from "../../utils/dynamicData"
 
 const ConnectSection = () => {
-  const firstImgRef = useRef(null)
-  const secondImgRef = useRef(null)
-  const thirdImgRef = useRef(null)
-  const fourthImgRef = useRef(null)
+  const imgRefs = {
+    firstImgRef: useRef(null),
+    secondImgRef: useRef(null),
+    thirdImgRef: useRef(null),
+    fourthImgRef: useRef(null)
+  }
+
+  const { firstImgRef, secondImgRef, thirdImgRef, fourthImgRef } = imgRefs
 
   useGSAP(() => {
     const timeLine = gsap.timeline()
@@ -33,18 +37,18 @@ const ConnectSection = () => {
   })
 
   return (
-    <section className="flex flex-col justify-center gap-y-36 shadow-sm overflow-y-hidden font-poppins bg-slate-50 w-[95%] h-[900px] mx-auto mt-20 px-4 rounded-xl">
+    <section className="mx-auto mt-20 flex h-[900px] w-[95%] flex-col justify-center gap-y-36 overflow-y-hidden rounded-xl bg-slate-50 px-4 font-poppins shadow-sm">
       <div className="flex justify-center gap-x-8">
         <div className="">
-          <h1 className="text-[45px] max-w-[700px] leading-tight text-black/90">
-            Connect Instantly, Communicate Effortlessly - <span className="bg-green-200 px-3 rounded-3xl">ChitChat</span>
+          <h1 className="max-w-[700px] text-[45px] leading-tight text-black/90">
+            Connect Instantly, Communicate Effortlessly - <span className="rounded-3xl bg-green-200 px-3">ChitChat</span>
           </h1>
-          <div className="flex justify-center gap-x-4 mt-6">
+          <div className="mt-6 flex justify-center gap-x-4">
             {connectIcons.map((icon, index) => {
               return (
                 <div
                   key={index}
-                  className="bg-white h-[40px] w-[40px] flex items-center justify-center rounded-full shadow-md"
+                  className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white shadow-md"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -67,9 +71,9 @@ const ConnectSection = () => {
             quibusdam nulla vel?
           </p>
           <div>
-            <button className="px-2 py-1 rounded-3xl bg-black/80 text-white flex items-center justify-center gap-x-2">
+            <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/80 px-2 py-1 text-white">
               <div className="pl-1">Get Started</div>
-              <div className="bg-white rounded-full p-[9px]">
+              <div className="rounded-full bg-white p-[9px]">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -85,9 +89,9 @@ const ConnectSection = () => {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-center gap-x-4 flex-wrap">
+      <div className="flex flex-wrap items-center justify-center gap-x-4">
         <div className="pb-20">
-          <div className="max-w-[300px] aspect-square">
+          <div className="aspect-square max-w-[300px]">
             <img
               className="rounded-lg object-cover"
               loading="lazy"
@@ -98,7 +102,7 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="pt-20">
-          <div className="max-w-[300px] aspect-square">
+          <div className="aspect-square max-w-[300px]">
             <img
               className="rounded-lg object-cover"
               loading="lazy"
@@ -109,7 +113,7 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="pb-20">
-          <div className="max-w-[300px] aspect-square">
+          <div className="aspect-square max-w-[300px]">
             <img
               className="rounded-lg object-cover"
               loading="lazy"
@@ -120,7 +124,7 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="pt-20">
-          <div className="max-w-[300px] aspect-square">
+          <div className="aspect-square max-w-[300px]">
             <img
               className="rounded-lg object-cover"
               loading="lazy"

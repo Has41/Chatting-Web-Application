@@ -39,6 +39,12 @@ const conversationSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    messages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+      },
+    ],
   },
   { timestamps: true }
 )

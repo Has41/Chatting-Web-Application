@@ -2,10 +2,10 @@ import React from "react"
 
 const Navbar = () => {
   return (
-    <nav className="flex items-center justify-between mx-auto py-8 w-[90%] font-poppins text-black/80">
+    <nav className="mx-auto flex w-[90%] items-center justify-between py-8 font-poppins text-black/80">
       <h1 className="text-xl">ChitChat</h1>
       <div>
-        <ul className="flex items-center justify-center text-black/80 gap-x-6 bg-slate-50 px-6 py-1 rounded-2xl">
+        <ul className="flex items-center justify-center gap-x-6 rounded-2xl bg-slate-50 px-6 py-1 text-black/80">
           <li>About</li>
           <li>Benefits</li>
           <li>App</li>
@@ -14,9 +14,9 @@ const Navbar = () => {
         </ul>
       </div>
       <div>
-        <button className="px-2 py-1 rounded-3xl bg-slate-100 flex items-center justify-center gap-x-2 font-medium">
+        <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-2 py-1 font-medium">
           <div className="pl-1">Get Started</div>
-          <div className="bg-green-300 rounded-full p-[9px]">
+          <div className="rounded-full bg-green-300 p-[9px]">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

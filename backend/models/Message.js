@@ -59,10 +59,6 @@ const messageSchema = new mongoose.Schema(
         emoji: { type: String, default: "" },
       },
     ],
-    conversation: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Conversation",
-    },
     editedAt: {
       type: Date,
     },

@@ -3,19 +3,19 @@ import mainImage from "../../assets/listen-music.jpg"
 
 const HeroComponent = () => {
   return (
-    <main className="flex items-center justify-center w-[90%] mx-auto gap-x-10 mt-14">
+    <main className="mx-auto mt-14 flex w-[90%] items-center justify-center gap-x-10">
       <div>
-        <h1 className="text-[48px] font-medium font-mont">
-          Empower Connections With <span className="text-green-400 font-semibold">ChitChat</span>
+        <h1 className="font-mont text-[48px] font-medium">
+          Empower Connections With <span className="font-semibold text-green-400">ChitChat</span>
         </h1>
-        <p className="break-all max-w-[700px] mt-4">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Est ut pariatur odit expedita reprehenderit aliquam asperiores
-          harum eligendi ab quae.
+        <p className="mt-4 max-w-[700px] break-all">
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Est ut pariatur odit expedita reprehenderit aliquam
+          asperiores harum eligendi ab quae.
         </p>
         <div className="mt-10 flex gap-x-6">
-          <button className="px-2 py-1 rounded-3xl bg-black/90 text-white flex items-center justify-center gap-x-2">
+          <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/90 px-2 py-1 text-white">
             <div className="pl-1">Try Out</div>
-            <div className="bg-white rounded-full p-[9px]">
+            <div className="rounded-full bg-white p-[9px]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -28,9 +28,9 @@ const HeroComponent = () => {
               </svg>
             </div>
           </button>
-          <button className="px-3 py-1 font-semibold rounded-3xl bg-slate-100 flex items-center justify-center gap-x-2">
+          <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-3 py-1 font-semibold">
             <div>Learn More</div>
-            <div className="bg-white rounded-full p-[9px]">
+            <div className="rounded-full bg-white p-[9px]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

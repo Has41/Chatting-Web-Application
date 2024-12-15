@@ -7,11 +7,16 @@ import Register from "../components/Auth/Register"
 const GetStarted = () => {
   const [currentForm, setCurrentForm] = useState("Register")
   const [shouldAnimate, setShouldAnimate] = useState(false)
-  const greenSectionRef = useRef(null)
-  const greenSectionTextRef = useRef(null)
-  const subGreenSectionRef = useRef(null)
-  const formContainerRef = useRef(null)
-  const isFirstRender = useRef(true)
+
+  const formPickerRefs = {
+    greenSectionRef: useRef(null),
+    greenSectionTextRef: useRef(null),
+    subGreenSectionRef: useRef(null),
+    formContainerRef: useRef(null),
+    isFirstRender: useRef(true)
+  }
+
+  const { greenSectionRef, greenSectionTextRef, subGreenSectionRef, formContainerRef, isFirstRender } = formPickerRefs
 
   const handleFormSwitch = (formSwitch) => {
     setCurrentForm(formSwitch)
@@ -121,20 +126,20 @@ const GetStarted = () => {
   }, [currentForm, shouldAnimate]) // Add shouldAnimate to dependency array
 
   return (
-    <section className="flex items-center relative h-screen w-full overflow-hidden">
+    <section className="relative flex h-screen w-full items-center overflow-hidden">
       <div
         ref={greenSectionRef}
-        className="absolute right-0 top-0 bottom-0 w-1/2 bg-dusty-grass shadow-lg flex items-center justify-center rounded-tl-full"
+        className="absolute bottom-0 right-0 top-0 flex w-1/2 items-center justify-center rounded-tl-full bg-dusty-grass shadow-lg"
       >
-        <h1 ref={greenSectionTextRef} className="relative text-white text-center text-5xl font-bold z-10 pb-[10%]">
+        <h1 ref={greenSectionTextRef} className="relative z-10 pb-[10%] text-center text-5xl font-bold text-white">
           {currentForm === "Register" ? "Join With Us!" : "Welcome Back!"}
         </h1>
         <div
           ref={subGreenSectionRef}
-          className="absolute shadow-lg bottom-0 left-0 bg-dusty-grass rounded-tl-full h-[150%] w-[150%]"
+          className="absolute bottom-0 left-0 h-[150%] w-[150%] rounded-tl-full bg-dusty-grass shadow-lg"
         />
       </div>
-      <div ref={formContainerRef} className="w-full max-w-[430px] ml-[10%]">
+      <div ref={formContainerRef} className="ml-[10%] w-full max-w-[430px]">
         {currentForm === "Register" ? (
           <Register onButtonClick={() => handleFormSwitch("Login")} />
         ) : (

@@ -1,23 +1,23 @@
 import React from "react"
-import StatusDropdown from "./ChatUtils/StatusDropdown"
+import StatusDropdown from "../Shared/StatusDropdown"
 
 const Settings = () => {
   return (
     <aside
-      className="w-1/4 h-screen bg-gray-50 border-l border-l-slate-200 border-r border-r-slate-200 font-poppins"
+      className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
       aria-label="Settings"
     >
       <section className="p-4">
-        <h2 className="text-xl text-black/80 font-semibold mb-4">Settings</h2>
-        <div className="flex flex-col items-center mb-8">
+        <h2 className="mb-4 text-xl font-semibold text-black/80">Settings</h2>
+        <div className="mb-8 flex flex-col items-center">
           <div className="relative">
             <img
               src="https://via.placeholder.com/80"
               alt="Profile"
-              className="w-20 h-20 rounded-full border-2 border-white shadow"
+              className="h-20 w-20 rounded-full border-2 border-white shadow"
             />
             <button
-              className="absolute bottom-1 right-1 bg-gray-100 border border-gray-300 rounded-full p-1 shadow-sm hover:bg-gray-200"
+              className="absolute bottom-1 right-1 rounded-full border border-gray-300 bg-gray-100 p-1 shadow-sm hover:bg-gray-200"
               aria-label="Change Profile Picture"
             >
               <svg
@@ -36,7 +36,7 @@ const Settings = () => {
               </svg>
             </button>
           </div>
-          <h3 className="text-lg font-semibold text-gray-800 mt-2">Username</h3>
+          <h3 className="mt-2 text-lg font-semibold text-gray-800">Username</h3>
           <div className="flex items-center justify-center gap-x-1">
             <StatusDropdown />
           </div>
@@ -46,7 +46,7 @@ const Settings = () => {
         <div className="space-y-4">
           {/* Personal Info */}
           <details>
-            <summary className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-100 rounded-md">
+            <summary className="flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-gray-100">
               <span className="text-sm font-medium">Personal Info</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@ const Settings = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5 group-open:rotate-180 transition-transform"
+                className="h-5 w-5 transition-transform group-open:rotate-180"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
               </svg>
@@ -64,7 +64,7 @@ const Settings = () => {
 
           {/* Themes */}
           <details>
-            <summary className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-100 rounded-md">
+            <summary className="flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-gray-100">
               <span className="text-sm font-medium">Themes</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -72,7 +72,7 @@ const Settings = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5 group-open:rotate-180 transition-transform"
+                className="h-5 w-5 transition-transform group-open:rotate-180"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
               </svg>
@@ -82,7 +82,7 @@ const Settings = () => {
 
           {/* Privacy */}
           <details>
-            <summary className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-100 rounded-md">
+            <summary className="flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-gray-100">
               <span className="text-sm font-medium">Privacy</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,7 @@ const Settings = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5 group-open:rotate-180 transition-transform"
+                className="h-5 w-5 transition-transform group-open:rotate-180"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
               </svg>
@@ -100,7 +100,7 @@ const Settings = () => {
 
           {/* Security */}
           <details>
-            <summary className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-100 rounded-md">
+            <summary className="flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-gray-100">
               <span className="text-sm font-medium">Security</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +108,7 @@ const Settings = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5 group-open:rotate-180 transition-transform"
+                className="h-5 w-5 transition-transform group-open:rotate-180"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
               </svg>
@@ -118,7 +118,7 @@ const Settings = () => {
 
           {/* Help */}
           <details>
-            <summary className="flex items-center justify-between cursor-pointer p-2 hover:bg-gray-100 rounded-md">
+            <summary className="flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-gray-100">
               <span className="text-sm font-medium">Help</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +126,7 @@ const Settings = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-5 h-5 group-open:rotate-180 transition-transform"
+                className="h-5 w-5 transition-transform group-open:rotate-180"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12l-7.5 7.5-7.5-7.5" />
               </svg>

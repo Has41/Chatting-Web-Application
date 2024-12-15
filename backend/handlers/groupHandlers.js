@@ -1,8 +1,6 @@
-import Conversation from "../models/Conversation.js"
-
 const joinGroup = async (socket, conversationId, userId) => {
   try {
-    const conversation = await Conversation.findById(conversationId).select("participants groupOwner")
+    const conversation = await cacheConvoData(conversationId, userId)
 
     if (!conversation) {
       console.error(`Conversation with ID ${conversationId} not found!`)
@@ -21,6 +19,7 @@ const joinGroup = async (socket, conversationId, userId) => {
     }
   } catch (err) {
     console.error(`Error in joinGroup for conversation ${conversationId} and user ${userId}:`, err)
+    throw errorHandler(500, `Failed to join group conversation: ${err?.message}`)
   }
 }
 

@@ -32,8 +32,10 @@ const getCurrentConversation = async (req, res, next) => {
 const createGroupConversation = async (req, res, next) => {
   try {
     const { participants, groupName, groupPicture } = req.body
+    const groupOwnerId = req.user.id
+    const allParticipants = [...new Set([...participants, groupOwnerId])]
 
-    const users = await User.find({ _id: { $in: participants } }, { displayName: 1, username: 1 })
+    const users = await User.find({ _id: { $in: allParticipants } }, { displayName: 1, username: 1 })
 
     if (users.length !== participants.length) {
       return res.status(404).json({ message: "Some participants not found" })
@@ -47,7 +49,7 @@ const createGroupConversation = async (req, res, next) => {
     const newGroupConversation = await Conversation.create({
       groupName: finalGroupName,
       groupPicture,
-      groupOwner: req.user.id,
+      groupOwner: groupOwnerId,
       participants: participants,
       conversationType: "group",
     })

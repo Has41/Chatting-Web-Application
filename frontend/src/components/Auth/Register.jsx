@@ -9,17 +9,17 @@ const Register = ({ onButtonClick }) => {
   const prevStep = () => setStep(step - 1)
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="shadow-lg w-full h-[37.5rem] py-7 px-4 bg-white rounded-lg tracking-wide">
+    <div className="flex h-screen items-center justify-center">
+      <div className="h-[37.5rem] w-full rounded-lg bg-white px-4 py-7 tracking-wide shadow-lg">
         <div className={`flex justify-between`}>
           <div className="ml-8 flex flex-col gap-y-4">
-            <h2 className="text-[1.7rem] font-bold font-poppins text-black/80 relative after:content-[''] after:w-[3rem] after:block after:h-1 after:rounded-xl after:bg-dusty-grass after:absolute after:left-6 after:transform after:-translate-x-1/2 after:-bottom-1">
+            <h2 className="relative font-poppins text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:bg-dusty-grass after:content-['']">
               Register
             </h2>
             <p className="font-poppins text-gray-600">Sign up your details</p>
           </div>
           {(step === 2 || step === 3) && (
-            <div className="mr-4 flex items-center justify-between max-w-[90%] mt-2">
+            <div className="mr-4 mt-2 flex max-w-[90%] items-center justify-between">
               <svg
                 onClick={prevStep}
                 xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +27,7 @@ const Register = ({ onButtonClick }) => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="size-7 cursor-pointer hover:text-custom-text transition-all duration-300"
+                className="size-7 cursor-pointer transition-all duration-300 hover:text-custom-text"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
               </svg>
@@ -35,12 +35,12 @@ const Register = ({ onButtonClick }) => {
           )}
         </div>
 
-        <div className="flex flex-col items-center mx-auto w-[90%]">
+        <div className="mx-auto flex w-[90%] flex-col items-center">
           <form action="#" className={`w-full font-poppins ${step !== 3 ? "py-8" : ""}`}>
             <div
-              className={`transition-opacity duration-1000 ease-in-out transform ${
-                step === 1 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-full"
-              } w-full flex flex-col gap-y-2`}
+              className={`transform transition-opacity duration-1000 ease-in-out ${
+                step === 1 ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
+              } flex w-full flex-col gap-y-2`}
             >
               {step === 1 && (
                 <>
@@ -48,12 +48,12 @@ const Register = ({ onButtonClick }) => {
                     return (
                       <div
                         key={field.id}
-                        className="flex items-center border-b-[1px] border-gray-300 focus-within:border-custom-border mb-6 pb-1"
+                        className="mb-6 flex items-center border-b-[1px] border-gray-300 pb-1 focus-within:border-custom-border"
                       >
                         <div className="relative w-full">
                           <input
                             id={field.id}
-                            className="px-3 py-2 peer w-full ml-6 text-gray-700 focus:outline-none focus:ring-0 border-custom-border"
+                            className="peer ml-6 w-full border-custom-border px-3 py-2 text-gray-700 focus:outline-none focus:ring-0"
                             name={field.id}
                             type={field.type}
                             placeholder=" "
@@ -64,13 +64,13 @@ const Register = ({ onButtonClick }) => {
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="w-6 h-6 text-gray-500 absolute left-0 top-2 peer-focus:text-custom-text"
+                            className="absolute left-0 top-2 h-6 w-6 text-gray-500 peer-focus:text-custom-text"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d={field.iconPath} />
                           </svg>
                           <label
                             htmlFor={field.label}
-                            className="absolute left-9 top-2 transition-all duration-300 ease-out transform scale-90 -translate-y-8 text-gray-600 peer-placeholder-shown:top-2 peer-placeholder-shown:left-9 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 peer-focus:scale-90 peer-focus:text-custom-text pointer-events-none"
+                            className="pointer-events-none absolute left-9 top-2 -translate-y-8 scale-90 transform text-gray-600 transition-all duration-300 ease-out peer-placeholder-shown:left-9 peer-placeholder-shown:top-2 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 peer-focus:scale-90 peer-focus:text-custom-text"
                           >
                             {field.label}
                           </label>
@@ -82,16 +82,16 @@ const Register = ({ onButtonClick }) => {
                   <div className="py-4">
                     <button
                       onClick={nextStep}
-                      className="w-full shadow-md px-4 py-2 bg-button-color font-poppins text-white rounded font-semibold"
+                      className="w-full rounded bg-button-color px-4 py-2 font-poppins font-semibold text-white shadow-md"
                     >
                       Next
                     </button>
                   </div>
 
-                  <div className="text-center py-4">
+                  <div className="py-4 text-center">
                     <p className="text-sm text-black/80">
                       Already have an account?{" "}
-                      <span onClick={() => onButtonClick("Login")} className="font-bold cursor-pointer">
+                      <span onClick={() => onButtonClick("Login")} className="cursor-pointer font-bold">
                         Log in!
                       </span>
                     </p>
@@ -100,9 +100,9 @@ const Register = ({ onButtonClick }) => {
               )}
             </div>
             <div
-              className={`transition-opacity duration-1000 ease-in-out transform ${
-                step === 2 ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
-              } w-full flex flex-col gap-y-2`}
+              className={`transform transition-opacity duration-1000 ease-in-out ${
+                step === 2 ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+              } flex w-full flex-col gap-y-2`}
             >
               {step === 2 && (
                 <>
@@ -110,12 +110,12 @@ const Register = ({ onButtonClick }) => {
                     return (
                       <div
                         key={field.id}
-                        className="flex items-center border-b-[1px] border-gray-300 focus-within:border-custom-border mb-6 pb-1"
+                        className="mb-6 flex items-center border-b-[1px] border-gray-300 pb-1 focus-within:border-custom-border"
                       >
                         <div className="relative w-full">
                           <input
                             id={field.id}
-                            className="px-3 py-2 peer w-full ml-6 text-gray-700 focus:outline-none focus:ring-0 border-custom-border"
+                            className="peer ml-6 w-full border-custom-border px-3 py-2 text-gray-700 focus:outline-none focus:ring-0"
                             name={field.id}
                             type={field.type}
                             placeholder=" "
@@ -126,13 +126,13 @@ const Register = ({ onButtonClick }) => {
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="w-6 h-6 text-gray-500 absolute left-0 top-2 peer-focus:text-custom-text"
+                            className="absolute left-0 top-2 h-6 w-6 text-gray-500 peer-focus:text-custom-text"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d={field.iconPath} />
                           </svg>
                           <label
                             htmlFor={field.label}
-                            className="absolute left-9 top-2 transition-all duration-300 ease-out transform scale-90 -translate-y-8 text-gray-600 peer-placeholder-shown:top-2 peer-placeholder-shown:left-9 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 peer-focus:scale-90 peer-focus:text-custom-text pointer-events-none"
+                            className="pointer-events-none absolute left-9 top-2 -translate-y-8 scale-90 transform text-gray-600 transition-all duration-300 ease-out peer-placeholder-shown:left-9 peer-placeholder-shown:top-2 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 peer-focus:scale-90 peer-focus:text-custom-text"
                           >
                             {field.label}
                           </label>
@@ -144,16 +144,16 @@ const Register = ({ onButtonClick }) => {
                   <div className="py-4">
                     <button
                       onClick={nextStep}
-                      className="w-full shadow-md px-4 py-2 bg-button-color font-poppins text-white rounded font-semibold"
+                      className="w-full rounded bg-button-color px-4 py-2 font-poppins font-semibold text-white shadow-md"
                     >
                       Next
                     </button>
                   </div>
 
-                  <div className="text-center py-4">
+                  <div className="py-4 text-center">
                     <p className="text-sm text-black/80">
                       Already have an account?{" "}
-                      <span onClick={() => onButtonClick("Login")} className="font-bold cursor-pointer">
+                      <span onClick={() => onButtonClick("Login")} className="cursor-pointer font-bold">
                         Log in!
                       </span>
                     </p>
@@ -163,18 +163,18 @@ const Register = ({ onButtonClick }) => {
             </div>
 
             <div
-              className={`transition-opacity duration-1000 ease-in-out transform ${
-                step === 3 ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full"
-              } flex items-center justify-center w-full h-full`}
+              className={`transform transition-opacity duration-1000 ease-in-out ${
+                step === 3 ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+              } flex h-full w-full items-center justify-center`}
             >
-              <div className={`px-4 mt-4 w-full ${step !== 3 ? "hidden" : ""}`}>
+              <div className={`mt-4 w-full px-4 ${step !== 3 ? "hidden" : ""}`}>
                 <h3 className="mb-4 ml-2 text-black/80">Would you like to upload?</h3>
                 <div className="mb-6 flex items-center justify-center">
-                  <div className="size-64 rounded-full overflow-none border-2 border-slate-200">
+                  <div className="overflow-none size-64 rounded-full border-2 border-slate-200">
                     {avatar ? (
-                      <img src={URL.createObjectURL(avatar)} alt="Avatar Preview" className="w-full h-full object-cover" />
+                      <img src={URL.createObjectURL(avatar)} alt="Avatar Preview" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex items-center justify-center m-auto h-full text-sm text-slate-400">
+                      <div className="m-auto flex h-full items-center justify-center text-sm text-slate-400">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -195,9 +195,9 @@ const Register = ({ onButtonClick }) => {
                 </div>
                 <div className="flex flex-col gap-y-3">
                   <div>
-                    <label htmlFor="avatar" className="block text-gray-700 font-medium mb-2 cursor-pointer">
-                      <div className="bg-slate-50 rounded-md py-2 px-4 flex items-center justify-between">
-                        <span className="text-sm font-poppins">Choose an avatar</span>
+                    <label htmlFor="avatar" className="mb-2 block cursor-pointer font-medium text-gray-700">
+                      <div className="flex items-center justify-between rounded-md bg-slate-50 px-4 py-2">
+                        <span className="font-poppins text-sm">Choose an avatar</span>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -216,9 +216,9 @@ const Register = ({ onButtonClick }) => {
                     </label>
                     <input type="file" id="avatar" className="hidden" />
                   </div>
-                  <div className="flex flex-col items-center justify-between max-w-[95%] mt-4 gap-y-4">
+                  <div className="mt-4 flex max-w-[95%] flex-col items-center justify-between gap-y-4">
                     <button
-                      className="bg-dusty-grass rounded-[4px] flex items-center justify-center w-full font-semibold tracking-wider py-2 text-white ml-2"
+                      className="ml-2 flex w-full items-center justify-center rounded-[4px] bg-dusty-grass py-2 font-semibold tracking-wider text-white"
                       type="submit"
                     >
                       <span>Submit</span>
