@@ -38,7 +38,7 @@ const CONVERSATION_PATHS = {
 }
 
 const FILE_PATHS = {
-  UPLOAD_FILES: "/api/files/upload-files"
+  GENERATE_SIGNATURE: "/api/files/generate-signature"
 }
 
 export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS }

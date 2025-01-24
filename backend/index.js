@@ -22,8 +22,8 @@ app.use((err, req, res, next) => {
   console.error("Error:", err.message, err.stack)
 
   const status = err.statusCode || 500
-  const msg = err.message || "Internal Server Error!"
-  return res.status(status).json({ msg, stack: err.stack })
+  const message = err.message || "Internal Server Error!"
+  return res.status(status).json({ message, stack: err.stack })
 })
 
 const connectDB = async () => {

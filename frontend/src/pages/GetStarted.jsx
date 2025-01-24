@@ -5,7 +5,7 @@ import Login from "../components/Auth/Login"
 import Register from "../components/Auth/Register"
 
 const GetStarted = () => {
-  const [currentForm, setCurrentForm] = useState("Register")
+  const [currentForm, setCurrentForm] = useState("Login")
   const [shouldAnimate, setShouldAnimate] = useState(false)
 
   const formPickerRefs = {
@@ -29,49 +29,11 @@ const GetStarted = () => {
       return
     }
 
-    if (!shouldAnimate) {
-      return
-    }
+    if (!shouldAnimate) return
 
     const timeLine = gsap.timeline()
 
     if (currentForm === "Register") {
-      timeLine
-        .set(greenSectionTextRef.current, { opacity: 0, duration: 2, ease: "power2.inOut" })
-        .to(greenSectionRef.current, {
-          width: "100%",
-          duration: 1,
-          ease: "power2.inOut"
-        })
-        .set(greenSectionTextRef.current, { opacity: 1, duration: 2, paddingBottom: "10%", ease: "power2.inOut" })
-        .to(greenSectionRef.current, {
-          width: "50%",
-          left: "50%",
-          bottom: 0,
-          top: 0,
-          borderBottomRightRadius: "0px",
-          borderTopLeftRadius: "9999px",
-          duration: 1,
-          ease: "power2.inOut"
-        })
-        .set(formContainerRef.current, { opacity: 0, duration: 2, ease: "power2.inOut" }, "-=2")
-        .to(
-          subGreenSectionRef.current,
-          {
-            left: 0,
-            bottom: 0,
-            borderBottomRightRadius: "0px",
-            borderTopLeftRadius: "9999px",
-            duration: 1,
-            ease: "power2.inOut"
-          },
-          "-=1"
-        )
-        .set(formContainerRef.current, { opacity: 1, duration: 2, ease: "power2.inOut" })
-        .to(formContainerRef.current, { marginLeft: "10%", duration: 1 }, "-=1")
-    }
-
-    if (currentForm === "Login") {
       timeLine
         .set(greenSectionTextRef.current, { opacity: 0, duration: 2, ease: "power2.inOut" })
         .to(greenSectionRef.current, {
@@ -119,6 +81,42 @@ const GetStarted = () => {
         .to(formContainerRef.current, { marginLeft: "55%", duration: 1 }, "-=1")
     }
 
+    if (currentForm === "Login") {
+      timeLine
+        .set(greenSectionTextRef.current, { opacity: 0, duration: 2, ease: "power2.inOut" })
+        .to(greenSectionRef.current, {
+          width: "100%",
+          duration: 1,
+          ease: "power2.inOut"
+        })
+        .set(greenSectionTextRef.current, { opacity: 1, duration: 2, paddingBottom: "10%", ease: "power2.inOut" })
+        .to(greenSectionRef.current, {
+          width: "50%",
+          left: "50%",
+          bottom: 0,
+          top: 0,
+          borderBottomRightRadius: "0px",
+          borderTopLeftRadius: "9999px",
+          duration: 1,
+          ease: "power2.inOut"
+        })
+        .set(formContainerRef.current, { opacity: 0, duration: 2, ease: "power2.inOut" }, "-=2")
+        .to(
+          subGreenSectionRef.current,
+          {
+            left: 0,
+            bottom: 0,
+            borderBottomRightRadius: "0px",
+            borderTopLeftRadius: "9999px",
+            duration: 1,
+            ease: "power2.inOut"
+          },
+          "-=1"
+        )
+        .set(formContainerRef.current, { opacity: 1, duration: 2, ease: "power2.inOut" })
+        .to(formContainerRef.current, { marginLeft: "10%", duration: 1 }, "-=1")
+    }
+
     // Reset animation trigger
     setShouldAnimate(false)
 
@@ -126,7 +124,7 @@ const GetStarted = () => {
   }, [currentForm, shouldAnimate]) // Add shouldAnimate to dependency array
 
   return (
-    <section className="relative flex h-screen w-full items-center overflow-hidden">
+    <section className="bg-custom-white relative flex h-screen w-full items-center overflow-hidden">
       <div
         ref={greenSectionRef}
         className="absolute bottom-0 right-0 top-0 flex w-1/2 items-center justify-center rounded-tl-full bg-dusty-grass shadow-lg"
@@ -140,10 +138,10 @@ const GetStarted = () => {
         />
       </div>
       <div ref={formContainerRef} className="ml-[10%] w-full max-w-[430px]">
-        {currentForm === "Register" ? (
-          <Register onButtonClick={() => handleFormSwitch("Login")} />
-        ) : (
+        {currentForm === "Login" ? (
           <Login onButtonClick={() => handleFormSwitch("Register")} />
+        ) : (
+          <Register onButtonClick={() => handleFormSwitch("Login")} />
         )}
       </div>
     </section>

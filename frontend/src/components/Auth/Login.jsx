@@ -1,89 +1,62 @@
-import React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { loginFields } from "../../utils/dynamicData"
+import InputField from "../Shared/InputField"
+import axiosInstance from "../../utils/axiosInstance"
+import { useMutation } from "react-query"
+import { AUTH_PATHS } from "../../constants/apiPaths"
+import { loginSchema } from "../../utils/zodSchema"
+import LoadingSpinner from "../Shared/LoadingSpinner"
+import { useState } from "react"
 
 const Login = ({ onButtonClick }) => {
+  const [errorMessage, setErrorMessage] = useState(null)
+  const {
+    register: login,
+    clearErrors,
+    handleSubmit,
+    trigger,
+    formState: { errors }
+  } = useForm({
+    resolver: zodResolver(loginSchema)
+  })
+
+  const { mutate, isLoading, error } = useMutation({
+    mutationFn: async (credentials) => {
+      return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
+    },
+    onError: (error) => {
+      setErrorMessage(error.response.data.message)
+      console.error(error)
+    }
+  })
+
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="shadow-lg w-full h-[480px] py-7 px-4 bg-white rounded-lg tracking-wide">
+    <div className="flex h-screen items-center justify-center">
+      <div className="min-h-[480px] w-full rounded-lg bg-white px-4 py-6 tracking-wide shadow-lg">
         <div className="ml-8 flex flex-col gap-y-4">
-          <h2 className="text-[1.7rem] font-bold font-poppins text-black/80 relative after:content-[''] after:w-[3rem] after:block after:h-1 after:rounded-xl after:bg-dusty-grass after:absolute after:left-6 after:transform after:-translate-x-1/2 after:-bottom-1">
+          <h2 className="relative font-poppins text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:bg-dusty-grass after:content-['']">
             Login
           </h2>
-          <p className="font-poppins text-gray-600">Sign in to your account</p>
+          {error ? (
+            <p className="font-poppins text-red-600">{errorMessage}</p>
+          ) : (
+            <p className="font-poppins text-gray-600">Sign in to your account</p>
+          )}
         </div>
-        <div className="flex flex-col items-center mx-auto w-[90%]">
-          <form action="#" className="w-full font-poppins py-8">
-            <div className="flex items-center border-b-[1px] border-gray-300 focus-within:border-custom-border mb-6 pb-2">
-              <div className="relative w-full">
-                <input
-                  id="username"
-                  className="px-3 py-2 peer w-full ml-6 text-gray-700 focus:outline-none focus:ring-0 border-custom-border"
-                  name="username"
-                  type="text"
-                  placeholder=" "
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6 text-gray-500 absolute left-0 top-2 peer-focus:text-custom-text"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                  />
-                </svg>
-                <label
-                  htmlFor="username"
-                  className="absolute left-9 top-2 transition-all duration-300 ease-out transform scale-90 -translate-y-8 text-gray-600 peer-placeholder-shown:top-2 peer-placeholder-shown:left-9 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 peer-focus:scale-90 peer-focus:text-custom-text pointer-events-none"
-                >
-                  Username
-                </label>
-              </div>
-            </div>
-
-            <div className="flex items-center border-b-[1px] border-gray-300 focus-within:border-custom-border mb-6 pb-2">
-              <div className="relative w-full">
-                <input
-                  id="password"
-                  className="px-3 py-2 peer w-full ml-6 text-gray-700 focus:outline-none focus:ring-0 focus:border-black/80"
-                  name="password"
-                  type="password"
-                  placeholder=" "
-                />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6 text-gray-500 absolute left-0 top-2 peer-focus:text-custom-text"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-                  />
-                </svg>
-                <label
-                  htmlFor="password"
-                  className="absolute left-9 top-2 transition-all duration-300 ease-out transform scale-90 -translate-y-7 text-gray-400 peer-placeholder-shown:top-2 peer-placeholder-shown:left-9 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-7 peer-focus:scale-90 peer-focus:text-custom-text pointer-events-none"
-                >
-                  Password
-                </label>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center my-4">
+        <div className="mx-auto flex w-[90%] flex-col items-center">
+          <form onSubmit={handleSubmit(mutate)} className="w-full py-8 font-poppins">
+            {loginFields.map((field) => {
+              return <InputField field={field} register={login} error={errors} trigger={trigger} clearErrors={clearErrors} />
+            })}
+            <div className="my-4 flex items-center justify-between">
               <div className="flex items-center gap-x-2">
                 <input
                   id="remember"
-                  className="rounded-sm lg:text-lg border border-slate-300 active:border active:border-custom-border checked:bg-custom-green focus:border-transparent focus:ring-0"
+                  className="rounded-sm border border-slate-300 checked:bg-custom-green focus:border-transparent focus:ring-0 active:border active:border-custom-border lg:text-lg"
                   type="checkbox"
                 />
-                <label htmlFor="remember" className="text-sm text-gray-500 cursor-pointer">
+                <label htmlFor="remember" className="cursor-pointer text-sm text-gray-500">
                   Remember me
                 </label>
               </div>
@@ -96,15 +69,23 @@ const Login = ({ onButtonClick }) => {
             </div>
 
             <div className="py-4">
-              <button className="w-full shadow-md px-4 py-2 bg-button-color font-poppins text-white rounded font-semibold">
-                Login Now
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full rounded bg-button-color ${
+                  isLoading
+                    ? "cursor-not-allowed bg-dusty-grass"
+                    : "bg-custom-green hover:bg-green-500 hover:transition-colors"
+                } px-4 py-2 font-poppins font-semibold text-white shadow-md`}
+              >
+                <LoadingSpinner loading={isLoading} loadingText={"Logging In"} finalText={"Login"} />
               </button>
             </div>
 
-            <div className="text-center py-4">
+            <div className="py-4 text-center">
               <p className="text-sm text-black/80">
                 Not signed in yet?{" "}
-                <span onClick={() => onButtonClick("Register")} className="font-bold cursor-pointer">
+                <span onClick={() => onButtonClick("Register")} className="cursor-pointer font-bold">
                   Sign up now!
                 </span>
               </p>

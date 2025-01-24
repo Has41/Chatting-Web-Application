@@ -60,6 +60,23 @@ const secondStepRegister = [
   }
 ]
 
+const loginFields = [
+  {
+    id: "username",
+    label: "Username",
+    type: "text",
+    iconPath:
+      "M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+  },
+  {
+    id: "password",
+    label: "Password",
+    type: "password",
+    iconPath:
+      "M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+  }
+]
+
 const connectIcons = [
   {
     path: "M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
@@ -137,4 +154,4 @@ const profileInfo = [
   }
 ]
 
-export { firstStepRegister, secondStepRegister, connectIcons, trustIcons, navOptions, chatOptions, profileInfo }
+export { firstStepRegister, secondStepRegister, loginFields, connectIcons, trustIcons, navOptions, chatOptions, profileInfo }

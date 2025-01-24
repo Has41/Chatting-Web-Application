@@ -75,7 +75,7 @@ const verifyOTP = async (req, res, next) => {
     const findOTP = await OTP.findOne({ email }).select("otp")
 
     if (!findOTP.otp || findOTP.otp !== otp) {
-      return next(errorHandler(404, "Invalid OTP or OTP expired!"))
+      return res.status(404).json({ message: "Invalid OTP or OTP expired!" })
     }
 
     const user = await User.findOne({ email }).select("verification")
@@ -209,7 +209,6 @@ const login = async (req, res, next) => {
       return next(errorHandler(401, "Incorrect password."))
     }
 
-    //To refresh the profileURL inside payLoad
     const payLoad = {
       id: findUser._id,
       name: findUser.username,

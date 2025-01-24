@@ -1,5 +1,5 @@
-const errorHandler = (status, msg) => {
-  const err = new Error(msg)
+const errorHandler = (status, message) => {
+  const err = new Error(message)
   err.statusCode = status
   return err
 }

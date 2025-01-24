@@ -1,5 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates&family=Montserrat:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@500&display=swap");
+@layer base {
+  input:read-only:focus {
+    @apply border border-gray-300 outline-none ring-0;
+  }
+}
