@@ -9,6 +9,7 @@ const useCloudinaryUpload = () => {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState(null)
   const [uploadedFileUrl, setUploadedFileUrl] = useState(null)
+  const [uploadedPublicId, setUploadedPublicId] = useState(null)
   const cloudName = import.meta.env.VITE_API_CLOUD_NAME
 
   const { mutateAsync: generateSignature } = useMutation({
@@ -24,8 +25,8 @@ const useCloudinaryUpload = () => {
       return data
     },
     onSuccess: (data) => {
-      console.log("Uploaded file data:", data)
       setUploadedFileUrl(data.secure_url)
+      setUploadedPublicId(data.public_id)
     },
     onError: (err) => {
       console.error("Error uploading file:", err)
@@ -48,7 +49,6 @@ const useCloudinaryUpload = () => {
         return
       }
       const signedData = await generateSignature({ folder, fileType, uploadType })
-      console.log("Signed data from backend:", signedData)
 
       const formData = new FormData()
       formData.append("file", file)
@@ -65,7 +65,8 @@ const useCloudinaryUpload = () => {
 
       const resourceType = signedData.resource_type || "auto"
 
-      await uploadToCloudinaryApi({ formData, resourceType })
+      const res = await uploadToCloudinaryApi({ formData, resourceType })
+      return res
     } catch (err) {
       setError(err.message || "An error occurred during upload")
       console.error(err)
@@ -74,7 +75,7 @@ const useCloudinaryUpload = () => {
     }
   }
 
-  return { uploadFile, isUploading, error, uploadedFileUrl }
+  return { uploadFile, isUploading, error, uploadedFileUrl, uploadedPublicId }
 }
 
 export default useCloudinaryUpload

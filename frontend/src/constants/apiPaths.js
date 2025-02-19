@@ -1,6 +1,8 @@
 const AUTH_PATHS = {
   LOGIN: "/api/auth/login",
   REGISTER: "/api/auth/register",
+  OTHER_DETAIL: "/api/auth/other-details",
+  SAVE_PROFILE_PIC: "/api/auth/profile-pic",
   LOG_OUT: "/api/auth/logout",
   VERIFY_OTP: "/api/auth/verify-otp",
   RESEND_OTP: "/api/auth/resend-otp",

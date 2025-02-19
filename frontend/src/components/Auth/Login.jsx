@@ -21,12 +21,12 @@ const Login = ({ onButtonClick }) => {
     resolver: zodResolver(loginSchema)
   })
 
-  const { mutate, isLoading, error } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationFn: async (credentials) => {
       return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
     },
     onError: (error) => {
-      setErrorMessage(error.response.data.message)
+      setErrorMessage(error?.response?.data?.message || "An unexpected error occurred")
       console.error(error)
     }
   })
@@ -38,16 +38,21 @@ const Login = ({ onButtonClick }) => {
           <h2 className="relative font-poppins text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:bg-dusty-grass after:content-['']">
             Login
           </h2>
-          {error ? (
-            <p className="font-poppins text-red-600">{errorMessage}</p>
-          ) : (
-            <p className="font-poppins text-gray-600">Sign in to your account</p>
-          )}
+          {errorMessage && <p className="font-poppins text-red-600">{errorMessage}</p>}
         </div>
         <div className="mx-auto flex w-[90%] flex-col items-center">
           <form onSubmit={handleSubmit(mutate)} className="w-full py-8 font-poppins">
             {loginFields.map((field) => {
-              return <InputField field={field} register={login} error={errors} trigger={trigger} clearErrors={clearErrors} />
+              return (
+                <InputField
+                  key={field.id}
+                  field={field}
+                  register={login}
+                  error={errors}
+                  trigger={trigger}
+                  clearErrors={clearErrors}
+                />
+              )
             })}
             <div className="my-4 flex items-center justify-between">
               <div className="flex items-center gap-x-2">
@@ -78,7 +83,7 @@ const Login = ({ onButtonClick }) => {
                     : "bg-custom-green hover:bg-green-500 hover:transition-colors"
                 } px-4 py-2 font-poppins font-semibold text-white shadow-md`}
               >
-                <LoadingSpinner loading={isLoading} loadingText={"Logging In"} finalText={"Login"} />
+                {isLoading ? <LoadingSpinner loading={isLoading} loadingText={"Logging In"} finalText={"Login"} /> : "Login"}
               </button>
             </div>
 

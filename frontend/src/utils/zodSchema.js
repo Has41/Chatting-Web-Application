@@ -33,9 +33,31 @@ const registerSchema = z
     }
   })
 
+const dateOfBirthSchema = z
+  .object({
+    day: z.string().optional(),
+    month: z.string().optional(),
+    year: z.string().optional()
+  })
+  .refine(
+    (data) => {
+      if (!data.day && !data.month && !data.year) return true
+      return Boolean(data.day && data.month && data.year)
+    },
+    {
+      message: "Please provide day, month, and year for the date of birth"
+    }
+  )
+
+const otherDetailSchema = z.object({
+  displayName: z.string().optional(),
+  dateOfBirth: dateOfBirthSchema.optional(),
+  bio: z.string().optional()
+})
+
 const loginSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters long" })
 })
 
-export { registerSchema, loginSchema }
+export { registerSchema, loginSchema, otherDetailSchema }

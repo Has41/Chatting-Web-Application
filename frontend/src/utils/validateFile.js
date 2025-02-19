@@ -1,5 +1,18 @@
 import { ERROR_MESSAGES, FILE_VALIDATION_RULES } from "../constants/constantValues"
 
+const dataURItoBlob = (dataURI) => {
+  const [header, base64Data] = dataURI.split(",")
+  const mimeMatch = header.match(/:(.*?);/)
+  const mime = mimeMatch ? mimeMatch[1] : ""
+  const byteString = atob(base64Data)
+  const ab = new ArrayBuffer(byteString.length)
+  const ia = new Uint8Array(ab)
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i)
+  }
+  return new Blob([ab], { type: mime })
+}
+
 const validateSize = (file, maxSize, error) => {
   if (file.size > maxSize) {
     return { success: false, error }
@@ -33,7 +46,12 @@ const validateFile = async (file) => {
     return { success: false, error: ERROR_MESSAGES.FILE_NOT_SPECIFIED }
   }
 
-  const fileType = file.type.split("/")[0]
+  let fileObj = file
+  if (typeof file === "string" && file.startsWith("data:image")) {
+    fileObj = dataURItoBlob(file)
+  }
+
+  const fileType = fileObj.type.split("/")[0]
   const rules = FILE_VALIDATION_RULES[fileType] || FILE_VALIDATION_RULES.default
 
   const sizeValidation = validateSize(file, rules.maxSize, `${rules.error || rules.sizeError} (File size: ${file.size})`)

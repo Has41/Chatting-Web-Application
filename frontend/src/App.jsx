@@ -19,6 +19,7 @@ import {
 } from "./constants/routePaths"
 import OtpAuthPage from "./pages/OtpAuthPage"
 import TestFileUpload from "./components/Test/TestFileUpload"
+import "./App.css"
 
 const App = () => {
   return (

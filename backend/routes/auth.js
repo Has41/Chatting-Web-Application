@@ -1,18 +1,33 @@
 import express from "express"
-import { register, login, logout, verifyOTP, resendOTP, forgotPassword, resetPassword } from "../controllers/auth.js"
-import { uploadProfilePicture } from "../middlewares/uploads.js"
+import {
+  register,
+  login,
+  logout,
+  verifyOTP,
+  resendOTP,
+  forgotPassword,
+  resetPassword,
+  otherDetails,
+  saveProfilePicture,
+} from "../controllers/auth.js"
 import {
   registerValidator,
   loginValidator,
   verifyOTPValidator,
   resendEmailValidator,
   resetPasswordValidator,
+  otherFormValidator,
+  profilePicValidator,
 } from "../validators/authValidators.js"
 import validateApiData from "../utils/apiValidator.js"
 
 const router = express.Router()
 
-router.post("/register", uploadProfilePicture.single("profilePicture"), registerValidator, validateApiData, register)
+router.post("/register", registerValidator, validateApiData, register)
+
+router.post("/other-details", otherFormValidator, validateApiData, otherDetails)
+
+router.post("/profile-pic", profilePicValidator, validateApiData, saveProfilePicture)
 
 router.post("/login", loginValidator, validateApiData, login)
 
