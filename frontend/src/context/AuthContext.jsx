@@ -16,15 +16,16 @@ const AuthProvider = ({ children }) => {
       return data
     },
     onSuccess: (data) => {
-      setUser(data?.data)
+      setUser(data)
       setIsAuthenticated(true)
+      console.log(data)
     },
     onError: (error) => {
       console.error("Failed to fetch user data:", error)
       setIsAuthenticated(false)
       setUser(null)
     },
-    retry: false,
+    // retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,

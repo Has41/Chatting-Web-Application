@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import User from "../Models/User.js"
+import User from "../models/User.js"
 import errorHandler from "../utils/errorHandler.js"
 import OTP from "../models/Otp.js"
 import sendOTP from "../utils/sendOTP.js"
@@ -268,7 +268,7 @@ const login = async (req, res, next) => {
       return res
         .status(200)
         .cookie("accessToken", token, {
-          httpOnly: true,
+          httpOnly: process.env.NODE_ENV === "production",
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
           maxAge: 24 * 60 * 60 * 1000,

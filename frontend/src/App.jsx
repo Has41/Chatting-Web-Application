@@ -19,14 +19,30 @@ import {
 } from "./constants/routePaths"
 import OtpAuthPage from "./pages/OtpAuthPage"
 import TestFileUpload from "./components/Test/TestFileUpload"
+import AuthWrapper from "./components/Shared/AuthWrapper"
+import ProtectedRoute from "./components/Shared/ProtectedRoute"
 import "./App.css"
 
 const App = () => {
   return (
     <Routes>
       <Route index element={<Home />} />
-      <Route path={AUTH_PAGE} element={<GetStarted />} />
-      <Route path={CHAT_PAGE} element={<ChatArea />}>
+      <Route
+        path={AUTH_PAGE}
+        element={
+          <AuthWrapper>
+            <GetStarted />
+          </AuthWrapper>
+        }
+      />
+      <Route
+        path={CHAT_PAGE}
+        element={
+          <ProtectedRoute>
+            <ChatArea />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<ChatList />} />
         <Route path={FRIENDS_PAGE} element={<FriendList />} />
         <Route path={CALLS_PAGE} element={<ChatCalls />} />

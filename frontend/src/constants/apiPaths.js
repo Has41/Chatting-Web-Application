@@ -12,15 +12,15 @@ const AUTH_PATHS = {
 
 const USER_PATHS = {
   GET_INFO: "/api/users/get-info",
-  EDIT_PROFILE: "/api/users/edit-info/:userId",
-  DELETE_ACCOUNT: "/api/users/delete-account/:userId",
-  TOGGLE_DARK_MODE: "/api/users/toggle-darkmode/:userId",
-  ADD_INTEREST: "/api/users/add-interests/:userId",
-  REMOVE_INTEREST: "/api/users/remove-interests/:userId/:interest",
-  SEND_FRIEND_REQUEST: "/api/users/send-friend-request/:userId",
-  RESPOND_FRIEND_REQUEST: "/api/users/respond-friend-request/:userId",
+  EDIT_PROFILE: "/api/users/edit-info",
+  DELETE_ACCOUNT: "/api/users/delete-account",
+  TOGGLE_DARK_MODE: "/api/users/toggle-darkmode",
+  ADD_INTEREST: "/api/users/add-interests",
+  REMOVE_INTEREST: "/api/users/remove-interests",
+  SEND_FRIEND_REQUEST: "/api/users/send-friend-request",
+  RESPOND_FRIEND_REQUEST: "/api/users/respond-friend-request",
   GET_FRIEND_REQUESTS: "/api/users/get-friend-requests",
-  REMOVE_FRIEND: "/api/users/remove-friend/:userId",
+  REMOVE_FRIEND: "/api/users/remove-friend",
   SEARCH_USER_DATA: "/api/users/search-users-messages/:searchInfo"
 }
 

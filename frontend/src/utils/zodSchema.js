@@ -55,9 +55,25 @@ const otherDetailSchema = z.object({
   bio: z.string().optional()
 })
 
+const displayNameSchema = z.object({
+  displayName: z.string().min(2, "Display Name must be at least 2 characters")
+})
+
+const bioSchema = z.object({
+  bio: z.string().max(200, "Bio must be less than 200 characters").optional()
+})
+
+const locationSchema = z.object({
+  location: z.string().min(1, "Please select a country")
+})
+
+const genderSchema = z.object({
+  gender: z.enum(["Male", "Female", "Prefer not to say"])
+})
+
 const loginSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters long" })
 })
 
-export { registerSchema, loginSchema, otherDetailSchema }
+export { registerSchema, loginSchema, otherDetailSchema, displayNameSchema, bioSchema, genderSchema, locationSchema }

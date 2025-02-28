@@ -1,4 +1,3 @@
-import formatNumber from "../utils/phoneUtils.js"
 import User from "../models/User.js"
 import errorHandler from "../utils/errorHandler.js"
 import jwt from "jsonwebtoken"
@@ -25,62 +24,28 @@ const getUserInfo = async (req, res, next) => {
 
 const editUserInfo = async (req, res, next) => {
   try {
-    const userId = req.params.userId
+    const updateData = req.body
 
-    const userData = await User.findById(userId)
-
-    if (!userData) {
-      return next(errorHandler(404, "User not found."))
-    }
-
-    const updateData = {
-      username: req.body.username || userData.username,
-      displayName: req.body.displayName || userData.displayName,
-      phoneNumber: formatNumber(req.body.phoneNumber) || userData.phoneNumber,
-      dateOfBirth: req.body.dateOfBirth || userData.dateOfBirth,
-      gender: req.body.gender || userData.gender,
-      location: req.body.location || userData.location,
-      bio: req.body.bio || userData.bio,
-      profilePicture: req.file ? { publicId: req.file.filename, url: req.file.path } : userData.profilePicture,
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, updateData, {
       new: true,
     })
 
-    const newToken = jwt.sign(
-      {
-        id: updatedUser._id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        profilePicture: updatedUser.profilePicture,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    )
-
-    // Send the new token back to the client in cookies
-    res.cookie("accessToken", newToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    })
+    if (!updatedUser) {
+      return next(errorHandler(404, "User not found."))
+    }
 
     return res.status(200).json({
       message: "User profile updated successfully.",
       user: updatedUser,
     })
   } catch (err) {
-    return next(errorHandler(500, err.message))
+    return next(errorHandler(500, err))
   }
 }
 
 const deleteUserAcc = async (req, res, next) => {
   try {
-    const userId = req.params.userId
-
-    const deleteAccount = await User.findByIdAndDelete(userId)
+    const deleteAccount = await User.findByIdAndDelete(req.user.id)
 
     if (deleteAccount) {
       res.clearCookie("accessToken", {
@@ -98,14 +63,13 @@ const deleteUserAcc = async (req, res, next) => {
 
 const addUserInterest = async (req, res, next) => {
   try {
-    const userId = req.params.userId
     const { newInterest } = req.body
 
-    // Check if interest already exists or if user has reached the maximum number of interests
     const user = await User.findOneAndUpdate(
       {
-        _id: userId,
-        $and: [{ interests: { $ne: newInterest } }, { interests: { $lt: 5 } }],
+        _id: req.user.id,
+        interests: { $ne: newInterest },
+        "interests.4": { $exists: false },
       },
       { $push: { interests: newInterest } },
       { new: true }
@@ -123,17 +87,15 @@ const addUserInterest = async (req, res, next) => {
 
 const removeUserInterest = async (req, res, next) => {
   try {
-    const userId = req.params.userId
-    const interestToRemove = req.params.interest
+    const { interestToRemove } = req.body
 
     if (!interestToRemove) {
       return next(errorHandler(400, "Interest cannot be empty or null."))
     }
 
-    // Find user and attempt to remove the interest in one operation
     const user = await User.findOneAndUpdate(
       {
-        _id: userId,
+        _id: req.user.id,
         interests: interestToRemove,
       },
       { $pull: { interests: interestToRemove } },
@@ -152,10 +114,8 @@ const removeUserInterest = async (req, res, next) => {
 
 const toggleDarkMode = async (req, res, next) => {
   try {
-    const userId = req.params.userId
-
     const user = await User.findOneAndUpdate(
-      { _id: userId },
+      { _id: req.user.id },
       { $bit: { darkMode: { $not: "$darkMode" } } },
       { new: true }
     )

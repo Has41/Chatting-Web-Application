@@ -5,7 +5,7 @@ const AuthWrapper = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
-    return "Loading..."
+    return
   }
 
   if (isAuthenticated) {

@@ -1,4 +1,5 @@
 import React from "react"
+import { Link } from "react-router-dom"
 
 const Navbar = () => {
   return (
@@ -14,7 +15,10 @@ const Navbar = () => {
         </ul>
       </div>
       <div>
-        <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-2 py-1 font-medium">
+        <Link
+          to={"/chat"}
+          className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-2 py-1 font-medium"
+        >
           <div className="pl-1">Get Started</div>
           <div className="rounded-full bg-green-300 p-[9px]">
             <svg
@@ -28,7 +32,7 @@ const Navbar = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
             </svg>
           </div>
-        </button>
+        </Link>
       </div>
     </nav>
   )

@@ -5,7 +5,7 @@ import Chatbox from "../components/Chat/Chatbox"
 
 const ChatArea = () => {
   return (
-    <main className="max-w-full flex">
+    <main className="flex max-w-full overflow-y-hidden">
       <Sidebar />
       <Outlet />
       <Chatbox />

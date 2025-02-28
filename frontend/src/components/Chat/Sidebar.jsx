@@ -7,12 +7,10 @@ import ChatLogo from "../Shared/ChatLogo"
 const Sidebar = () => {
   return (
     <nav className="flex h-screen w-[6%] flex-col items-center justify-between bg-white font-poppins transition-all duration-500">
-      {/* Logo */}
       <div className="mt-5 flex justify-center">
         <ChatLogo />
       </div>
 
-      {/* Options */}
       <ul className="flex flex-col justify-start gap-y-5">
         {navOptions.map((option, index) => (
           <li key={index}>
@@ -36,7 +34,6 @@ const Sidebar = () => {
         ))}
       </ul>
 
-      {/* Profile and Settings */}
       <div className="flex flex-col items-center gap-y-6 pb-6">
         <div className="flex cursor-pointer items-center rounded-md p-3 transition-all duration-500 hover:bg-slate-200">
           <NavLink to={"/chat/settings"}>
@@ -59,9 +56,6 @@ const Sidebar = () => {
           </NavLink>
         </div>
         <div className="flex items-center">
-          {/* <div className="size-10 bg-slate-300 cursor-pointer rounded-full">
-            <img className="" src="" alt="User Profile" />
-          </div> */}
           <ProfileDropdown />
         </div>
       </div>

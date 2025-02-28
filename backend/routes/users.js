@@ -27,30 +27,30 @@ const router = express.Router()
 
 router.get("/get-info", getUserInfo)
 
-router.put(
-  "/edit-info/:userId",
-  deleteImage,
-  uploadProfilePicture.single("profilePicture"),
+router.patch(
+  "/edit-info",
+  // deleteImage,
+  // uploadProfilePicture.single("profilePicture"),
   editInfoValidator,
   validateApiData,
   editUserInfo
 )
 
-router.delete("/delete-account/:userId", deleteImage, validateUserId, validateApiData, deleteUserAcc)
+router.delete("/delete-account", deleteImage, validateUserId, validateApiData, deleteUserAcc)
 
-router.post("/add-interests/:userId", addInterestValidator, validateApiData, addUserInterest)
+router.post("/add-interests", addInterestValidator, validateApiData, addUserInterest)
 
-router.delete("/remove-interests/:userId/:interest", removeInterestValidator, validateApiData, removeUserInterest)
+router.delete("/remove-interests", removeInterestValidator, validateApiData, removeUserInterest)
 
-router.patch("/toggle-darkmode/:userId", validateUserId, validateApiData, toggleDarkMode)
+router.patch("/toggle-darkmode", validateUserId, validateApiData, toggleDarkMode)
 
-router.post("/send-friend-request/:userId", validateUserId, validateApiData, sendFriendRequest)
+router.post("/send-friend-request", validateUserId, validateApiData, sendFriendRequest)
 
-router.post("/respond-friend-request/:userId", respondRequestValidator, validateApiData, respondFriendRequest)
+router.post("/respond-friend-request", respondRequestValidator, validateApiData, respondFriendRequest)
 
 router.get("/get-friend-requests", getFriendsAndRequests)
 
-router.delete("/remove-friend/:userId", validateUserId, validateApiData, removeFriends)
+router.delete("/remove-friend", validateUserId, validateApiData, removeFriends)
 
 router.get("/search-users-messages/:searchInfo", searchInfoValidator, validateApiData, searchUsersAndContent)
 

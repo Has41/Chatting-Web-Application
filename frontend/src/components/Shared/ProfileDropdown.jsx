@@ -1,8 +1,10 @@
 import React, { useState } from "react"
 import { profileInfo } from "../../utils/dynamicData"
+import useAuth from "../../hooks/useAuth"
 
 const ProfileDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="relative font-poppins">
@@ -10,7 +12,7 @@ const ProfileDropdown = () => {
         className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-slate-300"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
-        <img className="h-full w-full rounded-full object-cover" src="https://via.placeholder.com/40" alt="User Profile" />
+        <img className="h-full w-full rounded-full object-cover" src={user?.profilePicture.url} alt="User Profile" />
       </div>
 
       {isDropdownOpen && (

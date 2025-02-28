@@ -8,9 +8,13 @@ import { AUTH_PATHS } from "../../constants/apiPaths"
 import { loginSchema } from "../../utils/zodSchema"
 import LoadingSpinner from "../Shared/LoadingSpinner"
 import { useState } from "react"
+import useAuth from "../../hooks/useAuth"
+import { useNavigate } from "react-router-dom"
 
 const Login = ({ onButtonClick }) => {
   const [errorMessage, setErrorMessage] = useState(null)
+  const { setIsAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const {
     register: login,
     clearErrors,
@@ -27,7 +31,13 @@ const Login = ({ onButtonClick }) => {
     },
     onError: (error) => {
       setErrorMessage(error?.response?.data?.message || "An unexpected error occurred")
+      setIsAuthenticated(false)
       console.error(error)
+    },
+    onSuccess: () => {
+      setErrorMessage(null)
+      setIsAuthenticated(true)
+      navigate("/chat")
     }
   })
 
