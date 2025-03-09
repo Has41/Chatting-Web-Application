@@ -11,6 +11,9 @@ const messageSchema = new mongoose.Schema(
     media: {
       publicId: {
         type: String,
+        required: function () {
+          return ["file"].includes(this.messageType)
+        },
         default: "",
       },
       mediaUrl: {
@@ -19,18 +22,6 @@ const messageSchema = new mongoose.Schema(
           return ["file"].includes(this.messageType)
         },
         default: "",
-      },
-      meta: {
-        fileType: {
-          type: String,
-          required: function () {
-            return ["file"].includes(this.messageType)
-          },
-        },
-        fileSize: {
-          type: Number,
-          min: 0,
-        },
       },
     },
     sender: {

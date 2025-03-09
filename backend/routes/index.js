@@ -11,7 +11,7 @@ const router = express.Router()
 router.use("/auth", authRoutes)
 router.use("/users", isAuthentic, userRoutes)
 router.use("/messages", messageRoutes)
-router.use("/conversations", convoRoutes)
+router.use("/conversations", isAuthentic, convoRoutes)
 router.use("/files", fileRoute)
 
 export default router

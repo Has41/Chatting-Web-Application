@@ -3,7 +3,9 @@ import {
   addGroupParticipants,
   changeGroupOwnership,
   createGroupConversation,
+  getConversationsOfUser,
   getCurrentConversation,
+  getMessagesOfConversation,
   leaveGroupConversation,
   removeGroupParticipants,
   updateGroupConversation,
@@ -21,6 +23,10 @@ import validateApiData from "../utils/apiValidator.js"
 const router = express.Router()
 
 router.get("/get-current-convo/:convoId", validateConvoId, validateApiData, getCurrentConversation)
+
+router.get("/get-current-convo-messages/:convoId", validateConvoId, validateApiData, getMessagesOfConversation)
+
+router.get("/get-conversations", getConversationsOfUser)
 
 router.post("/create-group", createConversationValidator, validateApiData, createGroupConversation)
 

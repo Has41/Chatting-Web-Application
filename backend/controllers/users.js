@@ -1,6 +1,5 @@
 import User from "../models/User.js"
 import errorHandler from "../utils/errorHandler.js"
-import jwt from "jsonwebtoken"
 
 const getUserInfo = async (req, res, next) => {
   try {
@@ -18,7 +17,22 @@ const getUserInfo = async (req, res, next) => {
 
     return res.status(200).json(userData)
   } catch (err) {
-    return next(err)
+    return next(errorHandler(500, err))
+  }
+}
+
+const getUserById = async (req, res, next) => {
+  try {
+    const { userId } = req.params
+
+    const userData = await User.findById(userId).select("username profilePicture displayName")
+
+    if (!userData) {
+      return res.status(404).json({ message: "User data not found!" })
+    }
+    return res.status(200).json(userData)
+  } catch (err) {
+    return next(errorHandler(500, err))
   }
 }
 
@@ -254,16 +268,15 @@ const removeFriends = async (req, res, next) => {
 
 const searchUsersAndContent = async (req, res, next) => {
   try {
-    const searchInfo = req.params.searchInfo
-    const currentUserId = req.user.id
+    const dataToSearch = req.query.dataToSearch
 
     const searchedUsers = await User.find({
       $or: [
-        { username: { $regex: searchInfo, $options: "i" } },
-        { displayName: { $regex: searchInfo, $options: "i" } },
+        { username: { $regex: dataToSearch, $options: "i" } },
+        { displayName: { $regex: dataToSearch, $options: "i" } },
       ],
-      _id: { $ne: currentUserId },
-    }).select("username")
+      _id: { $ne: req.user.id },
+    }).select("username profilePicture displayName")
 
     // TODO: Gonna search for messages too!
     // const findMessages = await Message.find({ content: { $regex: searchInfo, $options: 'i' } })
@@ -284,6 +297,7 @@ const searchUsersAndContent = async (req, res, next) => {
 
 export {
   getUserInfo,
+  getUserById,
   editUserInfo,
   deleteUserAcc,
   addUserInterest,

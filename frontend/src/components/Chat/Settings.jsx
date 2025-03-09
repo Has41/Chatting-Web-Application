@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import StatusDropdown from "../Shared/StatusDropdown"
 import InfoDetails from "./Settings/InfoDetails"
 import useAuth from "../../hooks/useAuth"
+import ThemeSettings from "./Settings/ThemeSettings"
 
 const Settings = () => {
   const { user } = useAuth()
@@ -97,7 +98,9 @@ const Settings = () => {
               </svg>
             </button>
             {openSection === "themes" && (
-              <div className="mt-2 pl-4 text-sm text-gray-600">Customize your theme preferences.</div>
+              <div className="mt-2 pl-2 text-sm text-gray-600">
+                <ThemeSettings />
+              </div>
             )}
           </div>
 

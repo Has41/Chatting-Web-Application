@@ -9,7 +9,7 @@ let io
 const setupSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "*", // TODO: Change this for deployment
+      origin: "*", //? Change this for deployment
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -33,9 +33,12 @@ const setupSocket = (server) => {
       await sendMessage(messageData, fileData)
     })
 
-    socket.on("markMessageAsSeen", async (conversationId, userId, conversationType) => {
-      if (!validateSocketData(socket, socket.handshake.query, "markMessageAsSeen")) return
-      await markMessageAsSeen(conversationId, userId, conversationType)
+    socket.on("markMessageAsSeen", async (conversationId, userId, conversationType, lastMessageId) => {
+      if (!validateSocketData(socket, socket.handshake.query, "markMessageAsSeen")) {
+        console.error("Failed to mark user")
+        return
+      }
+      await markMessageAsSeen(conversationId, userId, conversationType, lastMessageId)
     })
 
     socket.on("join-group", async (conversationId, userId) => {

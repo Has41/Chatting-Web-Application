@@ -1,4 +1,4 @@
-import { body, param } from "express-validator"
+import { body, param, query } from "express-validator"
 
 const editInfoValidator = [
   body("displayName").optional().trim().escape(),
@@ -44,7 +44,7 @@ const respondRequestValidator = [
 ]
 
 const searchInfoValidator = [
-  param("searchInfo")
+  query("dataToSearch")
     .trim()
     .notEmpty()
     .withMessage("Search info is required")

@@ -44,10 +44,6 @@ const userSchema = new mongoose.Schema(
       enum: ["Male", "Female", "Prefer not to say"],
       default: "Prefer not to say",
     },
-    sidebarLock: {
-      type: Boolean,
-      default: false,
-    },
     location: {
       type: String,
       default: "Pakistan",

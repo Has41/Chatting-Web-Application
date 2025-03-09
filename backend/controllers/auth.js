@@ -285,7 +285,7 @@ const login = async (req, res, next) => {
 
 const logout = (req, res) => {
   res.clearCookie("accessToken", {
-    httpOnly: true,
+    httpOnly: process.env.NODE_ENV === "production",
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   })

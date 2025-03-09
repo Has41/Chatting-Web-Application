@@ -1,6 +1,7 @@
 import redis from "../redis.js"
 import Message from "../models/Message.js"
 import Conversation from "../models/Conversation.js"
+import errorHandler from "./errorHandler.js"
 
 const validateConvoType = async (messageId, conversationType) => {
   try {
@@ -23,7 +24,7 @@ const validateConvoType = async (messageId, conversationType) => {
     return messageData
   } catch (err) {
     console.error(err)
-    throw errorHandler(500, `Failed to validate convo: ${err?.message}`)
+    throw errorHandler(500, "Failed to validate convo: ", err)
   }
 }
 
@@ -37,7 +38,9 @@ const cacheMessage = async (messageId, conversationId, conversationType) => {
     } else {
       const messageData = await validateConvoType(messageId, conversationType)
       cachedMessageData = messageData.toJSON()
-      cachedMessageData.conversation = conversationId
+      if (!cachedMessageData.conversation) {
+        cachedMessageData.conversation = conversationId
+      }
       await redis.set(messageCacheKey, JSON.stringify(cachedMessageData), { ex: 3600 })
 
       return cachedMessageData
@@ -64,7 +67,10 @@ const cacheConvoData = async (conversationId, userId) => {
     const convoCacheKey = `conversation:${conversationId}`
     let cachedConvoData = await redis.get(convoCacheKey)
     if (cachedConvoData) {
-      return JSON.parse(cachedConvoData)
+      if (typeof cachedConvoData === "string") {
+        return JSON.parse(cachedConvoData)
+      }
+      return cachedConvoData
     } else {
       const convoData = await Conversation.findById(conversationId).select("participants groupOwner lastMessage")
 

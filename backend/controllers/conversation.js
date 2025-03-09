@@ -7,25 +7,75 @@ const getCurrentConversation = async (req, res, next) => {
   try {
     const convoId = req.params.convoId
 
-    const conversation = await Conversation.findById(convoId).populate("participants", "username")
+    const conversation = await Conversation.findById(convoId)
+      .populate("groupOwner participants lastMessage")
+      .select("conversationType groupName groupPicture")
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found!" })
     }
 
-    const messages = await Message.find({ conversation: convoId })
-      .populate("sender", "username")
-      .populate("recipient", "username")
-      .populate("seenBy.user", "username")
-      .sort({ createdAt: 1 })
-
     res.status(200).json({
       message: "Success!",
       conversation,
-      messages,
     })
   } catch (err) {
     return next(errorHandler(500, err.message))
+  }
+}
+
+const getConversationsOfUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).lean()
+
+    const conversations = await Conversation.find({
+      _id: { $in: user.conversations },
+    })
+      .populate({
+        path: "participants",
+        select: "username displayName profilePicture",
+      })
+      .populate({
+        path: "lastMessage",
+        select: "content createdAt",
+      })
+      .lean()
+
+    return res.status(200).json({ conversations })
+  } catch (err) {
+    return next(errorHandler(500, err))
+  }
+}
+
+const getMessagesOfConversation = async (req, res, next) => {
+  try {
+    const { convoId } = req.params
+    if (!convoId) {
+      return res.status(400).json({ message: "Conversation ID is required." })
+    }
+
+    const page = parseInt(req.query.page, 10) || 1
+    const limit = parseInt(req.query.limit, 10) || 20
+    const skip = (page - 1) * limit
+
+    const conversation = await Conversation.findById(convoId).lean()
+
+    if (!conversation) {
+      return res.status(404).json({ message: "Conversation not found." })
+    }
+
+    const messages = await Message.find({
+      _id: { $in: conversation.messages },
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean()
+
+    return res.status(200).json({ messages })
+  } catch (error) {
+    console.error("Error fetching messages:", error)
+    next(error)
   }
 }
 
@@ -267,4 +317,6 @@ export {
   removeGroupParticipants,
   changeGroupOwnership,
   removeGroupConversation,
+  getMessagesOfConversation,
+  getConversationsOfUser,
 }

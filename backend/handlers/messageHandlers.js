@@ -1,5 +1,5 @@
 import { io } from "../socket.js"
-import { cacheConvoData, cacheMessage } from "../utils/cachedMessage.js"
+import { cacheConvoData } from "../utils/cachedMessage.js"
 import errorHandler from "../utils/errorHandler.js"
 import userSocketMap from "../utils/socketMap.js"
 import Conversation from "../models/Conversation.js"
@@ -10,7 +10,7 @@ const updateConversationAndUser = async (conversation, createdMessage, userIds) 
   try {
     conversation.messages.push(createdMessage._id)
     await conversation.save()
-    await User.updateMany({ _id: { $in: userIds } }, { $push: { conversations: conversation._id } })
+    await User.updateMany({ _id: { $in: userIds } }, { $addToSet: { conversations: conversation._id } })
   } catch (err) {
     console.error("Error in updateConversationAndUser: ", err)
   }
@@ -34,12 +34,8 @@ const createdMessageData = (messageData, fileData) => {
 
     if (fileData && messageType === "file") {
       messageDataToCreate.media = {
-        publicId: fileData.filename,
-        mediaUrl: fileData.path,
-        meta: {
-          fileType: fileData.fileType,
-          fileSize: fileData.size,
-        },
+        publicId: fileData.public_id,
+        mediaUrl: fileData.url,
       }
     } else {
       console.error("Error setting url!")
@@ -48,7 +44,7 @@ const createdMessageData = (messageData, fileData) => {
     return messageDataToCreate
   } catch (err) {
     console.error(err)
-    throw errorHandler(500, `Failed to create message data: ${err?.message}`)
+    throw errorHandler(500, "Failed to create message data: " + err)
   }
 }
 
@@ -68,16 +64,27 @@ const sendMessage = async (messageData, fileData) => {
     }
 
     if (conversationType === "private") {
-      conversation = await Conversation.findOneAndUpdate(
-        {
-          participants: { $all: [sender, recipient] },
-          conversationType: "private",
-        },
-        { $set: { lastMessage: createdMessage._id } },
-        { new: true, upsert: true }
-      )
+      // Step 1: Try to find an existing conversation.
+      conversation = await Conversation.findOne({
+        participants: { $all: [sender, recipient] },
+        conversationType: "private",
+      })
 
-      if (!conversation) throw errorHandler(404, "Conversation not found!")
+      if (conversation) {
+        // Conversation exists: update the lastMessage field.
+        conversation.lastMessage = createdMessage._id
+        await conversation.save()
+      } else {
+        // Conversation doesn't exist: create a new one with participants.
+        conversation = await Conversation.create({
+          participants: [sender, recipient],
+          conversationType: "private",
+          lastMessage: createdMessage._id,
+          // Include other fields as needed.
+        })
+      }
+
+      // Now update the conversation and user data.
       await updateConversationAndUser(conversation, createdMessage, [sender, recipient])
     } else if (conversationType === "group") {
       conversation = await Conversation.findByIdAndUpdate(
@@ -91,25 +98,24 @@ const sendMessage = async (messageData, fileData) => {
     }
 
     await conversation.save()
-    const cachedMessageData = await cacheMessage(createdMessage._id, conversation._id, conversationType)
 
     if (conversationType === "private") {
       if (recipientSocketId) {
-        io.to(recipientSocketId).emit("receiveMessage", cachedMessageData)
+        io.to(recipientSocketId).emit("receiveMessage", createdMessage)
       }
 
       if (senderSocketId) {
-        io.to(senderSocketId).emit("receiveMessage", cachedMessageData)
+        io.to(senderSocketId).emit("receiveMessage", createdMessage)
       }
     } else if (conversationType === "group") {
-      io.to(conversationId).emit("receive-group-messages", cachedMessageData)
+      io.to(conversationId).emit("receive-group-messages", createdMessage)
     } else {
       console.error("Failed to send message!")
       return
     }
   } catch (err) {
     console.error(err)
-    throw errorHandler(500, `Failed to send message: ${err?.message}`)
+    throw errorHandler(500, "Failed to send message" + err)
   }
 }
 
@@ -134,7 +140,7 @@ const validateParticipant = (conversation, userId, conversationType) => {
   }
 }
 
-const markMessageAsSeen = async (conversationId, userId, conversationType) => {
+const markMessageAsSeen = async (conversationId, userId, conversationType, lastMessageId) => {
   try {
     const conversation = await cacheConvoData(conversationId, userId)
 
@@ -143,13 +149,17 @@ const markMessageAsSeen = async (conversationId, userId, conversationType) => {
 
     validateParticipant(conversation, userId, conversationType)
 
-    await Message.findByIdAndUpdate(
-      conversation.lastMessage,
+    const updatedMessage = await Message.findByIdAndUpdate(
+      lastMessageId,
       {
         $addToSet: { seenBy: { user: userId, seenAt: new Date() } },
       },
       { new: true }
     )
+    console.log("Updated message:", updatedMessage)
+    if (!updatedMessage) {
+      throw errorHandler(404, "Message not found for updating seenBy")
+    }
   } catch (err) {
     console.error(err)
     throw errorHandler(500, `Failed to update last seen: ${err?.message}`)

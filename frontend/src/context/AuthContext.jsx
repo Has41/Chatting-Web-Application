@@ -28,12 +28,11 @@ const AuthProvider = ({ children }) => {
     // retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
     staleTime: 24 * 60 * 60 * 1000
   })
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, setIsAuthenticated, refetch, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, isAuthenticated, setIsAuthenticated, refetch, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

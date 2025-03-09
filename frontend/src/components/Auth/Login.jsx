@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom"
 
 const Login = ({ onButtonClick }) => {
   const [errorMessage, setErrorMessage] = useState(null)
-  const { setIsAuthenticated } = useAuth()
+  const { setIsAuthenticated, setUser, refetch } = useAuth()
   const navigate = useNavigate()
   const {
     register: login,
@@ -32,11 +32,13 @@ const Login = ({ onButtonClick }) => {
     onError: (error) => {
       setErrorMessage(error?.response?.data?.message || "An unexpected error occurred")
       setIsAuthenticated(false)
+      setUser(null)
       console.error(error)
     },
     onSuccess: () => {
       setErrorMessage(null)
       setIsAuthenticated(true)
+      refetch()
       navigate("/chat")
     }
   })

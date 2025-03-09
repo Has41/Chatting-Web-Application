@@ -4,6 +4,7 @@ import {
   deleteUserAcc,
   editUserInfo,
   getFriendsAndRequests,
+  getUserById,
   getUserInfo,
   removeFriends,
   removeUserInterest,
@@ -12,7 +13,7 @@ import {
   sendFriendRequest,
   toggleDarkMode,
 } from "../controllers/users.js"
-import { deleteImage, uploadProfilePicture } from "../middlewares/uploads.js"
+import { deleteImage } from "../middlewares/uploads.js"
 import {
   addInterestValidator,
   editInfoValidator,
@@ -27,14 +28,9 @@ const router = express.Router()
 
 router.get("/get-info", getUserInfo)
 
-router.patch(
-  "/edit-info",
-  // deleteImage,
-  // uploadProfilePicture.single("profilePicture"),
-  editInfoValidator,
-  validateApiData,
-  editUserInfo
-)
+router.get("/get-info/:userId", validateUserId, validateApiData, getUserById)
+
+router.patch("/edit-info", editInfoValidator, validateApiData, editUserInfo)
 
 router.delete("/delete-account", deleteImage, validateUserId, validateApiData, deleteUserAcc)
 
@@ -52,6 +48,6 @@ router.get("/get-friend-requests", getFriendsAndRequests)
 
 router.delete("/remove-friend", validateUserId, validateApiData, removeFriends)
 
-router.get("/search-users-messages/:searchInfo", searchInfoValidator, validateApiData, searchUsersAndContent)
+router.get("/search-users-messages", searchInfoValidator, validateApiData, searchUsersAndContent)
 
 export default router

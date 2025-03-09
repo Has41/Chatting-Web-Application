@@ -1,10 +1,38 @@
 import React, { useState } from "react"
 import { profileInfo } from "../../utils/dynamicData"
 import useAuth from "../../hooks/useAuth"
+import { useMutation } from "react-query"
+import axiosInstance from "../../utils/axiosInstance"
+import { AUTH_PATHS } from "../../constants/apiPaths"
+import { useNavigate } from "react-router-dom"
 
 const ProfileDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const { user } = useAuth()
+  const { user, setUser, setIsAuthenticated } = useAuth()
+  const navigate = useNavigate()
+
+  const { mutate } = useMutation({
+    mutationFn: async () => {
+      return await axiosInstance.post(AUTH_PATHS.LOG_OUT)
+    },
+    onSuccess: () => {
+      console.log("Logged out successfully.")
+      setUser(null)
+      setIsAuthenticated(false)
+      navigate("/")
+    },
+    onError: (err) => {
+      console.error(err)
+    }
+  })
+
+  const handleOptionClick = (option) => {
+    if (option.name === "Logout") {
+      mutate()
+    } else {
+      setIsDropdownOpen(!isDropdownOpen)
+    }
+  }
 
   return (
     <div className="relative font-poppins">
@@ -20,8 +48,8 @@ const ProfileDropdown = () => {
           <div className="py-1">
             {profileInfo.map((option) => (
               <button
-                key={option}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                key={option.name}
+                onClick={() => handleOptionClick(option)}
                 className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
               >
                 <div className="flex gap-x-2">

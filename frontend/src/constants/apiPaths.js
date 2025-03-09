@@ -21,7 +21,7 @@ const USER_PATHS = {
   RESPOND_FRIEND_REQUEST: "/api/users/respond-friend-request",
   GET_FRIEND_REQUESTS: "/api/users/get-friend-requests",
   REMOVE_FRIEND: "/api/users/remove-friend",
-  SEARCH_USER_DATA: "/api/users/search-users-messages/:searchInfo"
+  SEARCH_USER_DATA: "/api/users/search-users-messages"
 }
 
 const MESSAGE_PATHS = {
@@ -30,7 +30,9 @@ const MESSAGE_PATHS = {
 }
 
 const CONVERSATION_PATHS = {
-  GET_CURRENT_CONVO: "/api/conversations/get-current-convo/:convoId",
+  GET_CURRENT_CONVO: "/api/conversations/get-current-convo",
+  GET_CURRENT_MESSAGES: "/api/conversations/get-current-convo-messages",
+  GET_CONVERSATIONS_OF_USER: "/api/conversations/get-conversations",
   CREATE_GROUP: "/api/conversations/create-group",
   EDIT_GROUP_INFO: "/api/conversations/edit-group-info/:convoId",
   LEAVE_GROUP: "/api/conversations/leave-group/:convoId",
