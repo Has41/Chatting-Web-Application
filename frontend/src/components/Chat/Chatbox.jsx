@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { chatOptions } from "../../utils/dynamicData"
 import useAuth from "../../hooks/useAuth"
 import { useQuery } from "react-query"
@@ -8,16 +8,18 @@ import { useNavigate, useParams } from "react-router-dom"
 import { io } from "socket.io-client"
 import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
+import ProfileSidebar from "./ProfileSidebar"
 
 const Chatbox = () => {
   const { user } = useAuth()
   const { conversationId, userId } = useParams()
   const navigate = useNavigate()
+  const socketRef = useRef(null)
   const [userData, setUserData] = useState(null)
   const [lastMessage, setLastMessage] = useState("")
   const [messageContent, setMessageContent] = useState("")
   const [messages, setMessages] = useState([])
-  const socketRef = useRef(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (user._id) {
@@ -62,6 +64,7 @@ const Chatbox = () => {
       }
     },
     onError: (error) => {
+      if (import.meta.env.PROD) return
       console.error(error)
     },
     enabled: !!userId || !!conversationId
@@ -90,7 +93,7 @@ const Chatbox = () => {
   return (
     <section className="flex h-screen w-[69%] flex-col font-poppins">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
-        <div className="flex items-center gap-x-3">
+        <div onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex cursor-pointer items-center gap-x-3">
           <img
             src={userData?.profilePicture?.url || "https://via.placeholder.com/40"}
             alt="Profile"
@@ -119,10 +122,14 @@ const Chatbox = () => {
         </div>
       </nav>
 
+      <ProfileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} data={userData} />
+
       <ChatMessages
         lastMessage={lastMessage}
         conversationId={conversationId}
+        setMessages={setMessages}
         user={user}
+        conversationType={"private"}
         userData={userData}
         socketMessages={messages}
         socket={socketRef}

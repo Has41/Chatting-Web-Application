@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "react-query"
 import App from "./App.jsx"
 import "./index.css"
 import AuthProvider from "./context/AuthContext.jsx"
+import ChatProvider from "./context/ChatContext.jsx"
 
 const queryClient = new QueryClient()
 
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <App />
+          <ChatProvider>
+            <App />
+          </ChatProvider>
         </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>

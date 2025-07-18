@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import Login from "../components/Auth/Login"

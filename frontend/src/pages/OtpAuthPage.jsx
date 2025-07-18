@@ -12,6 +12,10 @@ const OtpAuthPage = ({ onButtonClick }) => {
   const { mutate, isLoading } = useMutation({
     mutationFn: async ({ otp, email }) => {
       return await axiosInstance.post(AUTH_PATHS.VERIFY_OTP, { otp, email })
+    },
+    onError: (error) => {
+      if (import.meta.env.PROD) return
+      console.error("OTP verification error:", error)
     }
   })
 
@@ -31,6 +35,7 @@ const OtpAuthPage = ({ onButtonClick }) => {
           onButtonClick("InfoForm")
         },
         onError: (error) => {
+          if (import.meta.env.PROD) return
           console.error("OTP verification failed:", error)
           alert("OTP verification failed. Please try again.")
         }
@@ -44,7 +49,7 @@ const OtpAuthPage = ({ onButtonClick }) => {
     const updatedOtp = [...otpValues]
     updatedOtp[index] = value
     setOtpValues(updatedOtp)
-    console.log(updatedOtp)
+    // console.log(updatedOtp)
 
     if (value.length === 1 && index < inputRefs.current.length - 1) {
       inputRefs.current[index + 1].focus()
@@ -58,7 +63,7 @@ const OtpAuthPage = ({ onButtonClick }) => {
       const updatedOtp = [...otpValues]
       updatedOtp[index] = ""
       setOtpValues(updatedOtp)
-      console.log(updatedOtp)
+      // console.log(updatedOtp)
     }
   }
 

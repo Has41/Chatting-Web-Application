@@ -29,17 +29,18 @@ const Login = ({ onButtonClick }) => {
     mutationFn: async (credentials) => {
       return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
     },
-    onError: (error) => {
-      setErrorMessage(error?.response?.data?.message || "An unexpected error occurred")
-      setIsAuthenticated(false)
-      setUser(null)
-      console.error(error)
-    },
     onSuccess: () => {
       setErrorMessage(null)
       setIsAuthenticated(true)
       refetch()
       navigate("/chat")
+    },
+    onError: (error) => {
+      setErrorMessage(error?.response?.data?.message || "An unexpected error occurred")
+      setIsAuthenticated(false)
+      setUser(null)
+      if (import.meta.env.PROD) return
+      console.error(error)
     }
   })
 

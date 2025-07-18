@@ -1,3 +1,4 @@
+import Conversation from "../models/Conversation.js"
 import Message from "../models/Message.js"
 import errorHandler from "../utils/errorHandler.js"
 
@@ -46,10 +47,36 @@ const editMessage = async (req, res, next) => {
       return res.status(404).json({ message: "Message not found" })
     }
 
-    return res.status(200).json({ message: "Message edited successfully!" })
+    return res
+      .status(200)
+      .json({ message: "Message edited successfully!", messageId: editMessage._id, content: editMessage.content })
   } catch (err) {
     return next(errorHandler(500, err.message))
   }
 }
 
-export { addReaction, editMessage }
+const removeMessage = async (req, res, next) => {
+  try {
+    const messageId = req.params.messageId
+
+    const message = await Message.findById(messageId)
+
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" })
+    }
+
+    if (message.sender.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized to delete this message" })
+    }
+
+    await Message.findByIdAndDelete(messageId)
+
+    await Conversation.updateOne({ messages: messageId }, { $pull: { messages: messageId } })
+
+    return res.status(200).json({ message: "Message deleted successfully!", messageId })
+  } catch (err) {
+    return next(errorHandler(500, err.message))
+  }
+}
+
+export { addReaction, editMessage, removeMessage }

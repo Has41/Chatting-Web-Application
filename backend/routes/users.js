@@ -3,13 +3,15 @@ import {
   addUserInterest,
   deleteUserAcc,
   editUserInfo,
+  getFriendsAndConversations,
   getFriendsAndRequests,
   getUserById,
   getUserInfo,
   removeFriends,
   removeUserInterest,
   respondFriendRequest,
-  searchUsersAndContent,
+  searchConversationUsersAndContent,
+  searchUsersOrFriends,
   sendFriendRequest,
   toggleDarkMode,
 } from "../controllers/users.js"
@@ -40,14 +42,18 @@ router.delete("/remove-interests", removeInterestValidator, validateApiData, rem
 
 router.patch("/toggle-darkmode", validateUserId, validateApiData, toggleDarkMode)
 
-router.post("/send-friend-request", validateUserId, validateApiData, sendFriendRequest)
+router.post("/send-friend-request/:userId", validateUserId, validateApiData, sendFriendRequest)
 
-router.post("/respond-friend-request", respondRequestValidator, validateApiData, respondFriendRequest)
+router.post("/respond-friend-request/:userId", respondRequestValidator, validateApiData, respondFriendRequest)
 
-router.get("/get-friend-requests", getFriendsAndRequests)
+router.get("/get-friends-and-requests", getFriendsAndRequests)
+
+router.get("/get-friends-and-conversations", getFriendsAndConversations)
 
 router.delete("/remove-friend", validateUserId, validateApiData, removeFriends)
 
-router.get("/search-users-messages", searchInfoValidator, validateApiData, searchUsersAndContent)
+router.get("/search-user-conversations-data", searchInfoValidator, validateApiData, searchConversationUsersAndContent)
+
+router.get("/search-friends-users", searchInfoValidator, validateApiData, searchUsersOrFriends)
 
 export default router

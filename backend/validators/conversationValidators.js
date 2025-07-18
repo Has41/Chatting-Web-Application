@@ -15,15 +15,9 @@ const createConversationValidator = [
     .isLength({ min: 2 })
     .withMessage("A group must have at least two participants"),
 
-  body("groupName")
-    .optional()
-    .isLength({ min: 3 })
-    .withMessage("Group name must be at least 3 characters long"),
+  body("groupName").optional().isLength({ min: 3 }).withMessage("Group name must be at least 3 characters long"),
 
-  body("groupPicture")
-    .optional()
-    .isURL()
-    .withMessage("Invalid group picture URL format"),
+  body("groupPicture").optional().isURL().withMessage("Invalid group picture URL format"),
 ]
 
 const editConversationValidator = [
@@ -33,22 +27,16 @@ const editConversationValidator = [
     .isMongoId()
     .withMessage("Invalid user ID format."),
 
-  body("groupName")
-    .optional()
-    .isLength({ min: 3 })
-    .withMessage("Group name must be at least 3 characters long"),
+  body("groupName").optional().isLength({ min: 3 }).withMessage("Group name must be at least 3 characters long"),
 
-  body("groupPicture")
-    .optional()
-    .isURL()
-    .withMessage("Invalid group picture URL format"),
+  body("groupInfo").optional().isLength({ min: 3 }).withMessage("Group info must be at least 3 characters long"),
+
+  body("groupPicture").optional().isURL().withMessage("Invalid group picture URL format"),
 
   (req, res, next) => {
-    const { groupName, groupPicture } = req.body
-    if (!groupName && !groupPicture) {
-      return res
-        .status(400)
-        .json({ message: "At least one field must be updated" })
+    const { groupName, groupPicture, groupInfo } = req.body
+    if (!groupName && !groupPicture && !groupInfo) {
+      return res.status(400).json({ message: "At least one field must be updated" })
     }
     next()
   },

@@ -1,5 +1,3 @@
-import React from "react"
-
 const ChatLogo = ({ fill, size }) => {
   return (
     <svg
@@ -8,9 +6,9 @@ const ChatLogo = ({ fill, size }) => {
       version="1.1"
       id="Capa_1"
       xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox="0 0 60 60"
-      xml:space="preserve"
+      xmlSpace="preserve"
     >
       <path
         d="M59.949,58.684L55.104,44.15C57.654,39.702,59,34.647,59,29.5C59,13.233,45.767,0,29.5,0S0,13.233,0,29.5S13.233,59,29.5,59

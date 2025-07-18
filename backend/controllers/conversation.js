@@ -8,8 +8,20 @@ const getCurrentConversation = async (req, res, next) => {
     const convoId = req.params.convoId
 
     const conversation = await Conversation.findById(convoId)
-      .populate("groupOwner participants lastMessage")
-      .select("conversationType groupName groupPicture")
+      .populate({
+        path: "groupOwner participants",
+        select: "username displayName profilePicture bio",
+        model: "User",
+      })
+      .populate({
+        path: "lastMessage",
+        populate: {
+          path: "seenBy.user",
+          select: "username displayName profilePicture bio",
+          model: "User",
+        },
+      })
+      .select("conversationType groupName groupInfo groupPicture lastMessage")
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found!" })
@@ -67,6 +79,10 @@ const getMessagesOfConversation = async (req, res, next) => {
     const messages = await Message.find({
       _id: { $in: conversation.messages },
     })
+      .populate({
+        path: "seenBy.user",
+        select: "username displayName profilePicture",
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -81,13 +97,17 @@ const getMessagesOfConversation = async (req, res, next) => {
 
 const createGroupConversation = async (req, res, next) => {
   try {
-    const { participants, groupName, groupPicture } = req.body
+    const { participants, groupName, groupPicture, groupInfo } = req.body
     const groupOwnerId = req.user.id
     const allParticipants = [...new Set([...participants, groupOwnerId])]
 
     const users = await User.find({ _id: { $in: allParticipants } }, { displayName: 1, username: 1 })
 
-    if (users.length !== participants.length) {
+    if (allParticipants.length < 3) {
+      return res.status(400).json({ message: "A group must have at least 3 members" })
+    }
+
+    if (users.length !== allParticipants.length) {
       return res.status(404).json({ message: "Some participants not found" })
     }
 
@@ -101,8 +121,11 @@ const createGroupConversation = async (req, res, next) => {
       groupPicture,
       groupOwner: groupOwnerId,
       participants: participants,
+      groupInfo,
       conversationType: "group",
     })
+
+    await User.updateMany({ _id: { $in: allParticipants } }, { $addToSet: { conversations: newGroupConversation._id } })
 
     res.status(201).json(newGroupConversation)
   } catch (err) {
@@ -113,11 +136,12 @@ const createGroupConversation = async (req, res, next) => {
 const updateGroupConversation = async (req, res, next) => {
   try {
     const convoId = req.params.convoId
-    const { groupName, groupPicture } = req.body
+    const { groupName, groupPicture, groupInfo } = req.body
 
     const updateFields = {}
     if (groupName) updateFields.groupName = groupName
     if (groupPicture) updateFields.groupPicture = groupPicture
+    if (groupInfo) updateFields.groupInfo = groupInfo
 
     const updatedGroup = await Conversation.findOneAndUpdate(
       { _id: convoId, groupOwner: req.user.id },
@@ -251,6 +275,27 @@ const removeGroupParticipants = async (req, res, next) => {
   }
 }
 
+const getGroupParticipants = async (req, res, next) => {
+  try {
+    const convoId = req.params.convoId
+    const group = await Conversation.findById(convoId)
+      .select("participants groupOwner")
+      .populate("participants groupOwner", "username displayName profilePicture")
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found!" })
+    }
+
+    return res.status(200).json({
+      message: "Group participants fetched successfully!",
+      participants: group.participants,
+      groupOwner: group.groupOwner,
+    })
+  } catch (err) {
+    return next(errorHandler(500, err.message))
+  }
+}
+
 const changeGroupOwnership = async (req, res, next) => {
   try {
     const convoId = req.params.convoId
@@ -319,4 +364,5 @@ export {
   removeGroupConversation,
   getMessagesOfConversation,
   getConversationsOfUser,
+  getGroupParticipants,
 }

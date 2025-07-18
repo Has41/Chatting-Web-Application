@@ -1,8 +1,8 @@
-import React, { useRef } from "react"
+import { useRef } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { SlidingCard } from "../../utils/Cards"
+import { SlidingCard } from "../Shared/Cards"
 
 const AppBenefits = () => {
   const tileRefs = {

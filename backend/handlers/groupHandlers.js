@@ -1,3 +1,5 @@
+import { cacheConvoData } from "../utils/cachedMessage.js"
+
 const joinGroup = async (socket, conversationId, userId) => {
   try {
     const conversation = await cacheConvoData(conversationId, userId)

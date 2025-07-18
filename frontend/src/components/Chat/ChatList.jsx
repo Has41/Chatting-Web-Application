@@ -1,146 +1,63 @@
-import React, { useState } from "react"
-import { useMutation, useQuery } from "react-query"
-import axiosInstance from "../../utils/axiosInstance"
-import { CONVERSATION_PATHS, USER_PATHS } from "../../constants/apiPaths"
+import { useState } from "react"
 import { Link } from "react-router-dom"
-import { getNewChatRoute } from "../../constants/routePaths"
 import useAuth from "../../hooks/useAuth"
-import truncateText from "../../utils/truncateText"
 import moment from "moment"
+import GroupModal from "../Shared/GroupModal"
+import ChatSearch from "./Messages/ChatSearch"
+import { getChatConversationRoute, getGroupConversationRoute } from "../../constants/routePaths"
+import useChatList from "../../hooks/useChatList"
 
 const ChatList = () => {
   const { user } = useAuth()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [userResults, setUserResults] = useState([])
-  const [chatList, setChatList] = useState([])
+  const { chatList } = useChatList()
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [openGroupModal, setOpenGroupModal] = useState(false)
 
-  useQuery({
-    queryKey: CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER,
-    queryFn: async () => {
-      return await axiosInstance.get(CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER)
-    },
-    onSuccess: ({ data }) => {
-      setChatList(data?.conversations)
-    },
-    onError: (err) => {
-      console.error(err)
-    }
-  })
-
-  const { mutate } = useMutation({
-    mutationFn: async (data) => {
-      return await axiosInstance.get(USER_PATHS.SEARCH_USER_DATA, {
-        params: { dataToSearch: data.dataToSearch }
-      })
-    },
-    onSuccess: ({ data }) => {
-      if (data) {
-        setUserResults(data.users)
-      } else {
-        setUserResults([])
-      }
-    },
-    onError: (error) => {
-      setUserResults([])
-      console.error(error)
-    }
-  })
-
-  const handleSearch = (e) => {
-    const value = e.target.value
-    setSearchQuery(value)
-    if (value?.length < 3) {
-      setUserResults([])
-      return
-    }
-    mutate({ dataToSearch: value })
-  }
-
-  const handleClearSearch = () => {
-    setSearchQuery("")
-    setUserResults([])
-  }
+  const toggleDropdown = () => setShowDropdown((prev) => !prev)
 
   return (
     <aside
       className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
       aria-label="Chat List"
     >
-      <section className="p-4">
-        <h2 className="mb-4 text-xl font-semibold text-black/80">Chats</h2>
-        <div className="relative mx-auto mb-4 w-11/12">
+      <section className="px-4 py-6">
+        <div className="relative mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-black/80">Chats</h2>
           <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-5 w-5 text-gray-400"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-4.35-4.35m2.7-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0z"
-                />
-              </svg>
-            </span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearch}
-              placeholder="Search messages or users"
-              className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring focus:ring-blue-300"
-              aria-label="Search Chats"
-            />
-          </div>
+            <svg
+              onClick={toggleDropdown}
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6 cursor-pointer text-black/80"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
+              />
+            </svg>
 
-          {userResults.length > 0 && (
-            <div className="absolute left-0 right-0 top-full z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
-              <div className="flex items-center justify-between border-b border-gray-200 px-2 py-1">
-                <h3 className="font-semibold text-gray-800">Search Results</h3>
-                <button className="text-gray-500 hover:text-gray-700" onClick={handleClearSearch} aria-label="Clear search">
-                  &#x2715;
+            {showDropdown && (
+              <div className="absolute right-0 z-10 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black/5">
+                <button
+                  onClick={() => {
+                    setShowDropdown(false)
+                    setOpenGroupModal(true)
+                  }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                >
+                  Make Group
                 </button>
               </div>
-              <ul>
-                {userResults.map((user) => (
-                  <Link
-                    to={getNewChatRoute(user._id)}
-                    key={user._id}
-                    className="mt-1 flex items-center space-x-2 p-4 hover:bg-gray-100"
-                  >
-                    <img
-                      src={user?.profilePicture?.url}
-                      alt={user?.username}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <div className="flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16.5 12a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 1 0-2.636 6.364M16.5 12V8.25"
-                        />
-                      </svg>
-                      {user?.username}
-                    </div>
-                  </Link>
-                ))}
-              </ul>
-            </div>
-          )}
+            )}
+            {openGroupModal && <GroupModal onClose={() => setOpenGroupModal(false)} />}
+          </div>
         </div>
 
+        <ChatSearch />
         <div className="my-8">
           <div className="relative flex h-14 w-[5rem] flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
             <div className="relative">
@@ -155,35 +72,71 @@ const ChatList = () => {
           <div>
             <h1 className="mb-4 font-semibold text-black/80">Recent</h1>
           </div>
+          {/* Here fix from backend to exclude current User */}
           {chatList &&
-            chatList.map((list, index) => {
+            chatList.map((conversation) => {
+              const isGroup = conversation.conversationType === "group"
+
+              const otherUser = !isGroup ? conversation.participants.find((p) => p._id !== user._id) : null
+
+              const imageUrl = isGroup ? conversation.groupPicture?.url : otherUser?.profilePicture?.url
+
+              const displayName = isGroup ? conversation.groupName : otherUser?.displayName || otherUser?.username
+
               return (
-                <div key={index} className="my-4 w-full">
+                <div key={conversation._id} className="my-4 w-full">
                   <ul className="space-y-4">
-                    {list.participants
-                      .filter((participant) => participant._id !== user._id)
-                      .map((user) => (
-                        <Link
-                          to={`conversation/${list._id}`}
-                          className="flex cursor-pointer items-center rounded p-2 transition-all duration-500 hover:bg-gray-100"
-                        >
-                          <img className="mr-3 h-12 w-12 rounded-full bg-slate-200" src={user?.profilePicture?.url} alt="" />
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-800">{user.username}</div>
-                            <div className="truncate text-sm text-gray-600">{truncateText(list.lastMessage.content)}</div>
+                    <li>
+                      <Link
+                        to={
+                          conversation.conversationType === "private"
+                            ? getChatConversationRoute(conversation._id)
+                            : getGroupConversationRoute(conversation._id)
+                        }
+                        className="flex cursor-pointer items-center rounded p-2 transition-all duration-500 hover:bg-gray-100"
+                      >
+                        {imageUrl ? (
+                          <img
+                            className="mr-3 h-12 w-12 rounded-full bg-slate-200 object-cover"
+                            src={imageUrl}
+                            alt={displayName}
+                          />
+                        ) : (
+                          <div className="mr-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-lg font-semibold text-white">
+                            {displayName?.charAt(0).toUpperCase()}
                           </div>
+                        )}
+
+                        <div className="flex-1">
+                          <div className="max-w-[9rem] truncate font-semibold text-gray-800" title={displayName}>
+                            {displayName}
+                          </div>
+
+                          <div
+                            className="max-w-[9rem] truncate text-xs text-gray-600"
+                            title={conversation?.lastMessage?.content}
+                          >
+                            {conversation?.lastMessage?.content || "No messages yet"}
+                          </div>
+                        </div>
+
+                        {conversation?.lastMessage?.createdAt && (
                           <div className="mb-auto flex flex-col text-xs text-gray-500">
-                            <div>
-                              <p>{moment(list.lastMessage.createdAt).format("h:mm a")}</p>
-                            </div>
+                            <p>{moment(conversation?.lastMessage?.createdAt).format("h:mm a")}</p>
                           </div>
-                        </Link>
-                      ))}
+                        )}
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               )
             })}
         </div>
+        {chatList.length === 0 && (
+          <div className="mt-4 text-sm italic text-gray-500">
+            <p>No conversations found. Start a new chat!</p>
+          </div>
+        )}
       </section>
     </aside>
   )

@@ -1,6 +1,38 @@
-import React from "react"
+import { useRef, useState } from "react"
+import AttachmentMenu from "../../Shared/AttachmentMenu"
 
 const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) => {
+  const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
+  const [attachmentType, setAttachmentType] = useState(null)
+  const fileInputRef = useRef(null)
+
+  const handleAttachmentSelect = (type) => {
+    setAttachmentType(type)
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    handleSendFile({ type: attachmentType, file })
+  }
+
+  const getAcceptedTypes = (type) => {
+    switch (type) {
+      case "image":
+        return "image/*"
+      case "video":
+        return "video/*"
+      case "document":
+        return ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+      case "audio":
+        return "audio/*"
+      default:
+        return "*"
+    }
+  }
+
   return (
     <div className="flex max-w-full items-center gap-3 border-t p-4">
       <div className="w-[5%]">
@@ -24,7 +56,7 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
       <input
         type="text"
         placeholder="Type a message..."
-        className="w-3/4 rounded-md border border-slate-200 p-3 focus:outline-none"
+        className="w-3/4 rounded-md border border-slate-200 p-3 text-sm focus:outline-none"
         value={messageContent}
         onChange={(e) => setMessageContent(e.target.value)}
         onKeyDown={(e) => {
@@ -33,10 +65,21 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
           }
         }}
       />
+
       <div className="flex w-[15%] gap-x-1">
+        {showAttachmentOptions && (
+          <AttachmentMenu
+            onSelect={(type) => {
+              handleAttachmentSelect(type)
+              setShowAttachmentOptions(false)
+            }}
+            onClose={() => setShowAttachmentOptions(false)}
+          />
+        )}
+        {/* File icon */}
         <button
+          onClick={() => setShowAttachmentOptions((prev) => !prev)}
           className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text"
-          onClick={handleSendMessage}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -53,6 +96,7 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
             />
           </svg>
         </button>
+        {/* Emoji icon */}
         <button className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +113,10 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
             />
           </svg>
         </button>
-        <button className="rounded-full bg-custom-green p-3 text-white transition-all duration-500 hover:bg-green-400">
+        <button
+          onClick={handleSendMessage}
+          className="rounded-full bg-custom-green p-3 text-white transition-all duration-500 hover:bg-green-400"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

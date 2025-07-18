@@ -8,8 +8,9 @@ import ProtectedRoute from "./components/Shared/ProtectedRoute"
 import ChatArea from "./pages/ChatArea"
 import StartChat from "./components/Chat/StartChat"
 import Chatbox from "./components/Chat/Chatbox"
-import { AUTH_PAGE, CHAT_PAGE, CHAT_CONVERSATION, NEW_CHAT_PAGE, OTP_PAGE } from "./constants/routePaths"
+import { AUTH_PAGE, CHAT_PAGE, CHAT_CONVERSATION, NEW_CHAT_PAGE, OTP_PAGE, GROUP_CONVERSATION } from "./constants/routePaths"
 import "./App.css"
+import GroupChatbox from "./components/Chat/GroupChatbox"
 
 const App = () => {
   return (
@@ -41,6 +42,7 @@ const App = () => {
           <Route index element={<StartChat />} />
           <Route path={NEW_CHAT_PAGE} element={<Chatbox />} />
           <Route path={CHAT_CONVERSATION} element={<Chatbox />} />
+          <Route path={GROUP_CONVERSATION} element={<GroupChatbox />} />
         </Route>
       </Route>
     </Routes>

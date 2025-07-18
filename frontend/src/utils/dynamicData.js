@@ -154,4 +154,32 @@ const profileInfo = [
   }
 ]
 
-export { firstStepRegister, secondStepRegister, loginFields, connectIcons, trustIcons, navOptions, chatOptions, profileInfo }
+const profileInfoData = [
+  {
+    name: "Wallpaper",
+    iconPath:
+      "M7.5 3.75H6A2.25 2.25 0 0 0 3.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0 1 20.25 6v1.5m0 9V18A2.25 2.25 0 0 1 18 20.25h-1.5m-9 0H6A2.25 2.25 0 0 1 3.75 18v-1.5M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+  },
+  {
+    name: "Share",
+    iconPath:
+      "M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
+  },
+  {
+    name: "More",
+    iconPath:
+      "M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+  }
+]
+
+export {
+  firstStepRegister,
+  secondStepRegister,
+  loginFields,
+  connectIcons,
+  trustIcons,
+  navOptions,
+  chatOptions,
+  profileInfo,
+  profileInfoData
+}

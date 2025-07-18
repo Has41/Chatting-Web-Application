@@ -19,24 +19,28 @@ const USER_PATHS = {
   REMOVE_INTEREST: "/api/users/remove-interests",
   SEND_FRIEND_REQUEST: "/api/users/send-friend-request",
   RESPOND_FRIEND_REQUEST: "/api/users/respond-friend-request",
-  GET_FRIEND_REQUESTS: "/api/users/get-friend-requests",
+  GET_FRIENDS_AND_REQUESTS: "/api/users/get-friends-and-requests",
+  GET_FRIENDS_AND_CONVERSATIONS: "/api/users/get-friends-and-conversations",
   REMOVE_FRIEND: "/api/users/remove-friend",
-  SEARCH_USER_DATA: "/api/users/search-users-messages"
+  SEARCH_USER_CONVO_DATA: "/api/users/search-user-conversations-data",
+  SEARCH_FRIENDS_USERS: "/api/users/search-friends-users"
 }
 
 const MESSAGE_PATHS = {
-  ADD_REACTION: "/api/messages/add-reaction/:messageId",
-  EDIT_MESSAGE: "/api/messages/edit-message/:messageId"
+  ADD_REACTION: "/api/messages/add-reaction",
+  EDIT_MESSAGE: "/api/messages/edit-message",
+  DELETE_MESSAGE: "/api/messages/remove-message"
 }
 
 const CONVERSATION_PATHS = {
   GET_CURRENT_CONVO: "/api/conversations/get-current-convo",
   GET_CURRENT_MESSAGES: "/api/conversations/get-current-convo-messages",
   GET_CONVERSATIONS_OF_USER: "/api/conversations/get-conversations",
+  GET_GROUP_PARTICIPANTS: "/api/conversations/get-group-participants",
   CREATE_GROUP: "/api/conversations/create-group",
-  EDIT_GROUP_INFO: "/api/conversations/edit-group-info/:convoId",
+  EDIT_GROUP_INFO: "/api/conversations/edit-group-info",
   LEAVE_GROUP: "/api/conversations/leave-group/:convoId",
-  ADD_PARTICIPANTS: "/api/conversations/add-participants/:convoId",
+  ADD_PARTICIPANTS: "/api/conversations/add-participants",
   REMOVE_PARTICIPANTS: "/api/conversations/remove-participants/:convoId",
   CHANGE_OWNERSHIP: "/api/conversations/change-ownership/:convoId/:newOwnerId"
 }

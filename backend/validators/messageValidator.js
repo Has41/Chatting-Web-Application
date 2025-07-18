@@ -5,11 +5,11 @@ const validateMessageId = [
 ]
 
 const editMessageValidator = [
-  param("recipientId")
+  param("messageId")
     .notEmpty()
-    .withMessage("recipient ID required")
+    .withMessage("message ID required")
     .isMongoId()
-    .withMessage("Invalid recipient ID format."),
+    .withMessage("Invalid message ID format."),
 
   body("content").notEmpty().withMessage("Content required"),
 ]

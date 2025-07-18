@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { Outlet } from "react-router-dom"
 import Sidebar from "../components/Chat/Sidebar"
 import FriendList from "../components/Chat/FriendList"

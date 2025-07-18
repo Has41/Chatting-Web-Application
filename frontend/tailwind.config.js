@@ -20,6 +20,9 @@ export default {
       boxShadow: {
         right: "10px 0 15px -3px rgba(0, 0, 0, 0.3)"
       },
+      accentColor: {
+        "custom-text": "#96E6A1"
+      },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
         mont: ["Montserrat", "sans-serif"]
@@ -42,12 +45,17 @@ export default {
         slideInLeft: {
           "0%": { transform: "translateX(-100%)", opacity: 0 },
           "100%": { transform: "translateX(0)", opacity: 1 }
+        },
+        fadeIn: {
+          "0%": { opacity: 0, transform: "scale(0.95)" },
+          "100%": { opacity: 1, transform: "scale(1)" }
         }
       },
       animation: {
         "ping-slow": "ping-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         slideInRight: "slideInRight 0.5s ease-in-out forwards",
-        slideInLeft: "slideInLeft 0.5s ease-in-out backwards"
+        slideInLeft: "slideInLeft 0.5s ease-in-out backwards",
+        fadeIn: "fadeIn 0.3s ease-in-out"
       },
       borderRadius: {
         sent: "18px 18px 0 18px",

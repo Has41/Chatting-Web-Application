@@ -29,8 +29,9 @@ const useCloudinaryUpload = () => {
       setUploadedPublicId(data.public_id)
     },
     onError: (err) => {
-      console.error("Error uploading file:", err)
       setError(err.message || "An error occurred during upload")
+      if (import.meta.env.PROD) return
+      console.error("Error uploading file:", err)
     }
   })
 
@@ -69,6 +70,7 @@ const useCloudinaryUpload = () => {
       return res
     } catch (err) {
       setError(err.message || "An error occurred during upload")
+      if (import.meta.env.PROD) return
       console.error(err)
     } finally {
       setIsUploading(false)

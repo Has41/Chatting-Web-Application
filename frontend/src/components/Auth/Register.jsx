@@ -1,4 +1,3 @@
-import React from "react"
 import { useForm } from "react-hook-form"
 import { firstStepRegister } from "../../utils/dynamicData"
 import { useMutation } from "react-query"
@@ -31,6 +30,10 @@ const Register = ({ onButtonClick }) => {
       localStorage.setItem("newUser", data?.user.username)
       localStorage.setItem("userId", data?.user.id)
       onButtonClick("OtpPage")
+    },
+    onError: (error) => {
+      if (import.meta.env.PROD) return
+      console.error("Registration error:", error)
     }
   })
 

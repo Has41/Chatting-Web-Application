@@ -1,34 +1,32 @@
-import React from "react"
-
 const ChatCalls = () => {
   return (
     <aside
-      className="w-1/4 h-screen bg-gray-50 border-l border-l-slate-200 border-r border-r-slate-200 font-poppins"
+      className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
       aria-label="Chat Calls"
     >
       <section className="p-4">
-        <h2 className="text-xl text-black/80 font-semibold mb-4">Calls</h2>
+        <h2 className="mb-4 text-xl font-semibold text-black/80">Calls</h2>
         <div className="my-8">
-          <div className="w-[5rem] h-14 bg-slate-100 shadow-sm rounded-lg relative flex flex-col items-center justify-center">
+          <div className="relative flex h-14 w-[5rem] flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
             <div className="relative">
-              <div className="cursor-pointer size-12 mb-1 rounded-full -mt-5 bg-green-200"></div>
+              <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
               {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}
-              <span className="absolute bottom-1 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+              <span className="absolute bottom-1 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
             </div>
-            <p className="text-sm text-black/80 font-semibold">User</p>
+            <p className="text-sm font-semibold text-black/80">User</p>
           </div>
         </div>
         <div className="max-w-full">
           <div>
-            <h1 className="text-black/80 font-semibold mb-4">Recent Calls</h1>
+            <h1 className="mb-4 font-semibold text-black/80">Recent Calls</h1>
           </div>
           <div className="my-4 w-full">
             <ul className="space-y-4">
-              <li className="flex items-center p-2 rounded hover:bg-gray-100 transition-all duration-500 cursor-pointer">
-                <div className="size-12 rounded-full flex items-center justify-center bg-slate-100 mr-4"></div>
+              <li className="flex cursor-pointer items-center rounded p-2 transition-all duration-500 hover:bg-gray-100">
+                <div className="mr-4 flex size-12 items-center justify-center rounded-full bg-slate-100"></div>
                 <div className="flex flex-col justify-between gap-y-1">
                   <div className="font-semibold text-gray-800">John Doe</div>
-                  <div className="flex items-center justify-left gap-x-2 text-gray-600 truncate">
+                  <div className="justify-left flex items-center gap-x-2 truncate text-gray-600">
                     <div>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +48,7 @@ const ChatCalls = () => {
                     </div>
                   </div>
                 </div>
-                <div className="text-xs flex flex-col ml-auto gap-y-2 text-gray-500">
+                <div className="ml-auto flex flex-col gap-y-2 text-xs text-gray-500">
                   <p>10:00 pm</p>
                 </div>
               </li>

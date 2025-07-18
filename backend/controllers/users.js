@@ -1,3 +1,4 @@
+import Conversation from "../models/Conversation.js"
 import User from "../models/User.js"
 import errorHandler from "../utils/errorHandler.js"
 
@@ -179,16 +180,17 @@ const respondFriendRequest = async (req, res, next) => {
     const userId = req.user.id
     const { response } = req.body
 
+    const userData = await User.findById(userId)
+    const recipientData = await User.findById(senderId)
+
     const verifyFriendRequest = await User.findOne({
+      _id: userId,
       "friendRequests.from": senderId,
     })
 
     if (!verifyFriendRequest) {
       return res.status(404).json({ message: "Friend request not found!" })
     }
-
-    const userData = await User.findById(userId) //current User
-    const recipientData = await User.findById(senderId) //Other user
 
     if (!userData || !recipientData) {
       return res.status(404).json({ message: "User not found!" })
@@ -202,13 +204,11 @@ const respondFriendRequest = async (req, res, next) => {
       return res.status(404).json({ message: "Request not found!" })
     }
 
-    userData.friendRequests[specificRequestIndex].status = response
+    // userData.friendRequests[specificRequestIndex].status = response
 
     if (response === "accepted") {
       userData.friends.push(senderId)
       recipientData.friends.push(userId)
-      userData.friendRequests.splice(specificRequestIndex, 1)
-      await userData.save()
       await recipientData.save()
     }
 
@@ -226,8 +226,96 @@ const respondFriendRequest = async (req, res, next) => {
 
 const getFriendsAndRequests = async (req, res, next) => {
   try {
-    const userData = await User.findById(req.user.id).select("friendRequests friends")
+    const userData = await User.findById(req.user.id)
+      .select("friendRequests friends")
+      .populate("friendRequests.from friends", "username profilePicture displayName _id")
     return res.status(200).json(userData)
+  } catch (err) {
+    return next(errorHandler(500, err.message))
+  }
+}
+
+const getFriendsAndConversations = async (req, res, next) => {
+  try {
+    const userId = req.user.id
+
+    const user = await User.findById(userId).select("friends conversations").populate({
+      path: "friends",
+      select: "username profilePicture displayName _id",
+    })
+
+    const conversations = await Conversation.aggregate([
+      {
+        $match: {
+          _id: { $in: user.conversations },
+          conversationType: { $ne: "group" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "participants",
+          foreignField: "_id",
+          as: "participants",
+        },
+      },
+      {
+        $lookup: {
+          from: "messages",
+          localField: "lastMessage",
+          foreignField: "_id",
+          as: "lastMessageData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$lastMessageData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          participants: {
+            $filter: {
+              input: "$participants",
+              as: "participant",
+              cond: { $ne: ["$$participant._id", { $toObjectId: userId }] },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          isFriend: {
+            $in: [{ $arrayElemAt: ["$participants._id", 0] }, user.friends],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          participants: {
+            _id: 1,
+            username: 1,
+            profilePicture: 1,
+          },
+          lastMessageData: {
+            content: 1,
+            createdAt: 1,
+            sender: 1,
+          },
+          isFriend: 1,
+          groupName: 1,
+          conversationType: 1,
+          groupPicture: 1,
+        },
+      },
+    ])
+
+    res.status(200).json({
+      friends: user.friends,
+      conversations,
+    })
   } catch (err) {
     return next(errorHandler(500, err.message))
   }
@@ -266,30 +354,130 @@ const removeFriends = async (req, res, next) => {
   }
 }
 
-const searchUsersAndContent = async (req, res, next) => {
+const searchConversationUsersAndContent = async (req, res, next) => {
   try {
-    const dataToSearch = req.query.dataToSearch
+    const userId = req.user.id
+    const dataToSearch = req.query.dataToSearch?.toLowerCase()
 
-    const searchedUsers = await User.find({
+    const user = await User.findById(userId).select("conversations friends")
+
+    if (!user || !user.conversations.length) {
+      return res.status(200).json([])
+    }
+
+    const conversation = await Conversation.aggregate([
+      {
+        $match: {
+          _id: { $in: user.conversations },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "participants",
+          foreignField: "_id",
+          as: "participantsData",
+        },
+      },
+      {
+        $addFields: {
+          participantsData: {
+            $map: {
+              input: "$participantsData",
+              as: "participant",
+              in: {
+                _id: "$$participant._id",
+                username: "$$participant.username",
+                profilePicture: "$$participant.profilePicture",
+                displayName: "$$participant.displayName",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "messages",
+          localField: "messages",
+          foreignField: "_id",
+          as: "messagesData",
+        },
+      },
+      {
+        $lookup: {
+          from: "messages",
+          localField: "lastMessage",
+          foreignField: "_id",
+          as: "lastMessageData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$lastMessageData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { "participantsData.username": { $regex: dataToSearch, $options: "i" } },
+            { "messagesData.content": { $regex: dataToSearch, $options: "i" } },
+          ],
+        },
+      },
+      {
+        $project: {
+          groupName: 1,
+          conversationType: 1,
+          participants: "$participantsData",
+          messages: "$messagesData",
+          lastMessageData: "$lastMessageData",
+          groupPicture: 1,
+        },
+      },
+    ])
+
+    const friendsData = await User.find({ _id: { $in: user.friends } }).select(
+      "_id username displayName profilePicture conversations"
+    )
+
+    res.status(200).json({ conversation, friendsData })
+  } catch (err) {
+    return next(errorHandler(500, err.message))
+  }
+}
+
+const searchUsersOrFriends = async (req, res, next) => {
+  try {
+    const userId = req.user.id
+    const dataToSearch = req.query.dataToSearch?.toLowerCase()
+
+    const currentUser = await User.findById(userId).select("friends")
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found!" })
+    }
+    const friendsIds = currentUser.friends.map((friend) => friend._id)
+    const searchQuery = {
+      _id: { $nin: userId },
       $or: [
         { username: { $regex: dataToSearch, $options: "i" } },
         { displayName: { $regex: dataToSearch, $options: "i" } },
       ],
-      _id: { $ne: req.user.id },
-    }).select("username profilePicture displayName")
-
-    // TODO: Gonna search for messages too!
-    // const findMessages = await Message.find({ content: { $regex: searchInfo, $options: 'i' } })
-
-    // if (searchedUsers.length === 0 && findMessages.length === 0) {
-    //     return res.status(404).json({ message: "No results found!" })
-    // }
-
-    if (searchedUsers.length === 0) {
-      return res.status(404).json({ message: "No results found!" })
     }
+    const users = await User.find(searchQuery).select("username displayName profilePicture friendRequests").lean()
 
-    return res.status(200).json({ message: "Search results found!", users: searchedUsers })
+    const queryResults = users.map((user) => ({
+      _id: user._id,
+      username: user.username,
+      displayName: user.displayName,
+      profilePicture: user.profilePicture,
+      isFriend: friendsIds.map((id) => id.toString()).includes(user._id.toString()),
+      isRequestSent: user.friendRequests.some(
+        (req) => req.from.toString() === userId.toString() && req.status === "pending"
+      ),
+    }))
+
+    return res.status(200).json(queryResults)
   } catch (err) {
     return next(errorHandler(500, err.message))
   }
@@ -306,6 +494,8 @@ export {
   sendFriendRequest,
   respondFriendRequest,
   getFriendsAndRequests,
+  getFriendsAndConversations,
   removeFriends,
-  searchUsersAndContent,
+  searchConversationUsersAndContent,
+  searchUsersOrFriends,
 }

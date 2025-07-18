@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { io } from "socket.io-client"
 import useFetch from "../hooks/useFetch"
 
@@ -89,9 +89,13 @@ const GroupTest = () => {
               const conversationType = conversationData.conversation.conversationType
               const messageId = entry.target.dataset.messageId
               const lastMessage = conversationData.conversation.lastMessage
-              const seenByUser = conversationData.messages?.seenBy?.find((seen) => seen.user.toString() === userId.toString())
+              const seenByUser = conversationData.messages?.seenBy?.find(
+                (seen) => seen.user.toString() === userId.toString()
+              )
               const lastMessageData = conversationData.messages.find((msg) => msg._id === lastMessage)
-              const isParticipant = conversationData.conversation.participants.some((participant) => participant._id === userId)
+              const isParticipant = conversationData.conversation.participants.some(
+                (participant) => participant._id === userId
+              )
               const isParticipantOwner = conversationData.conversation.groupOwner === userId
 
               if (
@@ -150,7 +154,7 @@ const GroupTest = () => {
     <div>
       <h1>Test Messaging</h1>
       {!userId || !conversationId ? (
-        <div className="flex flex-col gap-y-6 mt-4">
+        <div className="mt-4 flex flex-col gap-y-6">
           <input type="text" placeholder="Enter your user ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
           <input
             type="text"

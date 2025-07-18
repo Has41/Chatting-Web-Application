@@ -1,10 +1,15 @@
-import React from "react"
 import { useInfiniteQuery } from "react-query"
 import axiosInstance from "../../../utils/axiosInstance"
 import { CONVERSATION_PATHS } from "../../../constants/apiPaths"
 import Message from "./Message"
+import useAuth from "../../../hooks/useAuth"
+import getGroupRecipients from "../../../utils/getGroupRecipients"
+import { useEffect, useRef } from "react"
 
-const ChatMessages = ({ conversationId, user, userData, socketMessages, lastMessage, socket }) => {
+const ChatMessages = ({ conversationId, userData, setMessages, socketMessages, lastMessage, socket, conversationType }) => {
+  const { user } = useAuth()
+  const scrollRef = useRef(null)
+
   const {
     data: infiniteData,
     fetchNextPage,
@@ -19,16 +24,20 @@ const ChatMessages = ({ conversationId, user, userData, socketMessages, lastMess
       return response.data
     },
     {
+      onError: (error) => {
+        if (!import.meta.env.PROD) console.error("Error fetching messages:", error)
+      },
       getNextPageParam: (lastPage, pages) => (lastPage.messages.length === 20 ? pages.length + 1 : undefined),
       enabled: !!conversationId
     }
   )
 
   const fetchedMessages = infiniteData?.pages.flatMap((page) => page.messages) || []
-
   const combinedMessages = [...fetchedMessages, ...socketMessages]
 
-  const deduplicatedMessages = Array.from(new Map(combinedMessages.map((msg) => [msg._id, msg])).values())
+  // De-duplicate by message ID
+  const messageMap = new Map(combinedMessages.map((msg) => [msg._id, msg]))
+  const deduplicatedMessages = Array.from(messageMap.values())
 
   deduplicatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
 
@@ -39,27 +48,58 @@ const ChatMessages = ({ conversationId, user, userData, socketMessages, lastMess
     }
   }
 
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [deduplicatedMessages])
+
   return (
-    <div onScroll={handleScroll} className="flex-grow overflow-y-auto bg-gray-100 p-4">
-      {isFetchingNextPage && <div>Loading more messages...</div>}
+    <div ref={scrollRef} onScroll={handleScroll} className="flex-grow overflow-y-auto bg-gray-100 p-4">
+      {isFetchingNextPage && <div className="text-center text-sm text-gray-500">Loading more messages...</div>}
+
       {deduplicatedMessages.map((msg) => {
-        const isSender = msg.sender === user._id || (msg.sender && msg.sender._id === user._id)
+        const isSender = msg.sender === user._id
+        const recipients = conversationType === "group" ? getGroupRecipients(userData, user._id) : userData
+
         return (
-          <div key={msg._id} className={`flex ${isSender ? "mb-1 justify-end" : "mb-4 justify-start"}`}>
-            {!isSender && (
-              <img
-                src={userData?.profilePicture?.url || "https://via.placeholder.com/40"}
-                alt="Profile"
-                className="mr-2 mt-auto h-8 w-8 rounded-full object-cover"
-              />
+          <div key={msg._id} className={`flex items-end ${isSender ? "mb-1 justify-end" : "mb-4 justify-start"}`}>
+            {!isSender && conversationType === "group" && (
+              <div className="mr-2 mt-4 flex flex-col items-center">
+                {(() => {
+                  const sender = recipients.find(
+                    (recipient) => recipient._id === msg.sender || recipient._id === msg.sender?._id
+                  )
+                  return sender ? (
+                    <img
+                      src={sender.profilePicture?.url || "https://via.placeholder.com/40"}
+                      alt={sender.username}
+                      className="mb-1 h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : null
+                })()}
+              </div>
             )}
+
+            {!isSender && conversationType !== "group" && (
+              <div className="mr-2 mt-4 flex flex-col items-center">
+                <img
+                  src={userData?.profilePicture?.url || "https://via.placeholder.com/40"}
+                  alt={userData?.username}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              </div>
+            )}
+
             <Message
               isSender={isSender}
               message={msg}
+              recipientData={conversationType === "group" && getGroupRecipients(userData, user._id)}
               lastMessage={lastMessage}
+              setMessages={setMessages}
               conversationId={conversationId}
               socket={socket}
-              conversationType={"private"}
+              conversationType={conversationType}
             />
           </div>
         )

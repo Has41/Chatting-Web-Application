@@ -1,7 +1,5 @@
-import React from "react"
-
 const IntroCard = ({ cardRef, icon, title, description }) => (
-  <div ref={cardRef} className="flex flex-col gap-y-4 bg-white p-6 rounded-lg shadow-md w-full max-w-[400px]">
+  <div ref={cardRef} className="flex w-full max-w-[400px] flex-col gap-y-4 rounded-lg bg-white p-6 shadow-md">
     <div className="flex items-center gap-x-3">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -9,27 +7,27 @@ const IntroCard = ({ cardRef, icon, title, description }) => (
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-6 h-6 text-black/80"
+        className="h-6 w-6 text-black/80"
       >
         <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
       </svg>
-      <h2 className="font-semibold text-black/90 text-lg">{title}</h2>
+      <h2 className="text-lg font-semibold text-black/90">{title}</h2>
     </div>
-    <p className="text-sm text-black/80 text-left leading-relaxed">{description}</p>
+    <p className="text-left text-sm leading-relaxed text-black/80">{description}</p>
   </div>
 )
 
 const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempPostRef, tempImg, tempTopic, tempName }) => (
   <div
     ref={tempRef}
-    className="px-4 py-2 rounded-2xl absolute left-0 top-0 z-20 w-full h-[400px] gap-x-10 mx-auto shadow-lg bg-white flex items-center justify-center gap-y-4"
+    className="absolute left-0 top-0 z-20 mx-auto flex h-[400px] w-full items-center justify-center gap-x-10 gap-y-4 rounded-2xl bg-white px-4 py-2 shadow-lg"
   >
     <div>
       <img className="rounded-2xl" src={tempImg} width={500} alt="" />
     </div>
     <div className="flex flex-col justify-center gap-y-6">
       <div ref={tempTitleRef || null}>
-        <h1 className="font-semibold font-poppins text-lg text-black/80">{tempTopic}</h1>
+        <h1 className="font-poppins text-lg font-semibold text-black/80">{tempTopic}</h1>
       </div>
       <div ref={tempDetailRef || null}>
         <p className="max-w-[500px] font-mont">
@@ -38,7 +36,7 @@ const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempP
         </p>
       </div>
       <div className="flex flex-col gap-y-3">
-        <div ref={tempNameRef || null} className="font-semibold text-lg text-black/80">
+        <div ref={tempNameRef || null} className="text-lg font-semibold text-black/80">
           {tempName}
         </div>
         <div ref={tempPostRef || null} className="font-mont">
@@ -50,9 +48,9 @@ const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempP
 )
 
 const SlidingCard = ({ tileRef, subTileSectionRef, subTileLogoRef, iconPath, tileName, tileDetail, tileQuote }) => (
-  <div ref={tileRef} className="flex items-center bg-white shadow-lg max-w-[90%] mx-auto gap-x-4 h-[250px] rounded-3xl">
-    <div ref={subTileSectionRef} className="flex items-center justify-center w-[40%] opacity-0 gap-x-10">
-      <div className="bg-black/80 rounded-full shadow-md text-white p-4 ml-7">
+  <div ref={tileRef} className="mx-auto flex h-[250px] max-w-[90%] items-center gap-x-4 rounded-3xl bg-white shadow-lg">
+    <div ref={subTileSectionRef} className="flex w-[40%] items-center justify-center gap-x-10 opacity-0">
+      <div className="ml-7 rounded-full bg-black/80 p-4 text-white shadow-md">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -64,17 +62,17 @@ const SlidingCard = ({ tileRef, subTileSectionRef, subTileLogoRef, iconPath, til
           <path strokeLinecap="round" strokeLinejoin="round" d={iconPath} />
         </svg>
       </div>
-      <div className="flex flex-col justify-center w-full h-full gap-y-3 my-auto ml-4">
-        <h2 className="text-black/80 text-lg font-semibold text-left">{tileName}</h2>
+      <div className="my-auto ml-4 flex h-full w-full flex-col justify-center gap-y-3">
+        <h2 className="text-left text-lg font-semibold text-black/80">{tileName}</h2>
         <p className="text-left">{tileDetail}</p>
       </div>
     </div>
     <div
       ref={subTileLogoRef}
-      className="gap-y-4 w-[45%] rounded-[30px] mx-auto bg-slate-50 h-full flex flex-col items-center justify-center"
+      className="mx-auto flex h-full w-[45%] flex-col items-center justify-center gap-y-4 rounded-[30px] bg-slate-50"
     >
       <h4 className="font-mont">We are here</h4>
-      <h1 className="text-2xl font-poppins font-medium">{tileQuote}</h1>
+      <h1 className="font-poppins text-2xl font-medium">{tileQuote}</h1>
     </div>
   </div>
 )

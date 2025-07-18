@@ -1,10 +1,10 @@
-import React, { useRef } from "react"
+import { useRef } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import tempImg from "../../assets/woman.jpg"
 import tempImg1 from "../../assets/man.jpg"
 import tempImg2 from "../../assets/female.jpg"
-import { CustomerCard } from "../../utils/Cards"
+import { CustomerCard } from "../Shared/Cards"
 
 const TrustedByPeople = () => {
   const tempRefs = {

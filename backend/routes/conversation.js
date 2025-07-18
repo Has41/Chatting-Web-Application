@@ -5,6 +5,7 @@ import {
   createGroupConversation,
   getConversationsOfUser,
   getCurrentConversation,
+  getGroupParticipants,
   getMessagesOfConversation,
   leaveGroupConversation,
   removeGroupParticipants,
@@ -25,6 +26,8 @@ const router = express.Router()
 router.get("/get-current-convo/:convoId", validateConvoId, validateApiData, getCurrentConversation)
 
 router.get("/get-current-convo-messages/:convoId", validateConvoId, validateApiData, getMessagesOfConversation)
+
+router.get("/get-group-participants/:convoId", validateConvoId, validateApiData, getGroupParticipants)
 
 router.get("/get-conversations", getConversationsOfUser)
 

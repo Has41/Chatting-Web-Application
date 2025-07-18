@@ -35,6 +35,10 @@ const conversationSchema = new mongoose.Schema(
         return this.conversationType === "group" || this.conversationType === "channel"
       },
     },
+    groupInfo: {
+      type: String,
+      default: "Hey, we using Chitchat!",
+    },
     createdAt: {
       type: Date,
       default: Date.now,

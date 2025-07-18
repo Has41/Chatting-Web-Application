@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"
 import setCanvasPreview from "../../utils/setCanvasPreview"
@@ -36,6 +36,7 @@ const ProfileUpload = () => {
       navigate("/chat")
     },
     onError: (err) => {
+      if (import.meta.env.PROD) return
       console.error("Error saving profile pic:", err)
       setIsLoading(false)
     }

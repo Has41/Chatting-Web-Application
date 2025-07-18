@@ -1,4 +1,3 @@
-import React from "react"
 import { navOptions } from "../../utils/dynamicData"
 import ProfileDropdown from "../Shared/ProfileDropdown"
 import ChatLogo from "../Shared/ChatLogo"

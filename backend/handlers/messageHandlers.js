@@ -108,7 +108,7 @@ const sendMessage = async (messageData, fileData) => {
         io.to(senderSocketId).emit("receiveMessage", createdMessage)
       }
     } else if (conversationType === "group") {
-      io.to(conversationId).emit("receive-group-messages", createdMessage)
+      io.to(conversationId).emit("receive-group-messages", createdMessage, conversation._id)
     } else {
       console.error("Failed to send message!")
       return

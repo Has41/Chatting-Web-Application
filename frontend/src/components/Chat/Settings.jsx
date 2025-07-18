@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import StatusDropdown from "../Shared/StatusDropdown"
 import InfoDetails from "./Settings/InfoDetails"
 import useAuth from "../../hooks/useAuth"
