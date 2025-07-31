@@ -24,6 +24,11 @@ const ChatMessages = ({ conversationId, userData, setMessages, socketMessages, l
       return response.data
     },
     {
+      onSuccess: (data) => {
+        console.log(data)
+      }
+    },
+    {
       onError: (error) => {
         if (!import.meta.env.PROD) console.error("Error fetching messages:", error)
       },

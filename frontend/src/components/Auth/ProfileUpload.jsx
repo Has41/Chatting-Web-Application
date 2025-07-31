@@ -122,7 +122,7 @@ const ProfileUpload = () => {
     const username = localStorage.getItem("newUser")
     const userId = localStorage.getItem("userId")
 
-    const res = await uploadFile(profilePhoto, `${ROOT_FOLDER}/${userId}/profile-upload`, "image")
+    const res = await uploadFile(profilePhoto, `${ROOT_FOLDER}/${userId}/profile-upload`, profilePhoto.type, "image")
 
     if (res?.secure_url && res?.public_id) {
       mutate({ secure_url: res?.secure_url, public_id: res?.public_id, username })

@@ -77,7 +77,7 @@ const ChatList = () => {
             chatList.map((conversation) => {
               const isGroup = conversation.conversationType === "group"
 
-              const otherUser = !isGroup ? conversation.participants.find((p) => p._id !== user._id) : null
+              const otherUser = !isGroup ? conversation.participants.find((p) => p?._id !== user?._id) : null
 
               const imageUrl = isGroup ? conversation.groupPicture?.url : otherUser?.profilePicture?.url
 
@@ -116,7 +116,8 @@ const ChatList = () => {
                             className="max-w-[9rem] truncate text-xs text-gray-600"
                             title={conversation?.lastMessage?.content}
                           >
-                            {conversation?.lastMessage?.content || "No messages yet"}
+                            {conversation?.lastMessage?.content ||
+                              (conversation?.lastMessage?.media?.mediaUrl ? "It's an image" : "")}
                           </div>
                         </div>
 

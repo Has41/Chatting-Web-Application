@@ -49,7 +49,7 @@ const getConversationsOfUser = async (req, res, next) => {
       })
       .populate({
         path: "lastMessage",
-        select: "content createdAt",
+        select: "content createdAt media",
       })
       .lean()
 

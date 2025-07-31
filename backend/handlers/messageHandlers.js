@@ -16,7 +16,7 @@ const updateConversationAndUser = async (conversation, createdMessage, userIds) 
   }
 }
 
-const createdMessageData = (messageData, fileData) => {
+const createdMessageData = ({ messageData, fileData }) => {
   try {
     const { conversationType, conversationId, sender, recipient, content, messageType } = messageData
 
@@ -34,8 +34,10 @@ const createdMessageData = (messageData, fileData) => {
 
     if (fileData && messageType === "file") {
       messageDataToCreate.media = {
-        publicId: fileData.public_id,
+        publicId: fileData.publicId,
         mediaUrl: fileData.url,
+        caption: fileData.caption || "",
+        thumbnailUrl: fileData.thumbnailUrl || "",
       }
     } else {
       console.error("Error setting url!")
@@ -48,13 +50,13 @@ const createdMessageData = (messageData, fileData) => {
   }
 }
 
-const sendMessage = async (messageData, fileData) => {
+const sendMessage = async ({ messageData, fileData }) => {
   try {
     console.log("Recieved file data: ", fileData)
     const { conversationType, conversationId, sender, recipient } = messageData
     const senderSocketId = userSocketMap.get(sender)
     const recipientSocketId = conversationType === "private" ? userSocketMap.get(recipient) : null
-    const createdMessage = await Message.create(createdMessageData(messageData, fileData))
+    const createdMessage = await Message.create(createdMessageData({ messageData, fileData }))
 
     let conversation
 

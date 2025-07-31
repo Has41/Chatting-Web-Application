@@ -28,9 +28,9 @@ const setupSocket = (server) => {
   }
 
   const setupSocketEvents = (socket) => {
-    socket.on("sendMessage", async (messageData, fileData) => {
+    socket.on("sendMessage", async ({ messageData, fileData }) => {
       if (!validateSocketData(socket, socket.handshake.query, "sendMessage")) return
-      await sendMessage(messageData, fileData)
+      await sendMessage({ messageData, fileData })
     })
 
     socket.on("markMessageAsSeen", async (conversationId, userId, conversationType, lastMessageId) => {

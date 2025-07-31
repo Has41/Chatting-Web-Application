@@ -1,47 +1,29 @@
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { chatOptions } from "../../utils/dynamicData"
 import useAuth from "../../hooks/useAuth"
 import { useQuery } from "react-query"
 import axiosInstance from "../../utils/axiosInstance"
 import { USER_PATHS, CONVERSATION_PATHS } from "../../constants/apiPaths"
-import { useNavigate, useParams } from "react-router-dom"
-import { io } from "socket.io-client"
+import { useParams } from "react-router-dom"
 import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
 import ProfileSidebar from "./ProfileSidebar"
+import useChatSocket from "../../hooks/useChatSocket"
 
 const Chatbox = () => {
   const { user } = useAuth()
   const { conversationId, userId } = useParams()
-  const navigate = useNavigate()
-  const socketRef = useRef(null)
   const [userData, setUserData] = useState(null)
   const [lastMessage, setLastMessage] = useState("")
   const [messageContent, setMessageContent] = useState("")
   const [messages, setMessages] = useState([])
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  useEffect(() => {
-    if (user._id) {
-      socketRef.current = io(import.meta.env.VITE_API_BASE_URL, { query: { userId: user._id } })
-
-      socketRef.current.on("connect", () => {
-        console.log("Connected to socket:", socketRef.current.id)
-      })
-
-      socketRef.current.on("receiveMessage", (messageData) => {
-        console.log("Received message:", messageData)
-        if (!conversationId && messageData.conversation) {
-          navigate(`/chat/conversation/${messageData.conversation}`)
-        }
-        setMessages((prev) => [...prev, messageData])
-      })
-
-      return () => {
-        socketRef.current.disconnect()
-      }
-    }
-  }, [user._id, conversationId, navigate])
+  const { socketRef, sendMessage } = useChatSocket({
+    userId: user._id,
+    conversationId,
+    setMessages
+  })
 
   useQuery({
     queryKey: ["chatData", userId, conversationId],
@@ -69,26 +51,6 @@ const Chatbox = () => {
     },
     enabled: !!userId || !!conversationId
   })
-
-  const handleSendMessage = () => {
-    if (!messageContent.trim()) return
-
-    const recipientId = userId ? userId : userData?._id
-
-    const messageData = {
-      conversationId,
-      sender: user._id,
-      content: messageContent,
-      recipient: recipientId,
-      messageType: "text",
-      conversationType: "private"
-    }
-
-    if (socketRef.current) {
-      socketRef.current.emit("sendMessage", messageData, null)
-    }
-    setMessageContent("")
-  }
 
   return (
     <section className="flex h-screen w-[69%] flex-col font-poppins">
@@ -136,10 +98,14 @@ const Chatbox = () => {
       />
 
       <SendMessage
-        handleSendMessage={handleSendMessage}
+        sendMessage={sendMessage}
+        conversationId={conversationId}
+        socketRef={socketRef}
+        recipientId={userId || userData?._id}
         messageContent={messageContent}
         setMessageContent={setMessageContent}
       />
+      <div id="inline-preview-root" className="absolute bottom-20 left-0 z-50 w-full" />
     </section>
   )
 }

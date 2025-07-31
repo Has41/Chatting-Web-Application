@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { chatOptions } from "../../utils/dynamicData"
 import { useParams } from "react-router-dom"
 import { useQuery } from "react-query"
@@ -7,13 +7,12 @@ import axiosInstance from "../../utils/axiosInstance"
 import { CONVERSATION_PATHS } from "../../constants/apiPaths"
 import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
-import { io } from "socket.io-client"
 import ProfileSidebar from "./ProfileSidebar"
+import useChatSocket from "../../hooks/useChatSocket"
 
 const GroupChatbox = () => {
   const { user } = useAuth()
   const { conversationId } = useParams()
-  const socketRef = useRef(null)
 
   const [messages, setMessages] = useState([])
   const [lastMessage, setLastMessage] = useState("")
@@ -21,32 +20,13 @@ const GroupChatbox = () => {
   const [groupData, setGroupData] = useState(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  useEffect(() => {
-    if (user._id) {
-      socketRef.current = io(import.meta.env.VITE_API_BASE_URL, {
-        query: { userId: user._id }
-      })
+  const { socketRef, sendMessage } = useChatSocket({
+    userId: user._id,
+    conversationId,
+    setMessages,
+    type: "group"
+  })
 
-      socketRef.current.on("connect", () => {
-        console.log("Connected to socket:", socketRef.current.id)
-
-        socketRef.current.emit("join-group", conversationId, user._id)
-      })
-
-      socketRef.current.on("receive-group-messages", (messageData, convoId) => {
-        console.log("Received group message:", messageData)
-        if (convoId === conversationId) {
-          setMessages((prev) => [...prev, messageData])
-        } else {
-          console.log("Received message for a different conversation:", convoId === conversationId)
-        }
-      })
-
-      return () => socketRef.current.disconnect()
-    }
-  }, [user._id, conversationId])
-
-  // 🔵 Fetch Group Info
   useQuery({
     queryKey: ["groupConversation", conversationId],
     queryFn: async () => await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`),
@@ -58,22 +38,22 @@ const GroupChatbox = () => {
     enabled: !!conversationId
   })
 
-  const handleSendMessage = () => {
-    if (!messageContent.trim()) return
+  // const handleSendMessage = () => {
+  //   if (!messageContent.trim()) return
 
-    const messageData = {
-      conversationId,
-      sender: user._id,
-      content: messageContent,
-      messageType: "text",
-      conversationType: "group"
-    }
+  //   const messageData = {
+  //     conversationId,
+  //     sender: user._id,
+  //     content: messageContent,
+  //     messageType: "text",
+  //     conversationType: "group"
+  //   }
 
-    if (socketRef.current) {
-      socketRef.current.emit("sendMessage", messageData, null)
-    }
-    setMessageContent("")
-  }
+  //   if (socketRef.current) {
+  //     socketRef.current.emit("sendMessage", messageData, null)
+  //   }
+  //   setMessageContent("")
+  // }
 
   return (
     <section className="flex h-screen w-[69%] flex-col font-poppins">
@@ -131,7 +111,10 @@ const GroupChatbox = () => {
       />
 
       <SendMessage
-        handleSendMessage={handleSendMessage}
+        sendMessage={sendMessage}
+        conversationId={conversationId}
+        socketRef={socketRef}
+        conversationType={"group"}
         messageContent={messageContent}
         setMessageContent={setMessageContent}
       />

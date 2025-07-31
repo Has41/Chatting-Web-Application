@@ -8,7 +8,7 @@ const LoadingSpinner = ({
   additionalClasses = ""
 }) => {
   return (
-    <div>
+    <>
       {loading ? (
         <>
           <svg
@@ -27,12 +27,12 @@ const LoadingSpinner = ({
               fill="currentFill"
             />
           </svg>
-          <span className="ml-2">{loadingText}</span>
+          {loadingText && <span className="ml-2">{loadingText}</span>}
         </>
       ) : (
         finalText
       )}
-    </div>
+    </>
   )
 }
 

@@ -1,8 +1,20 @@
 import { useRef, useState } from "react"
 import AttachmentMenu from "../../Shared/AttachmentMenu"
+import FilePreviewModal from "../FilePreviewModal"
+import useAuth from "../../../hooks/useAuth"
 
-const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) => {
+const SendMessage = ({
+  setMessageContent,
+  messageContent,
+  recipientId,
+  socketRef,
+  conversationType = "private",
+  conversationId,
+  sendMessage
+}) => {
+  const { user } = useAuth()
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
+  const [previewFile, setPreviewFile] = useState(null)
   const [attachmentType, setAttachmentType] = useState(null)
   const fileInputRef = useRef(null)
 
@@ -15,7 +27,40 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
     const file = e.target.files?.[0]
     if (!file) return
 
-    handleSendFile({ type: attachmentType, file })
+    setPreviewFile(file)
+    // handleSendFile({ type: attachmentType, file })
+    e.target.value = null
+  }
+
+  const handleSendMessage = ({ conversationId, messageContent, messageType, fileMeta }) => {
+    console.log(conversationId)
+
+    if (!messageContent?.trim() && !fileMeta) return
+
+    let fileData = {}
+
+    const messageData = {
+      conversationId,
+      sender: user._id,
+      content: messageContent || "",
+      recipient: recipientId,
+      messageType,
+      conversationType
+    }
+
+    if (messageType === "file" && fileMeta) {
+      fileData = {
+        publicId: fileMeta.public_url,
+        url: fileMeta.media_url,
+        caption: fileMeta.caption || "",
+        thumbnailUrl: fileMeta.thumbnailUrl || ""
+      }
+    }
+
+    if (socketRef.current) {
+      sendMessage({ messageData, fileData })
+    }
+    setMessageContent("")
   }
 
   const getAcceptedTypes = (type) => {
@@ -34,7 +79,18 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
   }
 
   return (
-    <div className="flex max-w-full items-center gap-3 border-t p-4">
+    <div className="relative flex max-w-full items-center gap-3 border-t p-4">
+      {previewFile && (
+        <FilePreviewModal
+          file={previewFile}
+          type={attachmentType}
+          recipientId={recipientId}
+          conversationId={conversationId}
+          conversationType={conversationType}
+          onSend={handleSendMessage}
+          onCancel={() => setPreviewFile(null)}
+        />
+      )}
       <div className="w-[5%]">
         <button className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text">
           <svg
@@ -60,13 +116,18 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
         value={messageContent}
         onChange={(e) => setMessageContent(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleSendMessage()
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault()
+            handleSendMessage({
+              conversationId,
+              messageContent,
+              messageType: "text"
+            })
           }
         }}
       />
 
-      <div className="flex w-[15%] gap-x-1">
+      <div className="flex w-1/6 gap-x-1">
         {showAttachmentOptions && (
           <AttachmentMenu
             onSelect={(type) => {
@@ -81,6 +142,14 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
           onClick={() => setShowAttachmentOptions((prev) => !prev)}
           className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text"
         >
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept={getAcceptedTypes(attachmentType)}
+            onChange={handleFileChange}
+          />
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -114,7 +183,7 @@ const SendMessage = ({ handleSendMessage, setMessageContent, messageContent }) =
           </svg>
         </button>
         <button
-          onClick={handleSendMessage}
+          onClick={() => handleSendMessage({ conversationId, messageContent, messageType: "text" })}
           className="rounded-full bg-custom-green p-3 text-white transition-all duration-500 hover:bg-green-400"
         >
           <svg

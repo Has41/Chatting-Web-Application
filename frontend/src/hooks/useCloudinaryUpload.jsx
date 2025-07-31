@@ -13,8 +13,8 @@ const useCloudinaryUpload = () => {
   const cloudName = import.meta.env.VITE_API_CLOUD_NAME
 
   const { mutateAsync: generateSignature } = useMutation({
-    mutationFn: async ({ folder, fileType, uploadType }) => {
-      const { data } = await axiosInstance.post(`${FILE_PATHS.GENERATE_SIGNATURE}/${fileType}`, { folder, uploadType })
+    mutationFn: async ({ folder, mimeType, uploadType }) => {
+      const { data } = await axiosInstance.post(FILE_PATHS.GENERATE_SIGNATURE, { folder, uploadType, mimeType })
       return data
     }
   })
@@ -35,7 +35,7 @@ const useCloudinaryUpload = () => {
     }
   })
 
-  const uploadFile = async (file, folder, fileType, uploadType) => {
+  const uploadFile = async (file, folder, mimeType, uploadType) => {
     if (!file) {
       console.error("File must be specified!")
       return
@@ -49,7 +49,7 @@ const useCloudinaryUpload = () => {
         setError(validationResult.error)
         return
       }
-      const signedData = await generateSignature({ folder, fileType, uploadType })
+      const signedData = await generateSignature({ folder, mimeType, uploadType })
 
       const formData = new FormData()
       formData.append("file", file)
@@ -58,6 +58,7 @@ const useCloudinaryUpload = () => {
       formData.append("signature", signedData.signature)
       formData.append("public_id", signedData.public_id)
       formData.append("folder", folder)
+      console.log(signedData)
 
       if (signedData.eager) formData.append("eager", signedData.eager)
       if (signedData.transformation) formData.append("transformation", signedData.transformation)

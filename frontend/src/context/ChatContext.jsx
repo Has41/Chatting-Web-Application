@@ -19,11 +19,7 @@ const ChatProvider = ({ children }) => {
     onError: (err) => {
       if (import.meta.env.PROD) return
       console.error(err)
-    },
-    // retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: 24 * 60 * 60 * 1000
+    }
   })
 
   return <ChatContext.Provider value={{ chatList, setChatList, isLoading }}>{children}</ChatContext.Provider>

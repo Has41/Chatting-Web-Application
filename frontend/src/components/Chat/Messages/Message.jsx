@@ -7,6 +7,7 @@ import { useMutation } from "react-query"
 import axiosInstance from "../../../utils/axiosInstance"
 import { MESSAGE_PATHS } from "../../../constants/apiPaths"
 import EditMessageModal from "../../Shared/EditMessageModal"
+import FileMessagePreview from "../../Shared/FileMessagePreview"
 
 const Message = ({
   isSender,
@@ -22,7 +23,7 @@ const Message = ({
   const hasMarkedSeenRef = useRef(false)
   const { user } = useAuth()
   const isVisible = useIntersectionObserver(messageRef)
-  const [messageId, setMessageId] = useState(message._id)
+  const [messageId, _] = useState(message._id)
   const [editContent, setEditContent] = useState(message.content)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -75,11 +76,11 @@ const Message = ({
   useEffect(() => {
     const hasCurrentUserSeen = lastMessage?.seenBy?.some((seen) => seen.user._id === user._id || seen.user?._id === user._id)
     if (
-      message._id === lastMessage._id &&
+      message?._id === lastMessage?._id &&
       isVisible &&
       !hasCurrentUserSeen &&
       !hasMarkedSeenRef.current &&
-      message.sender !== user._id
+      message?.sender !== user?._id
     ) {
       socket.current.emit("markMessageAsSeen", conversationId, user._id, conversationType, lastMessage._id)
       hasMarkedSeenRef.current = true
@@ -91,26 +92,34 @@ const Message = ({
     <div className={`mb-3 ${isSender ? "flex justify-end" : "flex justify-start"}`}>
       <div className="flex flex-col">
         <div className="group relative flex items-center gap-x-1">
-          {}
           <div
             ref={messageRef}
-            className={`inline-block max-w-full overflow-x-hidden whitespace-normal break-words px-4 py-3 text-sm shadow ${
-              isSender ? "rounded-sent bg-custom-green text-white" : "rounded-recieved bg-custom-white text-black"
+            className={`inline-block max-w-full overflow-x-hidden whitespace-normal break-words ${message?.messageType === "file" ? "p-1" : "px-4 py-3"} text-sm shadow ${
+              message.messageType === "text"
+                ? isSender
+                  ? "rounded-sent bg-custom-green text-white"
+                  : "rounded-recieved bg-custom-white text-black"
+                : isSender
+                  ? "rounded bg-custom-green text-white"
+                  : "rounded bg-custom-white text-black"
             }`}
           >
             {!isSender && conversationType === "group" && (
-              <p className="mb-2 text-xs font-semibold text-green-600">
+              <p className={`mb-2 ${message?.media?.mediaUrl && "p-2"} text-xs font-semibold text-green-600`}>
                 {recipientData.find((r) => r._id === message.sender || r._id === message.sender?._id)?.username}
               </p>
             )}
-
-            <div className="flex max-w-96 flex-wrap items-end justify-between gap-x-4 gap-y-4">
-              <div className="break-all">{message.content}</div>
-              <div className="text-custom-white ml-auto block select-none text-right text-xs">
-                {message.editedAt && <span className="mr-2 text-white">Edited</span>}
-                {moment(message.createdAt).format("h:mm a")}
+            {message.messageType === "file" ? (
+              <FileMessagePreview fileMeta={message.media} isSender={isSender} />
+            ) : (
+              <div className="flex max-w-96 flex-wrap items-end justify-between gap-x-4 gap-y-4">
+                <div className="break-all">{message.content}</div>
+                <div className="text-custom-white ml-auto block select-none text-right text-xs">
+                  {message.editedAt && <span className="mr-2 text-white">Edited</span>}
+                  {moment(message.createdAt).format("h:mm a")}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <div>
             <div
@@ -194,7 +203,7 @@ const Message = ({
             )}
           </div>
         </div>
-        {message._id === lastMessage._id && lastMessage.sender === user._id && lastMessage.seenBy.length > 0 && (
+        {message?._id === lastMessage?._id && lastMessage?.sender === user?._id && lastMessage?.seenBy?.length > 0 && (
           <div className="mt-2 flex flex-col items-end text-xs font-medium text-gray-600">
             {conversationType === "group" ? (
               <>

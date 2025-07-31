@@ -23,6 +23,14 @@ const messageSchema = new mongoose.Schema(
         },
         default: "",
       },
+      thumbnailUrl: {
+        type: String,
+        default: "",
+      },
+      caption: {
+        type: String,
+        default: "",
+      },
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
