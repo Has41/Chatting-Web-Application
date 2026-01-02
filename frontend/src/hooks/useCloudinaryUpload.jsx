@@ -21,7 +21,11 @@ const useCloudinaryUpload = () => {
 
   const { mutateAsync: uploadToCloudinaryApi } = useMutation({
     mutationFn: async ({ formData, resourceType }) => {
-      const { data } = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, formData)
+      const { data } = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      })
       return data
     },
     onSuccess: (data) => {
@@ -47,6 +51,7 @@ const useCloudinaryUpload = () => {
 
       if (!validationResult.success) {
         setError(validationResult.error)
+        console.error(validationResult.error)
         return
       }
       const signedData = await generateSignature({ folder, mimeType, uploadType })
@@ -58,7 +63,6 @@ const useCloudinaryUpload = () => {
       formData.append("signature", signedData.signature)
       formData.append("public_id", signedData.public_id)
       formData.append("folder", folder)
-      console.log(signedData)
 
       if (signedData.eager) formData.append("eager", signedData.eager)
       if (signedData.transformation) formData.append("transformation", signedData.transformation)
@@ -68,6 +72,8 @@ const useCloudinaryUpload = () => {
       const resourceType = signedData.resource_type || "auto"
 
       const res = await uploadToCloudinaryApi({ formData, resourceType })
+      console.log(res)
+
       return res
     } catch (err) {
       setError(err.message || "An error occurred during upload")

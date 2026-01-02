@@ -95,6 +95,20 @@ const getMessagesOfConversation = async (req, res, next) => {
   }
 }
 
+const getMediaOfConversation = async (req, res, next) => {
+  try {
+    const convo = await Conversation.findById(req.params.convoId).select("mediaUrls")
+
+    if (!convo) {
+      return res.status(404).json({ message: "Conversation not found" })
+    }
+
+    res.status(200).json(convo)
+  } catch (error) {
+    next(error)
+  }
+}
+
 const createGroupConversation = async (req, res, next) => {
   try {
     const { participants, groupName, groupPicture, groupInfo } = req.body
@@ -363,6 +377,7 @@ export {
   changeGroupOwnership,
   removeGroupConversation,
   getMessagesOfConversation,
+  getMediaOfConversation,
   getConversationsOfUser,
   getGroupParticipants,
 }

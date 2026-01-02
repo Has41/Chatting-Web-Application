@@ -43,10 +43,10 @@ const FilePreviewModal = ({ file, type, onCancel, recipientId, onSend, conversat
 
     if (res.secure_url) {
       const fileMeta = {
-        public_url: res.public_id,
-        media_url: res.secure_url,
+        public_url: res?.public_id,
+        media_url: res?.secure_url,
         caption,
-        thumbnailUrl: res?.eager[0]?.secure_url || ""
+        thumbnailUrl: res?.eager?.[0]?.secure_url || ""
       }
 
       onSend({
@@ -54,8 +54,6 @@ const FilePreviewModal = ({ file, type, onCancel, recipientId, onSend, conversat
         fileMeta,
         conversationId
       })
-    } else {
-      console.error("Upload succeeded but no secure_url in response", res)
     }
 
     setIsSending(false)

@@ -6,6 +6,7 @@ import cloudinary from "../config/cloudinary.js"
 const generateSignatureUniversal = (req, res, next) => {
   try {
     const { folder, uploadType, mimeType } = req.body
+    // console.log("Api running")
 
     const timestamp = Math.round(Date.now() / 1000)
     let publicId = ""
@@ -41,14 +42,19 @@ const generateSignatureUniversal = (req, res, next) => {
           ? "w_1280,h_720,c_limit,f_auto,q_auto,so_0"
           : "w_1080,h_720,c_limit,f_auto,q_auto,so_0"
     } else if (mimeType.startsWith("audio/")) {
+      console.log("I am an audio file")
       publicId = `audio_${uuidv4()}`
-      resourceType = "raw"
+      resourceType = "video"
       format = "mp3"
       transformation = "q_60"
+    } else if (mimeType.startsWith("application/pdf")) {
+      publicId = `pdf_${uuidv4()}`
+      resourceType = "image"
+      eager = "pg_1,f_png,w_500,h_700,c_fit,q_auto"
     } else {
       publicId = `docs_${uuidv4()}`
       resourceType = "raw"
-      eager = "pg_1,f_png,w_500"
+      eager = "pg_1,f_png,w_500,h_700,c_fit,q_auto"
     }
 
     const paramsToSign = {

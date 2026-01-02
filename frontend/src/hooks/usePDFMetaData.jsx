@@ -1,4 +1,3 @@
-// src/hooks/usePDFMetadata.jsx
 import { useEffect, useRef, useState } from "react"
 import * as pdfjsLib from "pdfjs-dist"
 import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url"
@@ -13,7 +12,7 @@ const usePDFMetadata = (source, width = 250) => {
 
   const fileName = decodeURIComponent(source?.split("/").pop().split("?")[0])
 
-  console.log(fileName)
+  // console.log(fileName)
   useEffect(() => {
     if (!source) {
       setError("No PDF source provided")
@@ -27,14 +26,12 @@ const usePDFMetadata = (source, width = 250) => {
       try {
         const loadingTask = pdfjsLib.getDocument(source)
 
-        // 2) wait for PDF, extract numPages
         const pdf = await loadingTask.promise
         if (cancelled) return
-        console.log(pdf)
+        // console.log(pdf)
 
         setNumPages(pdf.numPages)
 
-        // 3) render first page
         const page = await pdf.getPage(1)
 
         const viewport = page.getViewport({ scale: 1 })

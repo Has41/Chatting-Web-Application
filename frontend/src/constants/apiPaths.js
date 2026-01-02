@@ -35,6 +35,7 @@ const MESSAGE_PATHS = {
 const CONVERSATION_PATHS = {
   GET_CURRENT_CONVO: "/api/conversations/get-current-convo",
   GET_CURRENT_MESSAGES: "/api/conversations/get-current-convo-messages",
+  GET_CURRENT_MEDIA: "/api/conversations/get-current-convo-media",
   GET_CONVERSATIONS_OF_USER: "/api/conversations/get-conversations",
   GET_GROUP_PARTICIPANTS: "/api/conversations/get-group-participants",
   CREATE_GROUP: "/api/conversations/create-group",

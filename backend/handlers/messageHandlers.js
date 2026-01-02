@@ -9,6 +9,9 @@ import User from "../models/User.js"
 const updateConversationAndUser = async (conversation, createdMessage, userIds) => {
   try {
     conversation.messages.push(createdMessage._id)
+    if (createdMessage?.media && !createdMessage?.media?.mediaUrl.endsWith(".mp3")) {
+      conversation.mediaUrls.push(createdMessage?.media?.mediaUrl)
+    }
     await conversation.save()
     await User.updateMany({ _id: { $in: userIds } }, { $addToSet: { conversations: conversation._id } })
   } catch (err) {
@@ -19,7 +22,6 @@ const updateConversationAndUser = async (conversation, createdMessage, userIds) 
 const createdMessageData = ({ messageData, fileData }) => {
   try {
     const { conversationType, conversationId, sender, recipient, content, messageType } = messageData
-
     const messageDataToCreate = {
       sender,
       recipient: conversationType === "group" ? null : recipient,
@@ -39,6 +41,7 @@ const createdMessageData = ({ messageData, fileData }) => {
         caption: fileData.caption || "",
         thumbnailUrl: fileData.thumbnailUrl || "",
       }
+      // console.log(messageDataToCreate?.media?.thumbnailUrl)
     } else {
       console.error("Error setting url!")
     }

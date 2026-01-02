@@ -2,7 +2,8 @@ import { Server } from "socket.io"
 import userSocketMap from "./utils/socketMap.js"
 import { sendMessage, markMessageAsSeen } from "./handlers/messageHandlers.js"
 import joinGroup from "./handlers/groupHandlers.js"
-import validateSocketData from "./utils/socketValidator.js"
+import validateSocketData from "./validators/socketValidator.js"
+import setupCallEvents from "./utils/setupCallEvents.js"
 
 let io
 
@@ -10,7 +11,7 @@ const setupSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: "*", //? Change this for deployment
-      methods: ["GET", "POST"],
+      methods: ["GET", "POST", "PUT", "PATCH"],
       credentials: true,
     },
   })
@@ -45,6 +46,8 @@ const setupSocket = (server) => {
       if (!validateSocketData(socket, socket.handshake.query, "join-group")) return
       await joinGroup(socket, conversationId, userId)
     })
+
+    setupCallEvents(socket, io)
   }
 
   io.on("connection", (socket) => {

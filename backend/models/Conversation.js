@@ -49,6 +49,7 @@ const conversationSchema = new mongoose.Schema(
         ref: "Message",
       },
     ],
+    mediaUrls: [String],
   },
   { timestamps: true }
 )

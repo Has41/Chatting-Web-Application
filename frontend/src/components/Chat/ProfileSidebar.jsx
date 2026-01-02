@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { profileInfoData } from "../../utils/dynamicData"
-import { useMutation } from "react-query"
+import { useMutation, useQuery } from "react-query"
 import axiosInstance from "../../utils/axiosInstance"
 import { CONVERSATION_PATHS } from "../../constants/apiPaths"
 import useChatList from "../../hooks/useChatList"
@@ -35,7 +35,6 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
 
       return { previousChatList }
     },
-
     onSuccess: () => {
       setIsEditingInfo(false)
       setIsEditing(false)
@@ -47,6 +46,19 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
       console.error(error)
     }
   })
+
+  // const { data: mediaURL = [] } = useQuery({
+  //   queryKey: CONVERSATION_PATHS.GET_CURRENT_MEDIA,
+  //   queryFn: async (convoId) => {
+  //     return axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_MEDIA}/${convoId}`)
+  //   },
+  //   onSuccess: () => {
+  //     console.log("Successfully got media!")
+  //   },
+  //   onError: (error) => {
+  //     console.error(error)
+  //   }
+  // })
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value)
@@ -229,6 +241,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
             ))}
           </div>
         </div>
+        {/* Media is here */}
         {data?.conversationType && (
           <div className="mt-6 max-h-[35%] overflow-y-auto border-t px-4 pt-4">
             <h4 className="text-md mb-2 font-semibold">Members ({(data?.participants?.length || 0) + 1})</h4>

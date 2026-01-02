@@ -1,11 +1,9 @@
 import getFileType from "../../utils/getFileType"
-import getPdfThumbnail from "../../utils/getPdfThumbnail"
 import PDFMeta from "./PDFMeta"
 
 const FileMessagePreview = ({ fileMeta, isSender }) => {
-  const { mediaUrl, caption, publicId } = fileMeta
+  const { mediaUrl, caption } = fileMeta
   const fileType = getFileType(mediaUrl)
-  const thumbnailUrl = getPdfThumbnail(publicId)
 
   return (
     <div className="flex flex-col">
@@ -15,24 +13,16 @@ const FileMessagePreview = ({ fileMeta, isSender }) => {
 
       {fileType === "video" && <video src={mediaUrl} controls className="max-h-60 w-full rounded-md" />}
 
-      {fileType === "audio" && <audio src={mediaUrl} controls className="w-full" />}
+      {fileType === "audio" && <audio src={mediaUrl} controls className="max-w-full" />}
 
       {fileType === "pdf" && (
-        <div className="space-y-4">
-          {/* <PDFPreview source={mediaUrl} width={200} /> */}
-          <img
-            src={thumbnailUrl}
-            alt="PDF thumbnail"
-            className="h-auto w-20 rounded border shadow"
-            // onError={(e) => {
-            //   // fallback if thumbnail fails
-            //   e.currentTarget.src = "/pdf-icon.svg"
-            // }}
-          />
-
+        <div className="">
+          <img src={fileMeta?.thumbnailUrl} alt="PDF thumbnail" className="h-48 w-full rounded border shadow" />
           <PDFMeta mediaUrl={mediaUrl} fileName={mediaUrl} />
         </div>
       )}
+
+      {fileType === "word" && <div></div>}
 
       {fileType === "archive" || fileType === "other" ? (
         <div className="flex flex-col items-center">
