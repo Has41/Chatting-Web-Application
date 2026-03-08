@@ -38,7 +38,7 @@ const ConnectSection = () => {
   })
 
   return (
-    <section className="mx-auto mt-20 flex h-[900px] w-[95%] flex-col justify-center gap-y-36 overflow-y-hidden rounded-xl bg-slate-50 px-4 font-poppins shadow-sm">
+    <section className="font-poppins mx-auto mt-20 flex h-[900px] w-[95%] flex-col justify-center gap-y-36 overflow-y-hidden rounded-xl bg-slate-50 px-4 shadow-sm">
       <div className="flex justify-center gap-x-8">
         <div className="">
           <h1 className="max-w-[700px] text-[45px] leading-tight text-black/90">

@@ -5,7 +5,7 @@ import ChatLogo from "@shared/components/ChatLogo"
 
 const Sidebar = ({ setSelectedMenu }) => {
   return (
-    <nav className="flex h-screen w-[6%] flex-col items-center justify-between bg-white font-poppins transition-all duration-500">
+    <nav className="font-poppins flex h-screen w-[6%] flex-col items-center justify-between bg-white transition-all duration-500">
       <div className="mt-5 flex justify-center">
         <ChatLogo />
       </div>

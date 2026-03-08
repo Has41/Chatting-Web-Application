@@ -18,7 +18,7 @@ const DarkModeSwitch = () => {
         onClick={toggleDarkMode}
       >
         <div
-          className={`absolute left-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-custom-green transition-all duration-300 ${
+          className={`bg-custom-green absolute top-1 left-1 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
             isDark ? "translate-x-8 text-white" : "translate-x-0"
           }`}
         >

@@ -138,7 +138,7 @@ const SendMessage = ({
           {/* File icon */}
           <button
             onClick={() => setShowAttachmentOptions((prev) => !prev)}
-            className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text"
+            className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
           >
             <input
               type="file"
@@ -164,7 +164,7 @@ const SendMessage = ({
             </svg>
           </button>
           {/* Emoji icon */}
-          <button className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text">
+          <button className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -182,7 +182,7 @@ const SendMessage = ({
           </button>
           <button
             onClick={() => handleSendMessage({ conversationId, messageContent, messageType: "text" })}
-            className="rounded-full bg-custom-green p-3 text-white transition-all duration-500 hover:bg-green-400"
+            className="bg-custom-green rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

@@ -2,7 +2,7 @@
 import React, { useState } from "react"
 import { profileInfo } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { useNavigate } from "react-router-dom"
@@ -36,7 +36,7 @@ const ProfileDropdown = () => {
   }
 
   return (
-    <div className="relative font-poppins">
+    <div className="font-poppins relative">
       <div
         className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-slate-300"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -45,7 +45,7 @@ const ProfileDropdown = () => {
       </div>
 
       {isDropdownOpen && (
-        <div className="absolute bottom-12 left-1 z-10 w-40 rounded-md bg-white shadow-xl ring-1 ring-black ring-opacity-5">
+        <div className="ring-opacity-5 absolute bottom-12 left-1 z-10 w-40 rounded-md bg-white shadow-xl ring-1 ring-black">
           <div className="py-1">
             {profileInfo.map((option) => (
               <button

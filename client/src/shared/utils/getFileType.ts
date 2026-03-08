@@ -1,18 +1,7 @@
-type FileType =
-  | "image"
-  | "video"
-  | "audio"
-  | "pdf"
-  | "word"
-  | "excel"
-  | "powerpoint"
-  | "archive"
-  | "text"
-  | "code"
-  | "other";
+type FileType = "image" | "video" | "audio" | "pdf" | "word" | "excel" | "powerpoint" | "archive" | "text" | "code" | "other"
 
 const getFileType = (fileUrl: string): FileType => {
-  const extension = fileUrl.split(".").pop()?.toLowerCase() || "";
+  const extension = fileUrl.split(".").pop()?.toLowerCase() || ""
 
   switch (extension) {
     // Images
@@ -21,35 +10,35 @@ const getFileType = (fileUrl: string): FileType => {
     case "gif":
     case "png":
     case "webp":
-      return "image";
+      return "image"
 
     // Videos
     case "mp4":
     case "webm":
     case "ogg":
-      return "video";
+      return "video"
 
     // Audio
     case "mp3":
     case "wav":
     case "mpeg":
-      return "audio";
+      return "audio"
 
     // Documents
     case "pdf":
-      return "pdf";
+      return "pdf"
 
     case "doc":
     case "docx":
-      return "word";
+      return "word"
 
     case "xls":
     case "xlsx":
-      return "excel";
+      return "excel"
 
     case "ppt":
     case "pptx":
-      return "powerpoint";
+      return "powerpoint"
 
     // Archives
     case "zip":
@@ -57,7 +46,7 @@ const getFileType = (fileUrl: string): FileType => {
     case "7z":
     case "tar":
     case "gz":
-      return "archive";
+      return "archive"
 
     // Text & Data
     case "txt":
@@ -65,7 +54,7 @@ const getFileType = (fileUrl: string): FileType => {
     case "json":
     case "xml":
     case "html":
-      return "text";
+      return "text"
 
     // Code files
     case "js":
@@ -80,11 +69,11 @@ const getFileType = (fileUrl: string): FileType => {
     case "yaml":
     case "sh":
     case "php":
-      return "code";
+      return "code"
 
     default:
-      return "other";
+      return "other"
   }
-};
+}
 
-export default getFileType;
+export default getFileType

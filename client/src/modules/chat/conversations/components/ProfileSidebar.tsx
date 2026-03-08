@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useMemo, useState } from "react"
 import { profileInfoData } from "@shared/utils/dynamicData"
-import { useMutation, useQuery } from "react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import useChatList from "@chat/conversations/hooks/useChatList"
@@ -76,7 +76,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-opacity-40"
+          className="bg-opacity-40 fixed inset-0 z-40"
           onClick={() => {
             setIsEditing(false)
             setIsEditingInfo(false)
@@ -86,7 +86,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
       )}
 
       <div
-        className={`fixed right-0 top-0 z-50 h-full w-80 transform bg-white shadow-lg transition-transform duration-300 ${
+        className={`fixed top-0 right-0 z-50 h-full w-80 transform bg-white shadow-lg transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -124,7 +124,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                 />
                 <button
                   onClick={() => handleSave({ groupName })}
-                  className="flex size-7 items-center justify-center rounded-full bg-custom-green text-gray-500 hover:text-gray-700"
+                  className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
                   disabled={isLoading}
                 >
                   <svg
@@ -145,7 +145,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                 {data?.conversationType && (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex size-7 items-center justify-center rounded-full bg-custom-green text-gray-500 hover:text-gray-700"
+                    className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +179,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
 
                 <button
                   onClick={() => handleSave({ groupInfo })}
-                  className="flex size-7 items-center justify-center rounded-full bg-custom-green text-gray-500 hover:text-gray-700"
+                  className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +199,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                 {data?.conversationType && (
                   <button
                     onClick={() => setIsEditingInfo(true)}
-                    className="flex size-7 items-center justify-center rounded-full bg-custom-green text-gray-500 hover:text-gray-700"
+                    className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +232,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className="size-5 text-custom-text"
+                    className="text-custom-text size-5"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d={data.iconPath} />
                   </svg>
@@ -269,7 +269,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                 onChange={handleSearchChange}
                 type="text"
                 placeholder="Search members"
-                className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring focus:ring-blue-300"
+                className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
               />
             </div>
 
@@ -309,7 +309,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                 {/* Owner Section */}
                 {data.groupOwner && (
                   <div className="mb-3">
-                    <h5 className="mb-1 text-xs uppercase text-gray-500">Owner</h5>
+                    <h5 className="mb-1 text-xs text-gray-500 uppercase">Owner</h5>
                     <div className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
                       <div className="flex items-center gap-3">
                         <img
@@ -325,7 +325,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
                 )}
 
                 <div>
-                  <h5 className="mb-1 text-xs uppercase text-gray-500">Participants</h5>
+                  <h5 className="mb-1 text-xs text-gray-500 uppercase">Participants</h5>
                   <ul className="space-y-2">
                     {filteredParticipants.map((member) => (
                       <li key={member._id} className="flex items-center justify-between rounded p-2 hover:bg-gray-100">

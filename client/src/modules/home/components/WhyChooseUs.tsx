@@ -8,8 +8,8 @@ const WhyChooseUs = () => {
     <section className="mx-auto my-4 flex max-w-[85%] items-center justify-center gap-x-32 rounded-3xl bg-slate-50 px-6 py-4">
       <div className="flex flex-col gap-y-8">
         <div className="flex flex-col gap-y-4">
-          <h1 className="ml-2 font-poppins text-5xl font-medium">24/7 Availability</h1>
-          <h1 className="rounded-3xl bg-green-200 px-3 py-2 font-poppins text-4xl">Always Online, Always Connected</h1>
+          <h1 className="font-poppins ml-2 text-5xl font-medium">24/7 Availability</h1>
+          <h1 className="font-poppins rounded-3xl bg-green-200 px-3 py-2 text-4xl">Always Online, Always Connected</h1>
         </div>
         <p className="text-left">
           Your privacy is our top priority. With end-to-end encryption, your conversations stay between you and your

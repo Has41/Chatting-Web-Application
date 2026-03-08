@@ -2,7 +2,7 @@
 const ChatCalls = () => {
   return (
     <aside
-      className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
+      className="font-poppins h-screen w-1/4 border-r border-l border-r-slate-200 border-l-slate-200 bg-gray-50"
       aria-label="Chat Calls"
     >
       <section className="p-4">
@@ -12,7 +12,7 @@ const ChatCalls = () => {
             <div className="relative">
               <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
               {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}
-              <span className="absolute bottom-1 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
+              <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
             </div>
             <p className="text-sm font-semibold text-black/80">User</p>
           </div>

@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment"
 
 // Shorten "minutes" to "min" and remove "ago"
 moment.updateLocale("en", {
@@ -15,18 +15,18 @@ moment.updateLocale("en", {
     M: "1mo",
     MM: "%dmo",
     y: "1yr",
-    yy: "%dyrs",
-  },
-});
+    yy: "%dyrs"
+  }
+})
 
 const getSeenText = (seenAt: string | Date): string => {
-  const diffSeconds = moment().diff(moment(seenAt), "seconds");
+  const diffSeconds = moment().diff(moment(seenAt), "seconds")
 
   if (diffSeconds < 5) {
-    return "Seen just now";
+    return "Seen just now"
   } else {
-    return `Seen ${moment(seenAt).fromNow()} ago`;
+    return `Seen ${moment(seenAt).fromNow()} ago`
   }
-};
+}
 
-export default getSeenText;
+export default getSeenText

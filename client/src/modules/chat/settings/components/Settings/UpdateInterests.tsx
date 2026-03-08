@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState } from "react"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
 
@@ -63,7 +63,7 @@ const UpdateInterests = ({ currentInterests }) => {
         <button
           type="button"
           onClick={addUserInterest}
-          className="absolute inset-y-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-custom-green text-center"
+          className="bg-custom-green absolute inset-y-0 right-0 flex h-8 w-8 items-center justify-center rounded-full text-center"
           aria-label="Add Interest"
         >
           <svg
@@ -80,7 +80,7 @@ const UpdateInterests = ({ currentInterests }) => {
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         {interests.map((interest, idx) => (
-          <span key={idx} className="inline-flex items-center rounded-2xl bg-custom-white px-3 py-1 text-sm shadow-md">
+          <span key={idx} className="bg-custom-white inline-flex items-center rounded-2xl px-3 py-1 text-sm shadow-md">
             {interest}
             <button type="button" onClick={() => removeUserInterest(interest)} className="ml-2" aria-label="Remove Interest">
               <svg

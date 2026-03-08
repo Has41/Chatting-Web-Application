@@ -18,7 +18,7 @@ const ChatList = () => {
 
   return (
     <aside
-      className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
+      className="font-poppins h-screen w-1/4 border-r border-l border-r-slate-200 border-l-slate-200 bg-gray-50"
       aria-label="Chat List"
     >
       <section className="px-4 py-6">
@@ -63,7 +63,7 @@ const ChatList = () => {
           <div className="relative flex h-14 w-[5rem] flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
             <div className="relative">
               <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
-              <span className="absolute bottom-1 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
+              <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
             </div>
             <p className="text-sm font-semibold text-black/80">User</p>
           </div>
@@ -135,7 +135,7 @@ const ChatList = () => {
             })}
         </div>
         {chatList.length === 0 && (
-          <div className="mt-4 text-sm italic text-gray-500">
+          <div className="mt-4 text-sm text-gray-500 italic">
             <p>No conversations found. Start a new chat!</p>
           </div>
         )}

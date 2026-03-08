@@ -68,7 +68,7 @@ const InputField = ({
     const dateError = error.dateOfBirth?.day || error.dateOfBirth?.month || error.dateOfBirth?.year
     return (
       <div className={`${dateError ? "mb-4" : ""}`}>
-        <div key={field.id} className="flex items-center pb-2 focus-within:border-custom-border">
+        <div key={field.id} className="focus-within:border-custom-border flex items-center pb-2">
           <div className="relative w-full">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -76,7 +76,7 @@ const InputField = ({
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className={`absolute left-0 top-2 h-6 w-6 ${dateError ? "text-red-400" : "text-gray-500"}`}
+              className={`absolute top-2 left-0 h-6 w-6 ${dateError ? "text-red-400" : "text-gray-500"}`}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d={field.iconPath} />
             </svg>
@@ -84,7 +84,7 @@ const InputField = ({
               <div className="w-[40%] border-b border-gray-300">
                 <select
                   id={"dateOfBirth.day"}
-                  className="peer w-full px-3 py-2 text-gray-700 focus:outline-none focus:ring-0"
+                  className="peer w-full px-3 py-2 text-gray-700 focus:ring-0 focus:outline-none"
                   {...register("dateOfBirth.day")}
                   name={"dateOfBirth.day"}
                   onBlur={() => trigger("dateOfBirth.day")}
@@ -106,7 +106,7 @@ const InputField = ({
               <div className="w-[70%] border-b border-gray-300">
                 <select
                   id={"dateOfBirth.month"}
-                  className="w-full px-3 py-2 text-gray-700 focus:outline-none focus:ring-0"
+                  className="w-full px-3 py-2 text-gray-700 focus:ring-0 focus:outline-none"
                   {...register("dateOfBirth.month")}
                   name={"dateOfBirth.month"}
                   value={selectedMonth}
@@ -128,7 +128,7 @@ const InputField = ({
               <div className="w-[60%] border-b border-gray-300">
                 <select
                   id={"dateOfBirth.year"}
-                  className="w-full px-3 py-2 text-gray-700 focus:outline-none focus:ring-0"
+                  className="w-full px-3 py-2 text-gray-700 focus:ring-0 focus:outline-none"
                   {...register("dateOfBirth.year")}
                   name={"dateOfBirth.year"}
                   value={selectedYear}
@@ -150,7 +150,7 @@ const InputField = ({
             </div>
           </div>
         </div>
-        <p className={`ml-4 mt-1 select-none pb-1 text-sm ${dateError ? "text-red-500" : "invisible"}`}>
+        <p className={`mt-1 ml-4 pb-1 text-sm select-none ${dateError ? "text-red-500" : "invisible"}`}>
           {dateError?.message || "Placeholder"}
         </p>
       </div>
@@ -163,14 +163,14 @@ const InputField = ({
         key={field.id}
         className={`${
           error[field.id] ? "border-b-[1px] border-red-300" : "border-b-[1px] border-gray-300"
-        } flex items-center pb-2 focus-within:border-custom-border`}
+        } focus-within:border-custom-border flex items-center pb-2`}
       >
         <div className="relative w-full">
           <input
             id={field.id}
             className={`peer ml-6 ${
               error[field.id] ? "border-red-500" : "border-gray-300"
-            } w-full border-custom-border px-3 py-2 text-gray-700 focus:outline-none focus:ring-0`}
+            } border-custom-border w-full px-3 py-2 text-gray-700 focus:ring-0 focus:outline-none`}
             {...register(field.id)}
             name={field.id}
             type={field.type}
@@ -184,7 +184,7 @@ const InputField = ({
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className={`absolute left-0 top-2 h-6 w-6 ${
+            className={`absolute top-2 left-0 h-6 w-6 ${
               error[field.id] ? "text-red-400" : "text-gray-500"
             } peer-focus:text-custom-text`}
           >
@@ -192,17 +192,17 @@ const InputField = ({
           </svg>
           <label
             htmlFor={field.label}
-            className={`pointer-events-none absolute left-9 top-2 -translate-y-8 scale-90 transform transition-all duration-300 ease-out peer-placeholder-shown:left-9 peer-placeholder-shown:top-2 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 ${
+            className={`pointer-events-none absolute top-2 left-9 -translate-y-8 scale-90 transform transition-all duration-300 ease-out peer-placeholder-shown:top-2 peer-placeholder-shown:left-9 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-gray-400 peer-focus:-translate-y-8 ${
               error[field.id]
                 ? "text-red-400 peer-placeholder-shown:text-red-400 peer-focus:text-red-400"
-                : "text-gray-600 peer-placeholder-shown:text-gray-400 peer-focus:text-custom-text"
+                : "peer-focus:text-custom-text text-gray-600 peer-placeholder-shown:text-gray-400"
             } peer-focus:scale-90`}
           >
             {field.label}
           </label>
         </div>
       </div>
-      <p className={`ml-4 mt-1 select-none pb-1 text-sm ${error[field.id] ? "text-red-500" : "invisible"}`}>
+      <p className={`mt-1 ml-4 pb-1 text-sm select-none ${error[field.id] ? "text-red-500" : "invisible"}`}>
         {error[field.id]?.message || "Placeholder"}
       </p>
     </div>

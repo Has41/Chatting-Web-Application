@@ -101,7 +101,7 @@ const IntroSection = () => {
   })
 
   return (
-    <section className="m-auto mb-8 flex h-[80vh] w-full flex-col items-center justify-center bg-slate-50 font-poppins">
+    <section className="font-poppins m-auto mb-8 flex h-[80vh] w-full flex-col items-center justify-center bg-slate-50">
       <div ref={introRef}>
         <h3 className="max-w-[700px] text-2xl">
           Stay connected <span className="rounded-xl bg-green-200 px-1">with friends and family</span>
@@ -120,7 +120,7 @@ const IntroSection = () => {
           Introducing The <span className="rounded-xl bg-green-200 px-1">Chat Connect</span> Of The Future!
         </h1>
       </div>
-      <div className="flex items-center justify-center gap-x-5 font-poppins">
+      <div className="font-poppins flex items-center justify-center gap-x-5">
         <div className="flex flex-col items-center justify-center gap-y-40">
           <IntroCard
             cardRef={card1Ref}

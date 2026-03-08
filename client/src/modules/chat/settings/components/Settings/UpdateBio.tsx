@@ -2,7 +2,7 @@
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import { bioSchema } from "@shared/utils/zodSchema"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
@@ -53,7 +53,7 @@ const UpdateBio = ({ currentBio }) => {
       <button
         isabled={disableButton}
         type="submit"
-        className={`absolute right-2 top-6 flex h-8 w-8 items-center justify-center rounded-full bg-custom-green ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} text-center`}
+        className={`bg-custom-green absolute top-6 right-2 flex h-8 w-8 items-center justify-center rounded-full ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} text-center`}
         aria-label="Add Interest"
       >
         <svg

@@ -1,3 +1,3 @@
 export interface ChatModuleMeta {
-  feature: "chat";
+  feature: "chat"
 }

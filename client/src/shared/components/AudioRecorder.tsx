@@ -137,7 +137,7 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
         <div>
           <button
             onClick={startRecording}
-            className="rounded-full p-3 text-black/80 transition-all duration-500 hover:text-custom-text"
+            className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

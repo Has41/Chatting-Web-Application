@@ -21,7 +21,7 @@ const IntroCard = ({ cardRef, icon, title, description }) => (
 const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempPostRef, tempImg, tempTopic, tempName }) => (
   <div
     ref={tempRef}
-    className="absolute left-0 top-0 z-20 mx-auto flex h-[400px] w-full items-center justify-center gap-x-10 gap-y-4 rounded-2xl bg-white px-4 py-2 shadow-lg"
+    className="absolute top-0 left-0 z-20 mx-auto flex h-[400px] w-full items-center justify-center gap-x-10 gap-y-4 rounded-2xl bg-white px-4 py-2 shadow-lg"
   >
     <div>
       <img className="rounded-2xl" src={tempImg} width={500} alt="" />
@@ -31,7 +31,7 @@ const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempP
         <h1 className="font-poppins text-lg font-semibold text-black/80">{tempTopic}</h1>
       </div>
       <div ref={tempDetailRef || null}>
-        <p className="max-w-[500px] font-mont">
+        <p className="font-mont max-w-[500px]">
           We use Freshservice for everything, and that just makes it really easy—regardless of what you need as an
           employee—to know that you can always just go to this tool and you're going to get whatever you need.
         </p>

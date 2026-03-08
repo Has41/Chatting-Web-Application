@@ -2,7 +2,7 @@
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import { displayNameSchema } from "@shared/utils/zodSchema"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
@@ -48,7 +48,7 @@ const UpdateDisplayName = ({ currentDisplayName }) => {
       {errors.displayName && <p className="mt-1 text-xs text-red-500">{errors.displayName.message}</p>}
       <button
         type="submit"
-        className="absolute right-2 top-6 flex h-8 w-8 items-center justify-center rounded-full bg-custom-green text-center"
+        className="bg-custom-green absolute top-6 right-2 flex h-8 w-8 items-center justify-center rounded-full text-center"
         aria-label="Add Interest"
       >
         <svg

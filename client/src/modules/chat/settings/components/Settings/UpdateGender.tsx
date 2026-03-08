@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from "react"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { genderSchema } from "@shared/utils/zodSchema"
@@ -73,7 +73,7 @@ const UpdateGender = ({ currentGender }) => {
       </div>
       <button
         type="submit"
-        className="mt-4 flex items-center gap-2 rounded-full bg-custom-green px-4 py-2 text-center"
+        className="bg-custom-green mt-4 flex items-center gap-2 rounded-full px-4 py-2 text-center"
         aria-label="Save Interest"
       >
         <span className="text-sm font-semibold text-white">Save</span>

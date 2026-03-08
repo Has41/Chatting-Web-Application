@@ -1,8 +1,8 @@
-import { AppRoutes } from "./routes";
-import "@/styles/app.css";
+import { AppRoutes } from "./routes"
+import "@/styles/app.css"
 
 const App: React.FC = () => {
-  return <AppRoutes />;
-};
+  return <AppRoutes />
+}
 
-export default App;
+export default App

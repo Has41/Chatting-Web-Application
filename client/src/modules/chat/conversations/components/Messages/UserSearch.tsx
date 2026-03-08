@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState } from "react"
-import { useMutation, useQuery, useQueryClient } from "react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import { getNewChatRoute } from "@shared/constants/routePaths"
@@ -79,11 +79,11 @@ const UserSearch = () => {
           onChange={handleSearchChange}
           type="text"
           placeholder="Search friends or users"
-          className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
           aria-label="Search Chats"
         />
         {searchQuery.length >= 3 && userResults.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
+          <div className="absolute top-full right-0 left-0 z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
             <div className="flex items-center justify-between border-b border-gray-200 px-2 py-1">
               <h3 className="font-semibold text-gray-800">Search Results</h3>
               <button className="text-gray-500 hover:text-gray-700" onClick={handleClearSearch} aria-label="Clear search">

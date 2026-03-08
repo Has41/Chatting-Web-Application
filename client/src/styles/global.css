@@ -1,10 +1,5 @@
 @import "./variables.css";
-@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 *:focus {
   outline: none !important;
@@ -12,7 +7,7 @@
 
 @layer base {
   input:read-only:focus {
-    @apply border border-gray-300 outline-none ring-0;
+    @apply border border-gray-300 ring-0 outline-none;
   }
 }
 
@@ -27,17 +22,12 @@ input:-webkit-autofill:focus {
 }
 
 @layer utilities {
-  @variants responsive {
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-    /* Hide scrollbar for IE, Edge and Firefox */
-    .no-scrollbar {
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
-    }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 }
-

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { loginFields } from "@shared/utils/dynamicData"
 import InputField from "@shared/components/InputField"
 import axiosInstance from "@shared/utils/axiosInstance"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { loginSchema } from "@shared/utils/zodSchema"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
@@ -49,13 +49,13 @@ const Login = ({ onButtonClick }) => {
     <div className="flex h-screen items-center justify-center">
       <div className="min-h-[480px] w-full rounded-lg bg-white px-4 py-6 tracking-wide shadow-lg">
         <div className="ml-8 flex flex-col gap-y-4">
-          <h2 className="relative font-poppins text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:bg-dusty-grass after:content-['']">
+          <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
             Login
           </h2>
           {errorMessage && <p className="font-poppins text-red-600">{errorMessage}</p>}
         </div>
         <div className="mx-auto flex w-[90%] flex-col items-center">
-          <form onSubmit={handleSubmit(mutate)} className="w-full py-8 font-poppins">
+          <form onSubmit={handleSubmit(mutate)} className="font-poppins w-full py-8">
             {loginFields.map((field) => {
               return (
                 <InputField
@@ -72,7 +72,7 @@ const Login = ({ onButtonClick }) => {
               <div className="flex items-center gap-x-2">
                 <input
                   id="remember"
-                  className="rounded-sm border border-slate-300 checked:bg-custom-green focus:border-transparent focus:ring-0 active:border active:border-custom-border lg:text-lg"
+                  className="checked:bg-custom-green active:border-custom-border rounded-sm border border-slate-300 focus:border-transparent focus:ring-0 active:border lg:text-lg"
                   type="checkbox"
                 />
                 <label htmlFor="remember" className="cursor-pointer text-sm text-gray-500">
@@ -91,11 +91,11 @@ const Login = ({ onButtonClick }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full rounded bg-button-color ${
+                className={`bg-button-color w-full rounded ${
                   isLoading
-                    ? "cursor-not-allowed bg-dusty-grass"
+                    ? "bg-dusty-grass cursor-not-allowed"
                     : "bg-custom-green hover:bg-green-500 hover:transition-colors"
-                } px-4 py-2 font-poppins font-semibold text-white shadow-md`}
+                } font-poppins px-4 py-2 font-semibold text-white shadow-md`}
               >
                 {isLoading ? <LoadingSpinner loading={isLoading} loadingText={"Logging In"} finalText={"Login"} /> : "Login"}
               </button>

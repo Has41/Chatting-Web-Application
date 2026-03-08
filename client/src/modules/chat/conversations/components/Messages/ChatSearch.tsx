@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState } from "react"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import SearchDropdown from "@shared/components/SearchDropdown"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
@@ -72,7 +72,7 @@ const ChatSearch = () => {
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search messages or chats"
-          className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring focus:ring-blue-300"
+          className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
           aria-label="Search Chats"
         />
       </div>

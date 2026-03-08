@@ -5,7 +5,7 @@ import { getNewChatRoute } from "@shared/constants/routePaths"
 
 const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId, onClear }) => {
   return (
-    <div className="absolute left-0 right-0 top-full z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
+    <div className="absolute top-full right-0 left-0 z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
       <div className="flex items-center justify-between border-b border-gray-200 px-2 py-1">
         <h3 className="font-semibold text-gray-800">Search Results</h3>
         <button className="text-gray-500 hover:text-gray-700" onClick={onClear} aria-label="Clear search">
@@ -15,7 +15,7 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
 
       {conversationData.length > 0 && (
         <>
-          <h4 className="mb-1 mt-3 px-2 text-xs font-semibold uppercase text-gray-500">Conversations</h4>
+          <h4 className="mt-3 mb-1 px-2 text-xs font-semibold text-gray-500 uppercase">Conversations</h4>
           <ul>
             {conversationData.map((conversation) => {
               const otherUser = conversation.participants.find((p) => p._id !== currentUserId)
@@ -40,7 +40,7 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
                   </div>
 
                   {lastMessage && (
-                    <span className="whitespace-nowrap text-xs text-gray-400">
+                    <span className="text-xs whitespace-nowrap text-gray-400">
                       {moment(lastMessage.createdAt).format("h:mm a")}
                     </span>
                   )}
@@ -53,7 +53,7 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
 
       {friendsData.length > 0 && (
         <>
-          <h4 className="mb-1 mt-4 px-2 text-xs font-semibold uppercase text-gray-500">Friends</h4>
+          <h4 className="mt-4 mb-1 px-2 text-xs font-semibold text-gray-500 uppercase">Friends</h4>
           <ul>
             {friendsData.map((friend) => (
               <Link

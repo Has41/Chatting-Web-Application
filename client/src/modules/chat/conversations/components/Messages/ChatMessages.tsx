@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useInfiniteQuery } from "react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import Message from "./Message"
@@ -71,7 +71,7 @@ const ChatMessages = ({ conversationId, userData, setMessages, socketMessages, l
         return (
           <div key={msg._id} className={`flex items-end ${isSender ? "mb-1 justify-end" : "mb-4 justify-start"}`}>
             {!isSender && conversationType === "group" && (
-              <div className="mr-2 mt-4 flex flex-col items-center">
+              <div className="mt-4 mr-2 flex flex-col items-center">
                 {(() => {
                   const sender = recipients.find(
                     (recipient) => recipient._id === msg.sender || recipient._id === msg.sender?._id
@@ -88,7 +88,7 @@ const ChatMessages = ({ conversationId, userData, setMessages, socketMessages, l
             )}
 
             {!isSender && conversationType !== "group" && (
-              <div className="mr-2 mt-4 flex flex-col items-center">
+              <div className="mt-4 mr-2 flex flex-col items-center">
                 <img
                   src={userData?.profilePicture?.url || "https://via.placeholder.com/40"}
                   alt={userData?.username}

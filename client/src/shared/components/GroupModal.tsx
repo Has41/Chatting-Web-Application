@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import { useMutation, useQuery } from "react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 
@@ -67,7 +67,7 @@ const GroupModal = ({ onClose }) => {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center font-poppins shadow-lg backdrop-blur-sm">
+    <div className="font-poppins fixed inset-0 z-50 flex items-center justify-center shadow-lg backdrop-blur-sm">
       <div className="z-50 w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between border-b pb-2">
           <h2 className="text-lg font-semibold text-gray-800">Create Group</h2>
@@ -91,7 +91,7 @@ const GroupModal = ({ onClose }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             type="text"
             placeholder="Search friends or conversations"
-            className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
           />
         </div>
 
@@ -141,7 +141,7 @@ const GroupModal = ({ onClose }) => {
                         type="checkbox"
                         checked={selectedIds.includes(other._id)}
                         onChange={() => handleToggle(other._id)}
-                        className="h-4 w-4 text-custom-text accent-green-500 focus:ring-green-500"
+                        className="text-custom-text h-4 w-4 accent-green-500 focus:ring-green-500"
                       />
                     </div>
                   )
@@ -153,7 +153,7 @@ const GroupModal = ({ onClose }) => {
         <button
           onClick={handleCreateGroup}
           disabled={selectedIds.length < 2}
-          className="mt-4 w-full rounded bg-custom-green px-4 py-2 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-custom-green mt-4 w-full rounded px-4 py-2 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Create Group with {selectedIds.length} {selectedIds.length === 1 ? "member" : "members"}
         </button>

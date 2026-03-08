@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useForm } from "react-hook-form"
 import { firstStepRegister } from "@shared/utils/dynamicData"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import InputField from "@shared/components/InputField"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
@@ -51,7 +51,7 @@ const Register = ({ onButtonClick }) => {
       <div className="min-h-[80%] w-full rounded-lg bg-white px-4 tracking-wide shadow-lg">
         <div className={`flex justify-between`}>
           <div className="ml-8 flex flex-col gap-y-4 py-6">
-            <h2 className="relative font-poppins text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:bg-dusty-grass after:content-['']">
+            <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
               Register
             </h2>
             <p className="font-poppins text-gray-600">Sign up your details</p>
@@ -59,7 +59,7 @@ const Register = ({ onButtonClick }) => {
         </div>
 
         <div className="mx-auto flex w-[90%] flex-col items-center">
-          <form onSubmit={handleSubmit(onRegister)} className="w-full font-poppins">
+          <form onSubmit={handleSubmit(onRegister)} className="font-poppins w-full">
             <div className="flex w-full transform flex-col gap-y-2 transition-opacity duration-1000 ease-in-out">
               <>
                 {firstStepRegister.map((field) => {
@@ -78,9 +78,9 @@ const Register = ({ onButtonClick }) => {
                     type="submit"
                     className={`w-full ${
                       isLoading
-                        ? "cursor-not-allowed bg-dusty-grass"
+                        ? "bg-dusty-grass cursor-not-allowed"
                         : "bg-button-color hover:bg-green-500 hover:transition-colors"
-                    } rounded px-4 py-2 font-poppins font-semibold text-white shadow-md`}
+                    } font-poppins rounded px-4 py-2 font-semibold text-white shadow-md`}
                   >
                     <LoadingSpinner loading={isLoading} loadingText="Please wait..." finalText="Register" size="size-5" />
                   </button>

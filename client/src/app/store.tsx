@@ -1,11 +1,11 @@
-import React from "react";
-import { QueryClientProvider } from "react-query";
-import AuthProvider from "@auth/services/authContext";
-import ChatProvider from "@chat/conversations/services/chatContext";
-import queryClient from "@shared/utils/queryClient";
+import React from "react"
+import { QueryClientProvider } from "@tanstack/react-query"
+import AuthProvider from "@auth/services/authContext"
+import ChatProvider from "@chat/conversations/services/chatContext"
+import queryClient from "@shared/utils/queryClient"
 
 interface AppProvidersProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
@@ -15,5 +15,5 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
         <ChatProvider>{children}</ChatProvider>
       </AuthProvider>
     </QueryClientProvider>
-  );
-};
+  )
+}

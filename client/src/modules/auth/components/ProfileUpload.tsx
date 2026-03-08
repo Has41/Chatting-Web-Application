@@ -4,7 +4,7 @@ import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop } from "react
 import "react-image-crop/dist/ReactCrop.css"
 import setCanvasPreview from "@shared/utils/setCanvasPreview"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { useNavigate } from "react-router-dom"
@@ -132,7 +132,7 @@ const ProfileUpload = () => {
 
   return (
     <div>
-      <div className="mx-auto max-w-sm rounded-lg bg-white p-6 font-poppins shadow-lg">
+      <div className="font-poppins mx-auto max-w-sm rounded-lg bg-white p-6 shadow-lg">
         <div className="text-center">
           <h2 className="text-2xl font-bold">Elon Musk</h2>
           <p className="text-gray-500">@elonmusk</p>
@@ -172,7 +172,7 @@ const ProfileUpload = () => {
                   strokeWidth={1.5}
                   stroke="currentColor"
                   onClick={clearImage}
-                  className="absolute right-10 top-2 z-50 mt-2 size-6 rounded-full bg-red-500 p-1 text-xs text-white hover:bg-red-600"
+                  className="absolute top-2 right-10 z-50 mt-2 size-6 rounded-full bg-red-500 p-1 text-xs text-white hover:bg-red-600"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
@@ -185,7 +185,7 @@ const ProfileUpload = () => {
           <button
             type="button"
             onClick={confirmUpload}
-            className="w-full cursor-pointer rounded bg-button-color px-4 py-2 text-center font-semibold text-white shadow-md"
+            className="bg-button-color w-full cursor-pointer rounded px-4 py-2 text-center font-semibold text-white shadow-md"
           >
             <LoadingSpinner loading={isLoading} loadingText="Please wait..." finalText="Confirm" size="size-5" />
           </button>
@@ -196,10 +196,10 @@ const ProfileUpload = () => {
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
           <div className="w-full max-w-[30%] space-y-4 rounded-lg bg-white p-4">
             <div className="flex items-center justify-between py-2">
-              <h3 className="text-center font-mont text-xl font-semibold">Crop your photo</h3>
+              <h3 className="font-mont text-center text-xl font-semibold">Crop your photo</h3>
               <svg
                 onClick={closeModal}
                 xmlns="http://www.w3.org/2000/svg"
@@ -226,7 +226,7 @@ const ProfileUpload = () => {
             )}
             <button
               onClick={confirmCrop}
-              className="w-full rounded bg-button-color px-4 py-2 text-lg font-semibold text-white"
+              className="bg-button-color w-full rounded px-4 py-2 text-lg font-semibold text-white"
             >
               Confirm Crop
             </button>

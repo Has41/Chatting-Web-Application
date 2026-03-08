@@ -1,67 +1,67 @@
-import { useEffect, useRef, useCallback } from "react";
-import { io, Socket } from "socket.io-client";
+import { useEffect, useRef, useCallback } from "react"
+import { io, Socket } from "socket.io-client"
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
 
 interface CallSignal {
-  from: string;
-  to: string;
-  type: string;
-  offer?: RTCSessionDescriptionInit;
-  answer?: RTCSessionDescriptionInit;
-  candidate?: RTCIceCandidateInit;
+  from: string
+  to: string
+  type: string
+  offer?: RTCSessionDescriptionInit
+  answer?: RTCSessionDescriptionInit
+  candidate?: RTCIceCandidateInit
 }
 
 export const useCallSocket = (userId: string | undefined) => {
-  const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null)
 
   useEffect(() => {
     if (userId) {
       socketRef.current = io(SOCKET_URL, {
         query: { userId },
-        transports: ["websocket"],
-      });
+        transports: ["websocket"]
+      })
 
       return () => {
-        socketRef.current?.disconnect();
-      };
+        socketRef.current?.disconnect()
+      }
     }
-  }, [userId]);
+  }, [userId])
 
   const callUser = useCallback(
     (to: string, type: string, offer: RTCSessionDescriptionInit) => {
-      socketRef.current?.emit("call-user", { from: userId, to, type, offer });
+      socketRef.current?.emit("call-user", { from: userId, to, type, offer })
     },
-    [userId],
-  );
+    [userId]
+  )
 
   const answerCall = useCallback(
     (to: string, answer: RTCSessionDescriptionInit) => {
-      socketRef.current?.emit("answer-call", { from: userId, to, answer });
+      socketRef.current?.emit("answer-call", { from: userId, to, answer })
     },
-    [userId],
-  );
+    [userId]
+  )
 
   const rejectCall = useCallback(
     (to: string) => {
-      socketRef.current?.emit("reject-call", { from: userId, to });
+      socketRef.current?.emit("reject-call", { from: userId, to })
     },
-    [userId],
-  );
+    [userId]
+  )
 
   const sendIceCandidate = useCallback(
     (to: string, candidate: RTCIceCandidateInit) => {
-      socketRef.current?.emit("ice-candidate", { from: userId, to, candidate });
+      socketRef.current?.emit("ice-candidate", { from: userId, to, candidate })
     },
-    [userId],
-  );
+    [userId]
+  )
 
   const endCall = useCallback(
     (to: string) => {
-      socketRef.current?.emit("end-call", { from: userId, to });
+      socketRef.current?.emit("end-call", { from: userId, to })
     },
-    [userId],
-  );
+    [userId]
+  )
 
   return {
     socket: socketRef.current,
@@ -69,8 +69,8 @@ export const useCallSocket = (userId: string | undefined) => {
     answerCall,
     rejectCall,
     sendIceCandidate,
-    endCall,
-  };
-};
+    endCall
+  }
+}
 
-export default useCallSocket;
+export default useCallSocket

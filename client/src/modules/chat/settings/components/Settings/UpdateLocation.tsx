@@ -2,7 +2,7 @@
 import React, { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import countryList from "react-select-country-list"
 import { locationSchema } from "@shared/utils/zodSchema"
 import axiosInstance from "@shared/utils/axiosInstance"
@@ -60,7 +60,7 @@ const UpdateLocation = ({ currentLocation }) => {
       <button
         type="submit"
         disabled={disableButton}
-        className={`absolute right-1 top-6 flex size-8 items-center justify-center rounded-full bg-custom-green text-center ${disableButton ? "cursor-not-allowed" : "cursor-pointer"}`}
+        className={`bg-custom-green absolute top-6 right-1 flex size-8 items-center justify-center rounded-full text-center ${disableButton ? "cursor-not-allowed" : "cursor-pointer"}`}
         aria-label="Add Interest"
       >
         <svg

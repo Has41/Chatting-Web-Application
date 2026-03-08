@@ -6,7 +6,7 @@ import { otherDetailSchema } from "@shared/utils/zodSchema"
 import InputField from "@shared/components/InputField"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
@@ -138,13 +138,13 @@ const InfoForm = ({ onButtonClick }) => {
       <div className="min-h-[80%] w-full rounded-lg bg-white px-6 py-6 tracking-wide shadow-lg">
         <div className="flex justify-between">
           <div className="ml-8 flex flex-col gap-y-4 py-6">
-            <h2 className="relative font-poppins text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:bg-dusty-grass after:content-['']">
+            <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
               Additional Information
             </h2>
             <p className="font-poppins text-gray-600">Sign up your details</p>
           </div>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full font-poppins">
+        <form onSubmit={handleSubmit(onSubmit)} className="font-poppins w-full">
           <div ref={containerRef}>
             {renderStep()}
             <div className="mt-6 flex justify-between gap-x-6">
@@ -153,7 +153,7 @@ const InfoForm = ({ onButtonClick }) => {
                   type="button"
                   disabled={isTransitioning}
                   onClick={handleBack}
-                  className="w-full rounded bg-button-color px-4 py-2 font-poppins font-semibold text-white shadow-md"
+                  className="bg-button-color font-poppins w-full rounded px-4 py-2 font-semibold text-white shadow-md"
                 >
                   Back
                 </button>
@@ -163,7 +163,7 @@ const InfoForm = ({ onButtonClick }) => {
                   type="button"
                   disabled={isTransitioning}
                   onClick={handleNext}
-                  className="w-full rounded bg-button-color px-4 py-2 font-poppins font-semibold text-white shadow-md"
+                  className="bg-button-color font-poppins w-full rounded px-4 py-2 font-semibold text-white shadow-md"
                 >
                   Next
                 </button>
@@ -171,7 +171,7 @@ const InfoForm = ({ onButtonClick }) => {
                 <button
                   type="submit"
                   disabled={isTransitioning}
-                  className="w-full rounded bg-button-color px-4 py-2 font-poppins font-semibold text-white shadow-md"
+                  className="bg-button-color font-poppins w-full rounded px-4 py-2 font-semibold text-white shadow-md"
                 >
                   <LoadingSpinner loading={isLoading} loadingText="Please wait..." finalText="Confirm" size="size-5" />
                 </button>

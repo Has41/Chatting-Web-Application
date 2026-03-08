@@ -5,7 +5,7 @@ import { attachmentMenuOptions } from "@shared/utils/dynamicData"
 const AttachmentMenu = ({ onSelect, onClose }) => {
   return createPortal(
     <div
-      className="fixed bottom-16 right-10 z-50 w-48 rounded-lg bg-white p-4 font-poppins shadow-xl"
+      className="font-poppins fixed right-10 bottom-16 z-50 w-48 rounded-lg bg-white p-4 shadow-xl"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="grid grid-cols-2 gap-4">
@@ -15,7 +15,7 @@ const AttachmentMenu = ({ onSelect, onClose }) => {
             onClick={() => onSelect(menu.type)}
             className="flex flex-col items-center space-y-2 rounded p-3 text-gray-800 transition hover:bg-green-50"
           >
-            <div className="rounded-full bg-custom-green/40 p-3">
+            <div className="bg-custom-green/40 rounded-full p-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

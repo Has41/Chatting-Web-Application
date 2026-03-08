@@ -65,7 +65,7 @@ const FilePreviewModal = ({ file, type, onCancel, recipientId, onSend, conversat
 
   return (
     <div
-      className={`absolute bottom-full left-0 z-50 w-full border-b border-t border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 ease-in-out ${
+      className={`absolute bottom-full left-0 z-50 w-full border-t border-b border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 ease-in-out ${
         isVisible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
       }`}
     >
@@ -106,7 +106,7 @@ const FilePreviewModal = ({ file, type, onCancel, recipientId, onSend, conversat
         />
         <button
           onClick={handleFileSend}
-          className="flex items-center justify-center rounded-full bg-custom-green p-3 text-white transition-all duration-500 hover:bg-green-400"
+          className="bg-custom-green flex items-center justify-center rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
         >
           <LoadingSpinner
             size="size-5"

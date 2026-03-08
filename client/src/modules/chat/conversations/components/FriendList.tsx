@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from "react"
 import UserSearch from "./Messages/UserSearch"
-import { useMutation, useQuery } from "react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 
@@ -43,7 +43,7 @@ const FriendList = () => {
 
   return (
     <aside
-      className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
+      className="font-poppins h-screen w-1/4 border-r border-l border-r-slate-200 border-l-slate-200 bg-gray-50"
       aria-label="Friend List"
     >
       <section className="p-4">
@@ -65,7 +65,7 @@ const FriendList = () => {
             />
           </svg>
           {openNotifcation && (
-            <div className="absolute right-0 top-full z-10 mt-2 w-64 rounded-md bg-white p-3 shadow-lg ring-1 ring-black/5">
+            <div className="absolute top-full right-0 z-10 mt-2 w-64 rounded-md bg-white p-3 shadow-lg ring-1 ring-black/5">
               {friendRequests.length > 0 ? (
                 <div className="mb-6">
                   <h1 className="mb-4 font-semibold text-black/80">Friend Requests</h1>
@@ -129,7 +129,7 @@ const FriendList = () => {
                   </ul>
                 </div>
               ) : (
-                <div className="px-3 py-2 text-sm italic text-gray-500">No new friend requests</div>
+                <div className="px-3 py-2 text-sm text-gray-500 italic">No new friend requests</div>
               )}
             </div>
           )}
@@ -141,7 +141,7 @@ const FriendList = () => {
             <div className="relative">
               <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
               {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}
-              <span className="absolute bottom-1 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
+              <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
             </div>
             <p className="text-sm font-semibold text-black/80">User</p>
           </div>
@@ -183,7 +183,7 @@ const FriendList = () => {
                   </li>
                 ))
               ) : (
-                <li className="text-sm italic text-gray-500">No friends found. Find friends by searching them.</li>
+                <li className="text-sm text-gray-500 italic">No friends found. Find friends by searching them.</li>
               )}
             </ul>
           </div>

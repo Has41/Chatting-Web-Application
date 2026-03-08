@@ -15,7 +15,7 @@ const Settings = () => {
 
   return (
     <aside
-      className="h-screen w-1/4 select-none border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
+      className="font-poppins h-screen w-1/4 border-r border-l border-r-slate-200 border-l-slate-200 bg-gray-50 select-none"
       aria-label="Settings"
     >
       <section>
@@ -28,7 +28,7 @@ const Settings = () => {
               className="h-20 w-20 rounded-full border-2 border-white shadow"
             />
             <button
-              className="absolute bottom-1 right-1 rounded-full border border-gray-300 bg-gray-100 p-1 shadow-sm hover:bg-gray-200"
+              className="absolute right-1 bottom-1 rounded-full border border-gray-300 bg-gray-100 p-1 shadow-sm hover:bg-gray-200"
               aria-label="Change Profile Picture"
             >
               <svg

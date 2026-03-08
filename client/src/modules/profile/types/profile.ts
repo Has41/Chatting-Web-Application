@@ -1,3 +1,3 @@
 export interface ProfileModuleMeta {
-  feature: "profile";
+  feature: "profile"
 }

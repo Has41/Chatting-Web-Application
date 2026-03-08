@@ -199,7 +199,7 @@ const PrivateTest = () => {
     <div>
       <h1>Test Messaging</h1>
       {!userId || !conversationId ? (
-        <div className="flex flex-col gap-y-6 mt-4">
+        <div className="mt-4 flex flex-col gap-y-6">
           <input type="text" placeholder="Enter your user ID" value={userId} onChange={(e) => setUserId(e.target.value)} />
           <input
             type="text"

@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import { useParams } from "react-router-dom"
-import { useQuery } from "react-query"
+import { useQuery } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
@@ -57,7 +57,7 @@ const GroupChatbox = () => {
   // }
 
   return (
-    <section className="flex h-screen w-[69%] flex-col font-poppins">
+    <section className="font-poppins flex h-screen w-[69%] flex-col">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
         <div onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex cursor-pointer items-center gap-x-3">
           {groupData?.groupPicture?.url ? (

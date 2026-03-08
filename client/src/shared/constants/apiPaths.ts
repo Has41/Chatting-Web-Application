@@ -7,8 +7,8 @@ const AUTH_PATHS = {
   VERIFY_OTP: "/api/auth/verify-otp",
   RESEND_OTP: "/api/auth/resend-otp",
   FORGOT_PASSWORD: "/api/auth/forgot-password",
-  RESET_PASSWORD: "/api/auth/reset-password",
-};
+  RESET_PASSWORD: "/api/auth/reset-password"
+}
 
 const USER_PATHS = {
   GET_INFO: "/api/users/get-info",
@@ -23,14 +23,14 @@ const USER_PATHS = {
   GET_FRIENDS_AND_CONVERSATIONS: "/api/users/get-friends-and-conversations",
   REMOVE_FRIEND: "/api/users/remove-friend",
   SEARCH_USER_CONVO_DATA: "/api/users/search-user-conversations-data",
-  SEARCH_FRIENDS_USERS: "/api/users/search-friends-users",
-};
+  SEARCH_FRIENDS_USERS: "/api/users/search-friends-users"
+}
 
 const MESSAGE_PATHS = {
   ADD_REACTION: "/api/messages/add-reaction",
   EDIT_MESSAGE: "/api/messages/edit-message",
-  DELETE_MESSAGE: "/api/messages/remove-message",
-};
+  DELETE_MESSAGE: "/api/messages/remove-message"
+}
 
 const CONVERSATION_PATHS = {
   GET_CURRENT_CONVO: "/api/conversations/get-current-convo",
@@ -43,17 +43,11 @@ const CONVERSATION_PATHS = {
   LEAVE_GROUP: "/api/conversations/leave-group/:convoId",
   ADD_PARTICIPANTS: "/api/conversations/add-participants",
   REMOVE_PARTICIPANTS: "/api/conversations/remove-participants/:convoId",
-  CHANGE_OWNERSHIP: "/api/conversations/change-ownership/:convoId/:newOwnerId",
-};
+  CHANGE_OWNERSHIP: "/api/conversations/change-ownership/:convoId/:newOwnerId"
+}
 
 const FILE_PATHS = {
-  GENERATE_SIGNATURE: "/api/files/generate-signature",
-};
+  GENERATE_SIGNATURE: "/api/files/generate-signature"
+}
 
-export {
-  AUTH_PATHS,
-  USER_PATHS,
-  MESSAGE_PATHS,
-  CONVERSATION_PATHS,
-  FILE_PATHS,
-};
+export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS }

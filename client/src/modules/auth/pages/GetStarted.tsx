@@ -178,22 +178,22 @@ const GetStarted = () => {
   }, [currentForm])
 
   return (
-    <section className="relative flex h-screen w-full items-center overflow-hidden bg-custom-white">
+    <section className="bg-custom-white relative flex h-screen w-full items-center overflow-hidden">
       {currentForm === "Login" ? (
         <>
           <div
             ref={greenSectionRef}
-            className="absolute bottom-0 right-0 top-0 flex w-1/2 items-center justify-center rounded-tl-full bg-dusty-grass shadow-lg"
+            className="bg-dusty-grass absolute top-0 right-0 bottom-0 flex w-1/2 items-center justify-center rounded-tl-full shadow-lg"
           >
             <h1
               ref={greenSectionTextRef}
-              className="relative z-10 select-none pb-[10%] text-center text-5xl font-bold text-white"
+              className="relative z-10 pb-[10%] text-center text-5xl font-bold text-white select-none"
             >
               Welcome Back!
             </h1>
             <div
               ref={subGreenSectionRef}
-              className="absolute bottom-0 left-0 size-[150%] rounded-tl-full bg-dusty-grass shadow-lg"
+              className="bg-dusty-grass absolute bottom-0 left-0 size-[150%] rounded-tl-full shadow-lg"
             />
           </div>
           <div ref={formContainerRef} className="ml-[10%] w-full max-w-[430px]">
@@ -204,17 +204,17 @@ const GetStarted = () => {
         <>
           <div
             ref={greenSectionRef}
-            className="absolute bottom-0 right-auto top-0 flex w-[34%] items-center justify-center rounded-br-full bg-dusty-grass shadow-lg"
+            className="bg-dusty-grass absolute top-0 right-auto bottom-0 flex w-[34%] items-center justify-center rounded-br-full shadow-lg"
           >
             <h1
               ref={greenSectionTextRef}
-              className="relative z-10 select-none pb-[10%] text-center text-5xl font-bold text-white"
+              className="relative z-10 pb-[10%] text-center text-5xl font-bold text-white select-none"
             >
               Join With Us!
             </h1>
             <div
               ref={subGreenSectionRef}
-              className="absolute bottom-0 left-0 size-[150%] rounded-br-full bg-dusty-grass shadow-lg"
+              className="bg-dusty-grass absolute bottom-0 left-0 size-[150%] rounded-br-full shadow-lg"
             />
           </div>
           <div ref={formContainerRef} className="ml-[55%] w-full max-w-[430px]">

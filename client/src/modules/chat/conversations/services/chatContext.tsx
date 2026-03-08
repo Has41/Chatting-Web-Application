@@ -1,47 +1,67 @@
-import { createContext, useState, ReactNode } from "react";
-import { useQuery } from "react-query";
-import axiosInstance from "@shared/utils/axiosInstance";
-import { CONVERSATION_PATHS } from "@shared/constants/apiPaths";
-import type { Conversation } from "@shared/types";
+// @ts-nocheck
+import { createContext, ReactNode, useEffect, useReducer } from "react"
+import type { Conversation } from "@shared/types"
+import { useChatListQuery } from "@chat/queries/chatQueries"
 
 interface ChatContextType {
-  chatList: Conversation[];
-  setChatList: (chatList: Conversation[]) => void;
-  isLoading: boolean;
+  chatList: Conversation[]
+  setChatList: (chatList: Conversation[]) => void
+  isLoading: boolean
 }
 
-export const ChatContext = createContext<ChatContextType | undefined>(
-  undefined,
-);
+export const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 interface ChatProviderProps {
-  children: ReactNode;
+  children: ReactNode
+}
+
+interface ChatState {
+  chatList: Conversation[]
+}
+
+type ChatAction = { type: "SET_CHAT_LIST"; payload: Conversation[] } | { type: "RESET" }
+
+const initialState: ChatState = {
+  chatList: []
+}
+
+const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
+  switch (action.type) {
+    case "SET_CHAT_LIST":
+      return { ...state, chatList: action.payload }
+    case "RESET":
+      return initialState
+    default:
+      return state
+  }
 }
 
 const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-  const [chatList, setChatList] = useState<Conversation[]>([]);
+  const [state, dispatch] = useReducer(chatReducer, initialState)
+  const { data, isLoading, isError } = useChatListQuery()
 
-  const { isLoading } = useQuery({
-    queryKey: CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER,
-    queryFn: async () => {
-      return await axiosInstance.get(
-        CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER,
-      );
-    },
-    onSuccess: ({ data }: { data: { conversations: Conversation[] } }) => {
-      setChatList(data?.conversations);
-    },
-    onError: (err: unknown) => {
-      if (import.meta.env.PROD) return;
-      console.error(err);
-    },
-  });
+  useEffect(() => {
+    if (data?.conversations) {
+      dispatch({ type: "SET_CHAT_LIST", payload: data.conversations })
+      return
+    }
+
+    if (isError) {
+      dispatch({ type: "RESET" })
+    }
+  }, [data, isError])
 
   return (
-    <ChatContext.Provider value={{ chatList, setChatList, isLoading }}>
+    <ChatContext.Provider
+      value={{
+        chatList: state.chatList,
+        setChatList: (chatList) => dispatch({ type: "SET_CHAT_LIST", payload: chatList }),
+        isLoading
+      }}
+    >
       {children}
     </ChatContext.Provider>
-  );
-};
+  )
+}
 
-export default ChatProvider;
+export default ChatProvider

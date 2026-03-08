@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { useState } from "react"
+import { useReducer } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"
-import { useQuery } from "react-query"
+import { useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS, CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import { useParams } from "react-router-dom"
@@ -10,15 +10,14 @@ import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
 import ProfileSidebar from "./ProfileSidebar"
 import useChatSocket from "@chat/conversations/hooks/useChatSocket"
+import { chatBoxReducer, initialChatBoxState } from "@chat/states/chatBoxState"
 
 const Chatbox = () => {
   const { user } = useAuth()
   const { conversationId, userId } = useParams()
-  const [userData, setUserData] = useState(null)
-  const [lastMessage, setLastMessage] = useState("")
-  const [messageContent, setMessageContent] = useState("")
-  const [messages, setMessages] = useState([])
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [state, dispatch] = useReducer(chatBoxReducer, initialChatBoxState)
+
+  const setMessages = (payload) => dispatch({ type: "SET_MESSAGES", payload })
 
   const { socketRef, sendMessage } = useChatSocket({
     userId: user._id,
@@ -33,17 +32,16 @@ const Chatbox = () => {
         return await axiosInstance.get(`${USER_PATHS.GET_INFO}/${userId}`)
       } else if (conversationId) {
         return await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`)
-      } else {
-        return null
       }
+      return null
     },
     onSuccess: ({ data }) => {
       if (conversationId) {
-        setLastMessage(data.conversation.lastMessage)
+        dispatch({ type: "SET_LAST_MESSAGE", payload: data.conversation.lastMessage })
         const filteredParticipants = data.conversation.participants.filter((participant) => participant._id !== user._id)
-        setUserData(filteredParticipants[0] || null)
+        dispatch({ type: "SET_USER_DATA", payload: filteredParticipants[0] || null })
       } else {
-        setUserData(data)
+        dispatch({ type: "SET_USER_DATA", payload: data })
       }
     },
     onError: (error) => {
@@ -54,17 +52,17 @@ const Chatbox = () => {
   })
 
   return (
-    <section className="flex h-screen w-[69%] flex-col font-poppins">
+    <section className="font-poppins flex h-screen w-[69%] flex-col">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
-        <div onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex cursor-pointer items-center gap-x-3">
+        <div onClick={() => dispatch({ type: "TOGGLE_SIDEBAR" })} className="flex cursor-pointer items-center gap-x-3">
           <img
-            src={userData?.profilePicture?.url || "https://via.placeholder.com/40"}
+            src={state.userData?.profilePicture?.url || "https://via.placeholder.com/40"}
             alt="Profile"
             className="size-10 rounded-full object-cover"
           />
           <div className="flex items-center gap-x-2">
-            <h1 className="mb-[0.1rem] font-semibold">{userData?.username || "Username"}</h1>
-            <div className="size-[0.6rem] rounded-full bg-custom-green"></div>
+            <h1 className="mb-[0.1rem] font-semibold">{state.userData?.username || "Username"}</h1>
+            <div className="bg-custom-green size-[0.6rem] rounded-full"></div>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -85,16 +83,20 @@ const Chatbox = () => {
         </div>
       </nav>
 
-      <ProfileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} data={userData} />
+      <ProfileSidebar
+        isOpen={state.isSidebarOpen}
+        onClose={() => dispatch({ type: "SET_SIDEBAR", payload: false })}
+        data={state.userData}
+      />
 
       <ChatMessages
-        lastMessage={lastMessage}
+        lastMessage={state.lastMessage}
         conversationId={conversationId}
         setMessages={setMessages}
         user={user}
         conversationType={"private"}
-        userData={userData}
-        socketMessages={messages}
+        userData={state.userData}
+        socketMessages={state.messages}
         socket={socketRef}
       />
 
@@ -102,9 +104,9 @@ const Chatbox = () => {
         sendMessage={sendMessage}
         conversationId={conversationId}
         socketRef={socketRef}
-        recipientId={userId || userData?._id}
-        messageContent={messageContent}
-        setMessageContent={setMessageContent}
+        recipientId={userId || state.userData?._id}
+        messageContent={state.messageContent}
+        setMessageContent={(value) => dispatch({ type: "SET_MESSAGE_CONTENT", payload: value })}
       />
       <div id="inline-preview-root" className="absolute bottom-20 left-0 z-50 w-full" />
     </section>

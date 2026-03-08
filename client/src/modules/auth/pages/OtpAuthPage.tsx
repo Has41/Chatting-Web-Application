@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react"
 import PropTypes from "prop-types"
 import ChatLogo from "@shared/components/ChatLogo"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
@@ -99,14 +99,14 @@ const OtpAuthPage = ({ onButtonClick }) => {
       <div className="flex flex-col justify-center gap-y-7 p-8">
         <div className="flex">
           <ChatLogo size="size-5" />
-          <h1 className="ml-1 font-poppins text-black/80">ChitChat</h1>
+          <h1 className="font-poppins ml-1 text-black/80">ChitChat</h1>
         </div>
         <div>
-          <h1 className="mb-4 font-poppins text-2xl font-semibold">Verify your account</h1>
-          <p className="mb-6 font-mont text-gray-600">Enter the verification code sent to your email.</p>
+          <h1 className="font-poppins mb-4 text-2xl font-semibold">Verify your account</h1>
+          <p className="font-mont mb-6 text-gray-600">Enter the verification code sent to your email.</p>
         </div>
 
-        <div className="mx-auto max-w-[95%] font-poppins">
+        <div className="font-poppins mx-auto max-w-[95%]">
           <div className="mb-5 flex w-full justify-center gap-x-4">
             {Array(6)
               .fill("")
@@ -121,20 +121,20 @@ const OtpAuthPage = ({ onButtonClick }) => {
                   readOnly={index > 0 && otpValues[index - 1] === ""}
                   className={`size-12 rounded-lg border border-gray-300 ${
                     index > 0 && otpValues[index - 1] === "" ? "cursor-not-allowed bg-gray-100" : "cursor-pointer"
-                  } text-center text-lg font-medium focus:border-custom-border focus:outline-none focus:ring-2`}
+                  } focus:border-custom-border text-center text-lg font-medium focus:ring-2 focus:outline-none`}
                   onChange={(e) => handleInputChange(e, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                 />
               ))}
           </div>
 
-          <div className="mb-4 flex w-full justify-center font-poppins">
+          <div className="font-poppins mb-4 flex w-full justify-center">
             <button
               onClick={verifyOtp}
               disabled={isLoading}
               className={`w-full ${
                 isLoading
-                  ? "cursor-not-allowed bg-dusty-grass"
+                  ? "bg-dusty-grass cursor-not-allowed"
                   : "bg-button-color hover:bg-green-500 hover:transition-colors"
               } rounded-md px-4 py-2 font-semibold text-white transition-colors duration-500`}
             >
@@ -143,9 +143,9 @@ const OtpAuthPage = ({ onButtonClick }) => {
           </div>
         </div>
 
-        <p className="text-center font-poppins text-gray-500">
+        <p className="font-poppins text-center text-gray-500">
           Haven’t received the email?{" "}
-          <a href="#" className="font-semibold text-custom-text transition-colors duration-300 hover:text-green-500">
+          <a href="#" className="text-custom-text font-semibold transition-colors duration-300 hover:text-green-500">
             Send again
           </a>
         </p>

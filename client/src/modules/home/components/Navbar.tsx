@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 
 const Navbar = () => {
   return (
-    <nav className="mx-auto flex w-[90%] items-center justify-between py-8 font-poppins text-black/80">
+    <nav className="font-poppins mx-auto flex w-[90%] items-center justify-between py-8 text-black/80">
       <h1 className="text-xl">ChitChat</h1>
       <div>
         <ul className="flex items-center justify-center gap-x-6 rounded-2xl bg-slate-50 px-6 py-1 text-black/80">

@@ -3,7 +3,7 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
 
@@ -120,7 +120,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }) => {
       <button
         type="submit"
         disabled={disableButton}
-        className={`mt-4 ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} flex items-center gap-2 rounded-full bg-custom-green px-4 py-2 text-center`}
+        className={`mt-4 ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} bg-custom-green flex items-center gap-2 rounded-full px-4 py-2 text-center`}
         aria-label="Save Interest"
       >
         <span className="text-sm font-semibold text-white">Save</span>

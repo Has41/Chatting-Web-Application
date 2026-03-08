@@ -4,7 +4,7 @@ import useIntersectionObserver from "@shared/hooks/useIntersectionObserver"
 import useAuth from "@auth/hooks/useAuth"
 import getSeenText from "@shared/utils/getSeenText"
 import moment from "moment"
-import { useMutation } from "react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
 import EditMessageModal from "@shared/components/EditMessageModal"
@@ -95,14 +95,14 @@ const Message = ({
         <div className="group relative flex items-center gap-x-1">
           <div
             ref={messageRef}
-            className={`inline-block max-w-full overflow-x-hidden whitespace-normal break-words ${message?.messageType === "file" ? "p-1" : "px-4 py-3"} text-sm shadow ${
+            className={`inline-block max-w-full overflow-x-hidden break-words whitespace-normal ${message?.messageType === "file" ? "p-1" : "px-4 py-3"} text-sm shadow ${
               message.messageType === "text"
                 ? isSender
                   ? "rounded-sent bg-custom-green text-white"
                   : "rounded-recieved bg-custom-white text-black"
                 : isSender
-                  ? "rounded bg-custom-green text-white"
-                  : "rounded bg-custom-white text-black"
+                  ? "bg-custom-green rounded text-white"
+                  : "bg-custom-white rounded text-black"
             }`}
           >
             {!isSender && conversationType === "group" && (
@@ -115,7 +115,7 @@ const Message = ({
             ) : (
               <div className="flex max-w-96 flex-wrap items-end justify-between gap-x-4 gap-y-4">
                 <div className="break-all">{message.content}</div>
-                <div className="text-custom-white ml-auto block select-none text-right text-xs">
+                <div className="text-custom-white ml-auto block text-right text-xs select-none">
                   {message.editedAt && <span className="mr-2 text-white">Edited</span>}
                   {moment(message.createdAt).format("h:mm a")}
                 </div>
@@ -148,7 +148,7 @@ const Message = ({
             {showDropdown && isSender && (
               <div
                 ref={dropdownRef}
-                className="absolute -left-14 top-0 z-10 flex flex-col items-center rounded-md border bg-white px-2 py-1 shadow-lg"
+                className="absolute top-0 -left-14 z-10 flex flex-col items-center rounded-md border bg-white px-2 py-1 shadow-lg"
               >
                 <button
                   onClick={() => {
@@ -224,7 +224,7 @@ const Message = ({
                 </div>
 
                 {showSeenUsernames && (
-                  <div className="mt-2 flex max-w-[12rem] animate-fadeIn rounded bg-gray-100 px-2 py-1 transition-all duration-300 ease-in-out">
+                  <div className="animate-fadeIn mt-2 flex max-w-[12rem] rounded bg-gray-100 px-2 py-1 transition-all duration-300 ease-in-out">
                     <p className="">Seen by: </p>
                     <ul className="flex flex-wrap justify-end text-right">
                       {lastMessage.seenBy.map((seen, index) => (

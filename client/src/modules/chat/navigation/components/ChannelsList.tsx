@@ -2,7 +2,7 @@
 const ChannelsList = () => {
   return (
     <aside
-      className="h-screen w-1/4 border-l border-r border-l-slate-200 border-r-slate-200 bg-gray-50 font-poppins"
+      className="font-poppins h-screen w-1/4 border-r border-l border-r-slate-200 border-l-slate-200 bg-gray-50"
       aria-label="Chat Calls"
     >
       <section className="p-4">
@@ -28,7 +28,7 @@ const ChannelsList = () => {
           <input
             type="text"
             placeholder="Search channels"
-            className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
             aria-label="Search Chats"
           />
         </div>
@@ -37,7 +37,7 @@ const ChannelsList = () => {
             <div className="relative">
               <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
               {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}
-              <span className="absolute bottom-1 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
+              <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
             </div>
             <p className="text-sm font-semibold text-black/80">User</p>
           </div>
@@ -48,7 +48,7 @@ const ChannelsList = () => {
               <h1 className="font-semibold text-black/80">Your Channels</h1>
             </div>
             <div>
-              <button className="rounded-3xl bg-custom-green px-2 py-1 text-sm text-white transition-all duration-500 hover:bg-green-300">
+              <button className="bg-custom-green rounded-3xl px-2 py-1 text-sm text-white transition-all duration-500 hover:bg-green-300">
                 Explore
               </button>
             </div>

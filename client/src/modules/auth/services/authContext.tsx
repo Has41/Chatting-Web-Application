@@ -1,65 +1,54 @@
-import { createContext, useState, ReactNode } from "react";
-import { useQuery } from "react-query";
-import axiosInstance from "@shared/utils/axiosInstance";
-import { USER_PATHS } from "@shared/constants/apiPaths";
-import type { User } from "@shared/types";
+// @ts-nocheck
+import { createContext, ReactNode, useEffect, useReducer } from "react"
+import type { User } from "@shared/types"
+import { authReducer, initialAuthState } from "@auth/states/authState"
+import { useCurrentUserQuery } from "@auth/queries/authQueries"
 
 interface AuthContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  isAuthenticated: boolean;
-  setIsAuthenticated: (isAuthenticated: boolean) => void;
-  refetch: () => void;
-  isLoading: boolean;
+  user: User | null
+  setUser: (user: User | null) => void
+  isAuthenticated: boolean
+  setIsAuthenticated: (isAuthenticated: boolean) => void
+  refetch: () => void
+  isLoading: boolean
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined,
-);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 interface AuthProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [state, dispatch] = useReducer(authReducer, initialAuthState)
+  const { data, refetch, isLoading, isError } = useCurrentUserQuery()
 
-  const { refetch, isLoading } = useQuery({
-    queryKey: USER_PATHS.GET_INFO,
-    queryFn: async () => {
-      const { data } = await axiosInstance.get(USER_PATHS.GET_INFO);
-      return data;
-    },
-    onSuccess: (data: User) => {
-      setUser(data);
-      setIsAuthenticated(true);
-      console.log(data);
-    },
-    onError: (error: unknown) => {
-      console.error("Failed to fetch user data:", error);
-      setIsAuthenticated(false);
-      setUser(null);
-    },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    staleTime: 24 * 60 * 60 * 1000,
-  });
+  useEffect(() => {
+    if (data) {
+      dispatch({ type: "SET_USER", payload: data })
+      dispatch({ type: "SET_AUTHENTICATED", payload: true })
+      return
+    }
+
+    if (isError) {
+      dispatch({ type: "RESET" })
+    }
+  }, [data, isError])
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        setUser,
-        isAuthenticated,
-        setIsAuthenticated,
+        user: state.user,
+        setUser: (user) => dispatch({ type: "SET_USER", payload: user }),
+        isAuthenticated: state.isAuthenticated,
+        setIsAuthenticated: (isAuthenticated) => dispatch({ type: "SET_AUTHENTICATED", payload: isAuthenticated }),
         refetch,
-        isLoading,
+        isLoading
       }}
     >
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
 
-export default AuthProvider;
+export default AuthProvider
