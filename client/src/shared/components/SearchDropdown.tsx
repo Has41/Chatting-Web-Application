@@ -1,4 +1,3 @@
-// @ts-nocheck
 import moment from "moment"
 import { Link } from "react-router-dom"
 import { getNewChatRoute } from "@shared/constants/routePaths"

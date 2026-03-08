@@ -1,4 +1,3 @@
-// @ts-nocheck
 import usePDFMetadata from "@shared/hooks/usePDFMetaData"
 
 const PDFPreview = ({ fileUrl, width = 250 }) => {

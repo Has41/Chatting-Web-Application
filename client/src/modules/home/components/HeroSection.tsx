@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react"
 import mainImage from "@/assets/listen-music.jpg"
 

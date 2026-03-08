@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useReducer } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"

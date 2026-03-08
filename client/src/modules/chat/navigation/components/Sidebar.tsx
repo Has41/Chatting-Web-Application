@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { navOptions } from "@shared/utils/dynamicData"
 import ProfileDropdown from "@shared/components/ProfileDropdown"
 import ChatLogo from "@shared/components/ChatLogo"

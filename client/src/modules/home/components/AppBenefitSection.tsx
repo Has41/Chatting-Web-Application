@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useRef } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
@@ -80,7 +79,7 @@ const AppBenefits = () => {
   return (
     <section className="py-20">
       <div ref={containerRef} className="mb-14">
-        <h1 className="relative text-center text-5xl tracking-wide text-black/80 after:absolute after:bottom-[-15px] after:left-1/2 after:block after:h-1 after:w-[200px] after:-translate-x-1/2 after:transform after:rounded-2xl after:bg-green-300 after:content-['']">
+        <h1 className="relative text-center text-5xl tracking-wide text-black/80 after:absolute after:-bottom-3.75 after:left-1/2 after:block after:h-1 after:w-50 after:-translate-x-1/2 after:transform after:rounded-2xl after:bg-green-300 after:content-['']">
           Our Benefits
         </h1>
       </div>

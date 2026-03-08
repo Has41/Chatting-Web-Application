@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useRef } from "react"
 import { io } from "socket.io-client"
 import useFetch from "../hooks/useFetch"
@@ -8,7 +7,7 @@ const PrivateTest = () => {
   const [conversationId, setConversationId] = useState("")
   const [messageSent, setMessagesSent] = useState(false)
   const [messageContent, setMessageContent] = useState("")
-  const [lastMessage, setLastMessage] = useState([])
+  const [lastMessage, setLastMessage] = useState("")
   const [messages, setMessages] = useState([])
   const [socket, setSocket] = useState(null)
   // const [recipientId, setRecipientId] = useState(null)
@@ -17,7 +16,7 @@ const PrivateTest = () => {
   const recipientId = userId === "66c30544b750978ff0c18b60" ? "66c45ad7cdba8bc22d0d200a" : "66c30544b750978ff0c18b60"
 
   // Refs for IntersectionObserver
-  const messageRefs = useRef({})
+  const messageRefs = useRef<Record<string, any>>({})
 
   const { data: conversationData } = useFetch({
     endpoint: `/api/conversations/get-current-convo/66cc3ebfc635677da688854a`,
@@ -108,7 +107,7 @@ const PrivateTest = () => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               const conversationType = conversationData?.conversation?.conversationType
-              const messageId = entry.target.dataset.messageId
+              const messageId = (entry.target as HTMLElement).dataset.messageId
               const lastMessageData = conversationData?.messages.find((msg) => msg._id === messageId)
 
               if (
@@ -224,7 +223,13 @@ const PrivateTest = () => {
             <h2>Messages</h2>
             <ul>
               {messages.map((message) => (
-                <li key={message?._id} data-message-id={message?._id} ref={(el) => (messageRefs.current[message?._id] = el)}>
+                <li
+                  key={message?._id}
+                  data-message-id={message?._id}
+                  ref={(el) => {
+                    messageRefs.current[message?._id] = el
+                  }}
+                >
                   <strong>{message?.sender?.username}:</strong>
                   {message?.messageType === "file" ? (
                     <div>

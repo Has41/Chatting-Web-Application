@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import { useParams } from "react-router-dom"

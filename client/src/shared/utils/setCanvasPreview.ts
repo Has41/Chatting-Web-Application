@@ -5,7 +5,7 @@ interface Crop {
   height: number
 }
 
-const setCanvasPreview = (image: HTMLImageElement, canvas: HTMLCanvasElement, crop: Crop): void => {
+const setCanvasPreview = (image: HTMLImageElement, canvas: HTMLCanvasElement, crop: Crop, ..._rest: unknown[]): void => {
   const ctx = canvas.getContext("2d")
   if (!ctx) {
     throw new Error("No 2d context")

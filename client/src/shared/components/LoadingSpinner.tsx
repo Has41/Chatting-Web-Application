@@ -1,4 +1,15 @@
-// @ts-nocheck
+import type { ReactNode } from "react"
+
+interface LoadingSpinnerProps {
+  size?: string
+  loadingText?: string
+  loading: boolean
+  finalText?: ReactNode
+  color?: string
+  fill?: string
+  additionalClasses?: string
+}
+
 const LoadingSpinner = ({
   size = "size-5",
   loadingText = "",
@@ -7,7 +18,7 @@ const LoadingSpinner = ({
   color = "text-gray-200",
   fill = "fill-white",
   additionalClasses = ""
-}) => {
+}: LoadingSpinnerProps) => {
   return (
     <>
       {loading ? (

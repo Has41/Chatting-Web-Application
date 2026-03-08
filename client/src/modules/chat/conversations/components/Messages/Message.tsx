@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useRef, useState } from "react"
 import useIntersectionObserver from "@shared/hooks/useIntersectionObserver"
 import useAuth from "@auth/hooks/useAuth"

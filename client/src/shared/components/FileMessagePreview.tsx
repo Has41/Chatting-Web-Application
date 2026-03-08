@@ -1,4 +1,3 @@
-// @ts-nocheck
 import getFileType from "@shared/utils/getFileType"
 import PDFMeta from "./PDFMeta"
 

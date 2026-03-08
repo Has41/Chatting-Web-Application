@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react"
 import chatVideo from "@/assets/sectionVid.mp4"
 import { trustIcons } from "@shared/utils/dynamicData"

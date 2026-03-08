@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useState } from "react"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
 import { ROOT_FOLDER } from "@shared/constants/constantValues"

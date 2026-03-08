@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import SearchDropdown from "@shared/components/SearchDropdown"

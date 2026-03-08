@@ -1,9 +1,8 @@
-// @ts-nocheck
 import usePDFMetaData from "@shared/hooks/usePDFMetaData"
 import truncateText from "@shared/utils/truncateText"
 import pdfIcon from "@/assets/pdf_icon.png"
 
-const PDFMeta = ({ mediaUrl }) => {
+const PDFMeta = ({ mediaUrl }: { mediaUrl: string; fileName?: string }) => {
   const { numPages, fileName } = usePDFMetaData(mediaUrl)
 
   return (

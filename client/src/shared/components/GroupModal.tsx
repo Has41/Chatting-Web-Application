@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { useMutation, useQuery } from "@tanstack/react-query"

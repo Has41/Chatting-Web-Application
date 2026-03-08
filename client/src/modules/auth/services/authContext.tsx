@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createContext, ReactNode, useEffect, useReducer } from "react"
 import type { User } from "@shared/types"
 import { authReducer, initialAuthState } from "@auth/states/authState"

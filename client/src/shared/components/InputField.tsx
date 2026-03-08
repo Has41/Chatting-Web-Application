@@ -1,5 +1,20 @@
-// @ts-nocheck
 import { useEffect } from "react"
+
+interface InputFieldProps {
+  register: any
+  error: any
+  field: any
+  trigger: any
+  clearErrors: any
+  dayOptions?: any[]
+  selectedDay?: string
+  setSelectedDay?: (value: string) => void
+  setDayOptions?: (value: string[]) => void
+  selectedMonth?: string
+  setSelectedMonth?: (value: string) => void
+  selectedYear?: string
+  setSelectedYear?: (value: string) => void
+}
 
 const InputField = ({
   register,
@@ -7,15 +22,15 @@ const InputField = ({
   field,
   trigger,
   clearErrors,
-  dayOptions,
+  dayOptions = [],
   selectedDay,
-  setSelectedDay,
-  setDayOptions,
+  setSelectedDay = (_value: string) => {},
+  setDayOptions = (_value: string[]) => {},
   selectedMonth,
-  setSelectedMonth,
+  setSelectedMonth = (_value: string) => {},
   selectedYear,
-  setSelectedYear
-}) => {
+  setSelectedYear = (_value: string) => {}
+}: InputFieldProps) => {
   const months = [
     "January",
     "February",

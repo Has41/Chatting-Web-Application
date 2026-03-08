@@ -1,5 +1,32 @@
-// @ts-nocheck
-const IntroCard = ({ cardRef, icon, title, description }) => (
+interface IntroCardProps {
+  cardRef?: any
+  icon?: string
+  title?: string
+  description?: string
+}
+
+interface CustomerCardProps {
+  tempRef?: any
+  tempTitleRef?: any
+  tempDetailRef?: any
+  tempNameRef?: any
+  tempPostRef?: any
+  tempImg?: string
+  tempTopic?: string
+  tempName?: string
+}
+
+interface SlidingCardProps {
+  tileRef?: any
+  subTileSectionRef?: any
+  subTileLogoRef?: any
+  iconPath?: string
+  tileName?: string
+  tileDetail?: string
+  tileQuote?: string
+}
+
+const IntroCard = ({ cardRef, icon, title, description }: IntroCardProps) => (
   <div ref={cardRef} className="flex w-full max-w-[400px] flex-col gap-y-4 rounded-lg bg-white p-6 shadow-md">
     <div className="flex items-center gap-x-3">
       <svg
@@ -18,7 +45,16 @@ const IntroCard = ({ cardRef, icon, title, description }) => (
   </div>
 )
 
-const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempPostRef, tempImg, tempTopic, tempName }) => (
+const CustomerCard = ({
+  tempRef,
+  tempTitleRef,
+  tempDetailRef,
+  tempNameRef,
+  tempPostRef,
+  tempImg,
+  tempTopic,
+  tempName
+}: CustomerCardProps) => (
   <div
     ref={tempRef}
     className="absolute top-0 left-0 z-20 mx-auto flex h-[400px] w-full items-center justify-center gap-x-10 gap-y-4 rounded-2xl bg-white px-4 py-2 shadow-lg"
@@ -48,7 +84,7 @@ const CustomerCard = ({ tempRef, tempTitleRef, tempDetailRef, tempNameRef, tempP
   </div>
 )
 
-const SlidingCard = ({ tileRef, subTileSectionRef, subTileLogoRef, iconPath, tileName, tileDetail, tileQuote }) => (
+const SlidingCard = ({ tileRef, subTileSectionRef, subTileLogoRef, iconPath, tileName, tileDetail, tileQuote }: SlidingCardProps) => (
   <div ref={tileRef} className="mx-auto flex h-[250px] max-w-[90%] items-center gap-x-4 rounded-3xl bg-white shadow-lg">
     <div ref={subTileSectionRef} className="flex w-[40%] items-center justify-center gap-x-10 opacity-0">
       <div className="ml-7 rounded-full bg-black/80 p-4 text-white shadow-md">

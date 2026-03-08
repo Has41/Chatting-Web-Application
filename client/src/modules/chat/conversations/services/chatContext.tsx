@@ -1,11 +1,10 @@
-// @ts-nocheck
-import { createContext, ReactNode, useEffect, useReducer } from "react"
+import { createContext, ReactNode, useEffect, useReducer, type Dispatch, type SetStateAction } from "react"
 import type { Conversation } from "@shared/types"
 import { useChatListQuery } from "@chat/queries/chatQueries"
 
 interface ChatContextType {
   chatList: Conversation[]
-  setChatList: (chatList: Conversation[]) => void
+  setChatList: Dispatch<SetStateAction<Conversation[]>>
   isLoading: boolean
 }
 
@@ -55,7 +54,8 @@ const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     <ChatContext.Provider
       value={{
         chatList: state.chatList,
-        setChatList: (chatList) => dispatch({ type: "SET_CHAT_LIST", payload: chatList }),
+        setChatList: (chatList) =>
+          dispatch({ type: "SET_CHAT_LIST", payload: typeof chatList === "function" ? chatList(state.chatList) : chatList }),
         isLoading
       }}
     >

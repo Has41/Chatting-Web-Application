@@ -14,6 +14,7 @@ interface UploadResult {
   public_id: string
   secure_url: string
   format: string
+  eager?: Array<{ secure_url?: string }>
   width?: number
   height?: number
 }
@@ -23,7 +24,7 @@ const useCloudinaryUpload = () => {
   const [progress, setProgress] = useState<UploadProgress | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const upload = useCallback(async (file: File): Promise<UploadResult | null> => {
+  const upload = useCallback(async (file: File, ..._rest: any[]): Promise<UploadResult | null> => {
     setUploading(true)
     setProgress(null)
     setError(null)
@@ -64,9 +65,12 @@ const useCloudinaryUpload = () => {
 
   return {
     upload,
+    uploadFile: upload,
     uploading,
+    isUploading: uploading,
     progress,
     error,
+    uploadedFileUrl: null,
     reset
   }
 }

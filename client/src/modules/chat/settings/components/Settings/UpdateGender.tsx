@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react"
 import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -89,7 +88,7 @@ const UpdateGender = ({ currentGender }) => {
         </svg>
       </button>
 
-      {errors.gender && <p className="mt-1 text-xs text-red-500">{errors.gender.message}</p>}
+      {errors.gender && <p className="mt-1 text-xs text-red-500">{String(errors.gender.message || "")}</p>}
     </form>
   )
 }

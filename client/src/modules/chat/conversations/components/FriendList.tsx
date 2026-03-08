@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import UserSearch from "./Messages/UserSearch"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -137,7 +136,7 @@ const FriendList = () => {
 
         <UserSearch />
         <div className="my-8">
-          <div className="relative flex h-14 w-[5rem] flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
+          <div className="relative flex h-14 w-20 flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
             <div className="relative">
               <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
               {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}

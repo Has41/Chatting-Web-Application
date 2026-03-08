@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createPortal } from "react-dom"
 import { attachmentMenuOptions } from "@shared/utils/dynamicData"
 

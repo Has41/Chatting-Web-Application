@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from "react"
 import { profileInfo } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"

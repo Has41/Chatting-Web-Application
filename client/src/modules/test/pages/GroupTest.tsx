@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect, useRef } from "react"
 import { io } from "socket.io-client"
 import useFetch from "../hooks/useFetch"
@@ -88,7 +87,7 @@ const GroupTest = () => {
             if (entry.isIntersecting) {
               console.log(conversationData.messages)
               const conversationType = conversationData.conversation.conversationType
-              const messageId = entry.target.dataset.messageId
+              const messageId = (entry.target as HTMLElement).dataset.messageId
               const lastMessage = conversationData.conversation.lastMessage
               const seenByUser = conversationData.messages?.seenBy?.find(
                 (seen) => seen.user.toString() === userId.toString()
@@ -179,7 +178,13 @@ const GroupTest = () => {
             <h2>Messages</h2>
             <ul>
               {messages?.map((message) => (
-                <li key={message._id} data-message-id={message._id} ref={(el) => (messageRefs.current[message._id] = el)}>
+                <li
+                  key={message._id}
+                  data-message-id={message._id}
+                  ref={(el) => {
+                    messageRefs.current[message._id] = el
+                  }}
+                >
                   <strong>{message.sender.username}:</strong> {message.content}
                   <br />
                   <small>

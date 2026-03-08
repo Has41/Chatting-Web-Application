@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -49,9 +48,9 @@ const UpdateBio = ({ currentBio }) => {
         placeholder="Edit your bio"
         className="mt-1 block w-full border-b border-gray-300 py-2 text-sm"
       />
-      {errors.bio && <p className="mt-1 text-xs text-red-500">{errors.bio.message}</p>}
+      {errors.bio && <p className="mt-1 text-xs text-red-500">{String(errors.bio.message || "")}</p>}
       <button
-        isabled={disableButton}
+        disabled={disableButton}
         type="submit"
         className={`bg-custom-green absolute top-6 right-2 flex h-8 w-8 items-center justify-center rounded-full ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} text-center`}
         aria-label="Add Interest"

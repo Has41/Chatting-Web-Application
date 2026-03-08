@@ -1,9 +1,18 @@
-// @ts-nocheck
 import { useRef, useState } from "react"
 import AttachmentMenu from "@shared/components/AttachmentMenu"
 import FilePreviewModal from "../FilePreviewModal"
 import useAuth from "@auth/hooks/useAuth"
 import AudioRecorder from "@shared/components/AudioRecorder"
+
+interface SendMessageProps {
+  setMessageContent: (value: string) => void
+  messageContent: string
+  recipientId?: string
+  socketRef: any
+  conversationType?: string
+  conversationId?: string
+  sendMessage: (payload: any) => void
+}
 
 const SendMessage = ({
   setMessageContent,
@@ -13,7 +22,7 @@ const SendMessage = ({
   conversationType = "private",
   conversationId,
   sendMessage
-}) => {
+}: SendMessageProps) => {
   const { user } = useAuth()
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
@@ -35,7 +44,7 @@ const SendMessage = ({
     e.target.value = null
   }
 
-  const handleSendMessage = ({ conversationId, messageContent, messageType, fileMeta }) => {
+  const handleSendMessage = ({ conversationId, messageContent, messageType, fileMeta = null }) => {
     // console.log(conversationId)
 
     if (!messageContent?.trim() && !fileMeta) return

@@ -2,9 +2,11 @@
 export interface User {
   _id: string
   username: string
+  displayName?: string
   email: string
   phoneNumber?: string
   avatar?: string
+  profilePicture?: { url?: string; public_id?: string }
   bio?: string
   dateOfBirth?: string
   gender?: "male" | "female" | "other"
@@ -24,6 +26,14 @@ export interface Message {
   _id: string
   conversationId: string
   sender: string | User
+  content?: string
+  messageType?: string
+  media?: {
+    mediaUrl?: string
+    fileName?: string
+    thumbnailUrl?: string
+  }
+  seenBy?: Array<{ user: User | string; seenAt?: string }>
   text?: string
   file?: FileAttachment
   attachments?: FileAttachment[]
@@ -53,7 +63,12 @@ export interface MessageReaction {
 export interface Conversation {
   _id: string
   type: "private" | "group"
+  conversationType?: "private" | "group"
   name?: string
+  groupName?: string
+  groupInfo?: string
+  groupPicture?: { url?: string }
+  groupOwner?: any
   participants: (User | string)[]
   admins?: string[]
   lastMessage?: Message

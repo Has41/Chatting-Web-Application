@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import useAuth from "@auth/hooks/useAuth"
@@ -60,7 +59,7 @@ const ChatList = () => {
 
         <ChatSearch />
         <div className="my-8">
-          <div className="relative flex h-14 w-[5rem] flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
+          <div className="relative flex h-14 w-20 flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
             <div className="relative">
               <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
               <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
@@ -78,7 +77,7 @@ const ChatList = () => {
             chatList.map((conversation) => {
               const isGroup = conversation.conversationType === "group"
 
-              const otherUser = !isGroup ? conversation.participants.find((p) => p?._id !== user?._id) : null
+              const otherUser = !isGroup ? (conversation.participants as any[]).find((p) => p?._id !== user?._id) : null
 
               const imageUrl = isGroup ? conversation.groupPicture?.url : otherUser?.profilePicture?.url
 
@@ -109,12 +108,12 @@ const ChatList = () => {
                         )}
 
                         <div className="flex-1">
-                          <div className="max-w-[9rem] truncate font-semibold text-gray-800" title={displayName}>
+                          <div className="max-w-36 truncate font-semibold text-gray-800" title={displayName}>
                             {displayName}
                           </div>
 
                           <div
-                            className="max-w-[9rem] truncate text-xs text-gray-600"
+                            className="max-w-36 truncate text-xs text-gray-600"
                             title={conversation?.lastMessage?.content}
                           >
                             {conversation?.lastMessage?.content ||

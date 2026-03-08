@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMemo, useState } from "react"
 import { profileInfoData } from "@shared/utils/dynamicData"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -6,7 +5,14 @@ import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import useChatList from "@chat/conversations/hooks/useChatList"
 
-const ProfileSidebar = ({ isOpen, onClose, data, setData }) => {
+interface ProfileSidebarProps {
+  isOpen: boolean
+  onClose: () => void
+  data: any
+  setData?: (value: any) => void
+}
+
+const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSidebarProps) => {
   const { chatList, setChatList } = useChatList()
   const [isEditing, setIsEditing] = useState(false)
   const [isEditingInfo, setIsEditingInfo] = useState(false)

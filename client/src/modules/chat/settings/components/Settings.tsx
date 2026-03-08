@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import StatusDropdown from "@shared/components/StatusDropdown"
 import InfoDetails from "./Settings/InfoDetails"

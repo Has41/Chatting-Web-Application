@@ -1,5 +1,4 @@
-// @ts-nocheck
-const ChatLogo = ({ fill, size }) => {
+const ChatLogo = ({ fill, size }: { fill?: string; size?: string }) => {
   return (
     <svg
       fill={fill ? fill : "#96E6A1"}

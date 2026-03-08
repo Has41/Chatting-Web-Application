@@ -4,7 +4,7 @@ import { useAuth } from "@auth/hooks/useAuth"
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
 
-export const useChatSocket = () => {
+export const useChatSocket = (_config?: any) => {
   const { user } = useAuth()
   const socketRef = useRef<Socket | null>(null)
 
@@ -51,8 +51,14 @@ export const useChatSocket = () => {
     }
   }, [])
 
+  const sendMessage = useCallback((payload: any, fileMeta?: any) => {
+    socketRef.current?.emit("sendMessage", payload, fileMeta ?? null)
+  }, [])
+
   return {
     socket: socketRef.current,
+    socketRef,
+    sendMessage,
     emit,
     on,
     off

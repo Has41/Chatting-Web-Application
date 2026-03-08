@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useInfiniteQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
@@ -7,7 +6,26 @@ import useAuth from "@auth/hooks/useAuth"
 import getGroupRecipients from "@shared/utils/getGroupRecipients"
 import { useEffect, useRef } from "react"
 
-const ChatMessages = ({ conversationId, userData, setMessages, socketMessages, lastMessage, socket, conversationType }) => {
+interface ChatMessagesProps {
+  conversationId?: string
+  userData?: any
+  setMessages: (value: any) => void
+  socketMessages: any[]
+  lastMessage?: any
+  socket?: any
+  conversationType?: string
+  user?: any
+}
+
+const ChatMessages = ({
+  conversationId,
+  userData,
+  setMessages,
+  socketMessages,
+  lastMessage,
+  socket,
+  conversationType
+}: ChatMessagesProps) => {
   const { user } = useAuth()
   const scrollRef = useRef(null)
 
@@ -45,7 +63,7 @@ const ChatMessages = ({ conversationId, userData, setMessages, socketMessages, l
   const messageMap = new Map(combinedMessages.map((msg) => [msg._id, msg]))
   const deduplicatedMessages = Array.from(messageMap.values())
 
-  deduplicatedMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+  deduplicatedMessages.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
 
   const handleScroll = (e) => {
     const { scrollTop } = e.target

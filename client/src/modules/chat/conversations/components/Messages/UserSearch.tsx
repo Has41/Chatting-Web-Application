@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"

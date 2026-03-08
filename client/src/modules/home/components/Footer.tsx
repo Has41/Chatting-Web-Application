@@ -1,4 +1,3 @@
-// @ts-nocheck
 const Footer = () => {
   return (
     <footer className="font-poppins flex items-center justify-between px-10 py-8">

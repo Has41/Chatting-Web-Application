@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createPortal } from "react-dom"
 
 const EditMessageModal = ({ setEditContent, setShowEditModal, editMessage, editContent, editingMessageId }) => {

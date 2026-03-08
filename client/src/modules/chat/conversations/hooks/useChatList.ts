@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useContext } from "react"
 import { ChatContext } from "@chat/conversations/services/chatContext"
 

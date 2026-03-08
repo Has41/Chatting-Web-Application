@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -45,7 +44,7 @@ const UpdateDisplayName = ({ currentDisplayName }) => {
         placeholder="Enter your display name"
         className="mt-1 block w-full border-b border-gray-300 py-2 text-sm"
       />
-      {errors.displayName && <p className="mt-1 text-xs text-red-500">{errors.displayName.message}</p>}
+      {errors.displayName && <p className="mt-1 text-xs text-red-500">{String(errors.displayName.message || "")}</p>}
       <button
         type="submit"
         className="bg-custom-green absolute top-6 right-2 flex h-8 w-8 items-center justify-center rounded-full text-center"

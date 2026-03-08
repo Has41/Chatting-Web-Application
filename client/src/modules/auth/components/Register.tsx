@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useForm } from "react-hook-form"
 import { firstStepRegister } from "@shared/utils/dynamicData"
 import { useMutation } from "@tanstack/react-query"

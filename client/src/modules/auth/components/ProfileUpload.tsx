@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useRef } from "react"
 import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useEffect, useRef, useState } from "react"
 import PropTypes from "prop-types"
 import ChatLogo from "@shared/components/ChatLogo"
@@ -7,9 +6,9 @@ import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 
-const OtpAuthPage = ({ onButtonClick }) => {
+const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: string) => void }) => {
   const [otpValues, setOtpValues] = useState(Array(6).fill(""))
-  const inputRefs = useRef([])
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
   const { mutate, isLoading } = useMutation({
     mutationFn: async ({ otp, email }) => {
@@ -114,10 +113,12 @@ const OtpAuthPage = ({ onButtonClick }) => {
                 <input
                   key={index}
                   type="text"
-                  ref={(el) => (inputRefs.current[index] = el)}
+                  ref={(el) => {
+                    inputRefs.current[index] = el
+                  }}
                   value={otpValues[index]}
                   onPaste={(e) => handlePaste(e, index)}
-                  maxLength="1"
+                  maxLength={1}
                   readOnly={index > 0 && otpValues[index - 1] === ""}
                   className={`size-12 rounded-lg border border-gray-300 ${
                     index > 0 && otpValues[index - 1] === "" ? "cursor-not-allowed bg-gray-100" : "cursor-pointer"

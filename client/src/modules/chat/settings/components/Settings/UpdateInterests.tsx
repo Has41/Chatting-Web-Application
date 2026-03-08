@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
