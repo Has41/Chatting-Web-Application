@@ -1,15 +1,22 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ChangeEvent } from "react"
 import { profileInfoData } from "@shared/utils/dynamicData"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import useChatList from "@chat/conversations/hooks/useChatList"
+import type { Dispatch, SetStateAction } from "react"
+import type { Conversation, User } from "@shared/types"
+
+interface ProfileSidebarData extends Partial<Conversation>, Partial<User> {
+  groupOwner?: User | string
+  participants?: Array<User | string>
+}
 
 interface ProfileSidebarProps {
   isOpen: boolean
   onClose: () => void
-  data: any
-  setData?: (value: any) => void
+  data: ProfileSidebarData | null
+  setData?: Dispatch<SetStateAction<Conversation | null>>
 }
 
 const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSidebarProps) => {
@@ -21,23 +28,29 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
   const [searchQuery, setSearchQuery] = useState("")
 
   const { mutate: handleSave, isLoading } = useMutation({
-    mutationFn: async ({ groupName, groupInfo }) => {
+    mutationFn: async ({ groupName, groupInfo }: { groupName?: string; groupInfo?: string }) => {
       return await axiosInstance.put(`${CONVERSATION_PATHS.EDIT_GROUP_INFO}/${data?._id}`, {
         groupName,
         groupInfo
       })
     },
-    onMutate: async (newData) => {
+    onMutate: async (newData: { groupName?: string; groupInfo?: string }) => {
       const previousChatList = chatList
 
-      setData((prev) => ({
-        ...prev,
-        ...(newData.groupName !== undefined && { groupName: newData.groupName }),
-        ...(newData.groupInfo !== undefined && { groupInfo: newData.groupInfo })
-      }))
+      setData((prev: Conversation | null) =>
+        prev
+          ? {
+              ...prev,
+              ...(newData.groupName !== undefined && { groupName: newData.groupName }),
+              ...(newData.groupInfo !== undefined && { groupInfo: newData.groupInfo })
+            }
+          : prev
+      )
 
       if (newData.groupName !== undefined) {
-        setChatList((prev) => prev.map((chat) => (chat._id === data._id ? { ...chat, groupName: newData.groupName } : chat)))
+        setChatList((prev) =>
+          prev.map((chat) => (chat._id === data?._id ? { ...chat, groupName: newData.groupName } : chat))
+        )
       }
 
       return { previousChatList }
@@ -47,7 +60,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
       setIsEditing(false)
       console.log("Edited successfully!")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       setIsEditing(false)
       setIsEditingInfo(false)
       console.error(error)
@@ -67,16 +80,21 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
   //   }
   // })
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
   }
 
   const filteredParticipants = useMemo(() => {
     if (!searchQuery) return data?.participants || []
-    return data?.participants.filter((p) => p.username.toLowerCase().includes(searchQuery.toLowerCase()))
+    return (
+      data?.participants?.filter(
+        (p: User | string) => typeof p !== "string" && p.username.toLowerCase().includes(searchQuery.toLowerCase())
+      ) || []
+    )
   }, [searchQuery, data?.participants])
 
-  const ownerMatch = searchQuery && data.groupOwner.username.toLowerCase().includes(searchQuery.toLowerCase())
+  const ownerUser = data?.groupOwner && typeof data.groupOwner !== "string" ? data.groupOwner : null
+  const ownerMatch = Boolean(searchQuery && ownerUser?.username?.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
     <>
@@ -116,7 +134,11 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
               {data?.groupName?.charAt(0).toUpperCase()}
             </div>
           ) : (
-            <img src={data?.profilePicture?.url} alt="Profile" className="mx-auto h-24 w-24 rounded-full object-cover" />
+            <img
+              src={"profilePicture" in (data ?? {}) ? data?.profilePicture?.url : undefined}
+              alt="Profile"
+              className="mx-auto h-24 w-24 rounded-full object-cover"
+            />
           )}
           <div className="mt-4 flex items-center justify-center gap-2">
             {isEditing && data?.conversationType ? (
@@ -147,7 +169,9 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
               </>
             ) : (
               <>
-                <h4 className="text-lg font-bold">{data?.username || data?.groupName || "Unknown"}</h4>
+                <h4 className="text-lg font-bold">
+                  {("username" in (data ?? {}) ? data?.username : undefined) || data?.groupName || "Unknown"}
+                </h4>
                 {data?.conversationType && (
                   <button
                     onClick={() => setIsEditing(true)}
@@ -229,7 +253,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
         </div>
         <div className="mt-4 w-full px-6">
           <div className="flex justify-around">
-            {profileInfoData.map((data, index) => (
+            {profileInfoData.map((item, index) => (
               <div key={index} className="flex cursor-pointer flex-col items-center">
                 <div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-white shadow">
                   <svg
@@ -240,10 +264,10 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
                     stroke="currentColor"
                     className="text-custom-text size-5"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d={data.iconPath} />
+                    <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
                   </svg>
                 </div>
-                <span className="text-sm font-medium text-gray-700">{data.name}</span>
+                <span className="text-sm font-medium text-gray-700">{item.name}</span>
               </div>
             ))}
           </div>
@@ -281,7 +305,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
 
             {searchQuery ? (
               <>
-                {ownerMatch && (
+                {ownerMatch && data?.groupOwner && typeof data.groupOwner !== "string" && (
                   <div className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
                     <div className="flex items-center gap-3">
                       <img
@@ -296,24 +320,27 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
                 )}
 
                 {filteredParticipants.length > 0
-                  ? filteredParticipants.map((member) => (
-                      <div key={member._id} className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={member?.profilePicture?.url || "https://via.placeholder.com/40"}
-                            alt={member.username}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                          <span className="text-sm font-medium">{member.username}</span>
-                        </div>
-                      </div>
-                    ))
+                  ? filteredParticipants.map(
+                      (member) =>
+                        typeof member !== "string" && (
+                          <div key={member._id} className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={member?.profilePicture?.url || "https://via.placeholder.com/40"}
+                                alt={member.username}
+                                className="h-8 w-8 rounded-full object-cover"
+                              />
+                              <span className="text-sm font-medium">{member.username}</span>
+                            </div>
+                          </div>
+                        )
+                    )
                   : !ownerMatch && <p className="text-center text-sm text-gray-500">No members found</p>}
               </>
             ) : (
               <>
                 {/* Owner Section */}
-                {data.groupOwner && (
+                {data.groupOwner && typeof data.groupOwner !== "string" && (
                   <div className="mb-3">
                     <h5 className="mb-1 text-xs text-gray-500 uppercase">Owner</h5>
                     <div className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
@@ -333,18 +360,21 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
                 <div>
                   <h5 className="mb-1 text-xs text-gray-500 uppercase">Participants</h5>
                   <ul className="space-y-2">
-                    {filteredParticipants.map((member) => (
-                      <li key={member._id} className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={member?.profilePicture?.url || "https://via.placeholder.com/40"}
-                            alt={member.username}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                          <span className="text-sm font-medium">{member.username}</span>
-                        </div>
-                      </li>
-                    ))}
+                    {filteredParticipants.map(
+                      (member) =>
+                        typeof member !== "string" && (
+                          <li key={member._id} className="flex items-center justify-between rounded p-2 hover:bg-gray-100">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={member?.profilePicture?.url || "https://via.placeholder.com/40"}
+                                alt={member.username}
+                                className="h-8 w-8 rounded-full object-cover"
+                              />
+                              <span className="text-sm font-medium">{member.username}</span>
+                            </div>
+                          </li>
+                        )
+                    )}
                   </ul>
                 </div>
               </>

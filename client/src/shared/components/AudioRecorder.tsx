@@ -2,24 +2,32 @@ import { useEffect, useRef, useState } from "react"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
 import { ROOT_FOLDER } from "@shared/constants/constantValues"
 import useAuth from "@auth/hooks/useAuth"
+import type { AudioRecorderProps } from "@shared/types/components"
 
-const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conversationId, conversationType }) => {
+const AudioRecorder = ({
+  onSend,
+  isRecording,
+  setIsRecording,
+  recipientId,
+  conversationId,
+  conversationType
+}: AudioRecorderProps) => {
   const { uploadFile } = useCloudinaryUpload()
   const { user } = useAuth()
-  const [mediaRecorder, setMediaRecorder] = useState(null)
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const [isPaused, setIsPaused] = useState(false)
-  const [audioURL, setAudioURL] = useState(null)
-  const chunksRef = useRef([])
+  const [audioURL, setAudioURL] = useState<File | null>(null)
+  const chunksRef = useRef<Blob[]>([])
+  const stopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const MAX_DURATION = 2 * 60 * 1000 // 2 minutes in ms
-  let stopTimeout = null
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const recorder = new MediaRecorder(stream)
 
-      recorder.ondataavailable = (e) => {
+      recorder.ondataavailable = (e: BlobEvent) => {
         if (e.data.size > 0) {
           chunksRef.current.push(e.data)
         }
@@ -33,9 +41,9 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
         chunksRef.current = []
         stream.getTracks().forEach((track) => track.stop())
 
-        if (stopTimeout) {
-          clearTimeout(stopTimeout)
-          stopTimeout = null
+        if (stopTimeoutRef.current) {
+          clearTimeout(stopTimeoutRef.current)
+          stopTimeoutRef.current = null
         }
       }
 
@@ -44,7 +52,7 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
       setIsRecording(true)
 
       // auto-stop after 2 minutes
-      stopTimeout = setTimeout(() => {
+      stopTimeoutRef.current = setTimeout(() => {
         recorder.stop()
         setIsRecording(false)
       }, MAX_DURATION)
@@ -69,7 +77,7 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
       if (mediaRecorder.state !== "inactive") {
         mediaRecorder.stop()
       }
-      mediaRecorder.stream.getTracks().forEach((track) => track.stop())
+      mediaRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
       setIsRecording(false)
       setAudioURL(null)
       chunksRef.current = []
@@ -86,7 +94,7 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
       if (mediaRecorder.state !== "inactive") {
         mediaRecorder.stop()
       }
-      mediaRecorder.stream.getTracks().forEach((track) => track.stop())
+      mediaRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
     }
 
     const res = await uploadFile(
@@ -98,7 +106,7 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
       "audio"
     )
 
-    if (res.secure_url) {
+    if (res?.secure_url) {
       const fileMeta = {
         public_url: res?.public_id,
         media_url: res?.secure_url
@@ -124,7 +132,7 @@ const AudioRecorder = ({ onSend, isRecording, setIsRecording, recipientId, conve
         if (mediaRecorder.state !== "inactive") {
           mediaRecorder.stop()
         }
-        mediaRecorder.stream.getTracks().forEach((track) => track.stop())
+        mediaRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
       }
     }
   }, [mediaRecorder])

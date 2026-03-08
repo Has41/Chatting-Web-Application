@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 
 const StatusDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -9,9 +9,11 @@ const StatusDropdown = () => {
     { label: "Away", color: "text-yellow-600" },
     { label: "Do Not Disturb", color: "text-red-600" },
     { label: "Offline", color: "text-gray-600" }
-  ]
+  ] as const
 
-  const handleStatusChange = (newStatus) => {
+  type StatusOption = (typeof statuses)[number]
+
+  const handleStatusChange = (newStatus: StatusOption) => {
     setStatus(newStatus.label)
     setIsDropdownOpen(false)
   }

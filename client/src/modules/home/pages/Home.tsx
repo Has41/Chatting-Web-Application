@@ -17,20 +17,20 @@ import useIntersectionObserver from "@shared/hooks/useIntersectionObserver"
 
 const Home = () => {
   // Create refs for the wrapper divs
-  const introSectionRef = useRef(null)
-  const appBenefitsRef = useRef(null)
-  const whyChooseUsRef = useRef(null)
-  const trustedByPeopleRef = useRef(null)
-  const connectSectionRef = useRef(null)
-  const footerRef = useRef(null)
+  const introSectionRef = useRef<HTMLDivElement | null>(null)
+  const appBenefitsRef = useRef<HTMLDivElement | null>(null)
+  const whyChooseUsRef = useRef<HTMLDivElement | null>(null)
+  const trustedByPeopleRef = useRef<HTMLDivElement | null>(null)
+  const connectSectionRef = useRef<HTMLDivElement | null>(null)
+  const footerRef = useRef<HTMLDivElement | null>(null)
 
   // Observe the visibility of each section
-  const isIntroSectionVisible = useIntersectionObserver(introSectionRef)
-  const isAppBenefitsVisible = useIntersectionObserver(appBenefitsRef)
-  const isWhyChooseUsVisible = useIntersectionObserver(whyChooseUsRef)
-  const isTrustedByPeopleVisible = useIntersectionObserver(trustedByPeopleRef)
-  const isConnectSectionVisible = useIntersectionObserver(connectSectionRef)
-  const isFooterVisible = useIntersectionObserver(footerRef)
+  const isIntroSectionVisible = useIntersectionObserver(introSectionRef as React.RefObject<Element>)
+  const isAppBenefitsVisible = useIntersectionObserver(appBenefitsRef as React.RefObject<Element>)
+  const isWhyChooseUsVisible = useIntersectionObserver(whyChooseUsRef as React.RefObject<Element>)
+  const isTrustedByPeopleVisible = useIntersectionObserver(trustedByPeopleRef as React.RefObject<Element>)
+  const isConnectSectionVisible = useIntersectionObserver(connectSectionRef as React.RefObject<Element>)
+  const isFooterVisible = useIntersectionObserver(footerRef as React.RefObject<Element>)
 
   return (
     <main>

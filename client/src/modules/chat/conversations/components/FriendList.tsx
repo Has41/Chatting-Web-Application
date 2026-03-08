@@ -3,11 +3,16 @@ import UserSearch from "./Messages/UserSearch"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
+import type { User } from "@shared/types"
+
+interface FriendRequest {
+  from: User
+}
 
 const FriendList = () => {
   const [openNotifcation, setOpenNotification] = useState(false)
-  const [friendList, setFriendList] = useState([])
-  const [friendRequests, setFriendRequests] = useState([])
+  const [friendList, setFriendList] = useState<User[]>([])
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
 
   const toggleNotification = () => setOpenNotification((prev) => !prev)
 
@@ -16,26 +21,26 @@ const FriendList = () => {
     queryFn: async () => {
       return await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_REQUESTS)
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ data }: { data: { friends: User[]; friendRequests: FriendRequest[] } }) => {
       setFriendList(data.friends || [])
       setFriendRequests(data.friendRequests || [])
       console.log("Friend List and Requests:", data)
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error fetching friend list and requests:", error)
     }
   })
 
   const { mutate: respondFriendRequest } = useMutation({
-    mutationFn: async ({ userId, response }) => {
+    mutationFn: async ({ userId, response }: { userId: string; response: "accepted" | "rejected" }) => {
       return await axiosInstance.post(`${USER_PATHS.RESPOND_FRIEND_REQUEST}/${userId}`, {
         response
       })
     },
-    onSuccess: (data) => {
+    onSuccess: (data: unknown) => {
       console.log("Friend request response successful:", data)
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error responding to friend request:", error)
     }
   })
@@ -77,7 +82,7 @@ const FriendList = () => {
                         <div className="flex items-center gap-3">
                           <img
                             src={req?.from?.profilePicture?.url || "https://via.placeholder.com/36"}
-                            alt={req.username}
+                            alt={req.from.username}
                             className="h-9 w-9 rounded-full object-cover"
                           />
                           <span className="font-medium">{req.from.username}</span>

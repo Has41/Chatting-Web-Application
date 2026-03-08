@@ -3,12 +3,27 @@ import { createPortal } from "react-dom"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
+import type { Conversation, User } from "@shared/types"
 
-const GroupModal = ({ onClose }) => {
+interface FriendConversation extends Conversation {
+  isFriend?: boolean
+}
+
+interface GroupModalData {
+  _id: string
+  friends: User[]
+  conversations: FriendConversation[]
+}
+
+interface GroupModalProps {
+  onClose: () => void
+}
+
+const GroupModal = ({ onClose }: GroupModalProps) => {
   const [searchQuery, setSearchQuery] = useState("")
-  const [filteredFriends, setFilteredFriends] = useState([])
-  const [filteredConversations, setFilteredConversations] = useState([])
-  const [selectedIds, setSelectedIds] = useState([])
+  const [filteredFriends, setFilteredFriends] = useState<User[]>([])
+  const [filteredConversations, setFilteredConversations] = useState<FriendConversation[]>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const { data } = useQuery({
     queryKey: ["userFriendsAndConversations"],
@@ -16,27 +31,27 @@ const GroupModal = ({ onClose }) => {
       const res = await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_CONVERSATIONS)
       return res.data
     },
-    onSuccess: ({ friends, conversations }) => {
+    onSuccess: ({ friends, conversations }: GroupModalData) => {
       console.log("Fetched friends and conversations:", friends, conversations)
       setFilteredFriends(friends)
       setFilteredConversations(conversations)
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error fetching data:", error)
     }
   })
 
   const { mutate: createGroup } = useMutation({
-    mutationFn: async ({ participants }) => {
+    mutationFn: async ({ participants }: { participants: string[] }) => {
       return await axiosInstance.post(CONVERSATION_PATHS.CREATE_GROUP, {
         participants
       })
     },
-    onSuccess: (data) => {
+    onSuccess: (data: unknown) => {
       console.log("Group created successfully:", data)
       onClose()
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error creating group:", error)
     }
   })
@@ -46,17 +61,19 @@ const GroupModal = ({ onClose }) => {
 
     const query = searchQuery.toLowerCase()
 
-    setFilteredFriends(data.friends.filter((f) => f.username.toLowerCase().includes(query)))
+    const typedData = data as GroupModalData
+
+    setFilteredFriends(typedData.friends.filter((f: User) => f.username.toLowerCase().includes(query)))
 
     setFilteredConversations(
-      data.conversations.filter((c) => {
-        const other = c.participants.find((p) => p._id !== data._id)
+      typedData.conversations.filter((c: FriendConversation) => {
+        const other = c.participants.find((p): p is User => typeof p !== "string" && p._id !== typedData._id)
         return other?.username?.toLowerCase().includes(query)
       })
     )
   }, [searchQuery, data])
 
-  const handleToggle = (userId) => {
+  const handleToggle = (userId: string) => {
     setSelectedIds((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]))
   }
 
@@ -125,7 +142,8 @@ const GroupModal = ({ onClose }) => {
               {filteredConversations
                 .filter((con) => con.isFriend === false)
                 .map((conv) => {
-                  const other = conv.participants.find((p) => p._id !== data._id)
+                  const other = conv.participants.find((p): p is User => typeof p !== "string" && p._id !== data._id)
+                  if (!other) return null
                   return (
                     <div key={other._id} className="flex items-center justify-between rounded px-3 py-2 hover:bg-gray-50">
                       <div className="flex items-center space-x-3">

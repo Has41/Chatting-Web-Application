@@ -9,8 +9,9 @@ import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
+import type { AuthSwitchProps, InfoFormData } from "@auth/types/forms"
 
-const InfoForm = ({ onButtonClick }) => {
+const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
   const [selectedDay, setSelectedDay] = useState("")
   const [selectedMonth, setSelectedMonth] = useState("")
   const [selectedYear, setSelectedYear] = useState("")
@@ -18,7 +19,7 @@ const InfoForm = ({ onButtonClick }) => {
   const [dayOptions, setDayOptions] = useState(Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, "0")))
   const [step, setStep] = useState(0)
   const [_, setDirection] = useState("next")
-  const containerRef = useRef(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const {
     register,
     clearErrors,
@@ -30,7 +31,7 @@ const InfoForm = ({ onButtonClick }) => {
   })
 
   const { mutate, isLoading } = useMutation({
-    mutationFn: async (formData) => {
+    mutationFn: async (formData: InfoFormData & { dateOfBirth: Date; userId: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.OTHER_DETAIL, formData)
     }
   })
@@ -72,17 +73,17 @@ const InfoForm = ({ onButtonClick }) => {
     setStep((prev) => Math.max(prev - 1, 0))
   }
 
-  const onSubmit = (data) => {
-    let userId = localStorage.getItem("userId")
+  const onSubmit = (data: Partial<InfoFormData>) => {
+    const userId = localStorage.getItem("userId")
     const dateOfBirth = new Date(`${selectedYear}-${selectedMonth}-${selectedDay}T00:00:00Z`)
-    const formData = { ...data, dateOfBirth, userId }
+    const formData = { ...data, displayName: data.displayName ?? "", bio: data.bio ?? "", dateOfBirth, userId }
 
     mutate(formData, {
-      onSuccess: (response) => {
+      onSuccess: (response: unknown) => {
         console.log("Other details added successfully!", response)
-        onButtonClick("ProfileForm")
+        onButtonClick?.("ProfileForm")
       },
-      onError: (error) => {
+      onError: (error: unknown) => {
         if (import.meta.env.PROD) return
         console.error("Error updating details:", error)
       }

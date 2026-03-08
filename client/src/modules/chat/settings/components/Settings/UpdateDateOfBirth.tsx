@@ -1,4 +1,3 @@
-import React from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -12,7 +11,13 @@ const dateOfBirthSchema = z.object({
   year: z.string().nonempty("Year is required")
 })
 
-const UpdateDateOfBirth = ({ currentDateOfBirth }) => {
+type DateOfBirthFormData = z.infer<typeof dateOfBirthSchema>
+
+interface UpdateDateOfBirthProps {
+  currentDateOfBirth?: string
+}
+
+const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
   let defaultValues = { day: "", month: "", year: "" }
   if (currentDateOfBirth) {
     const date = new Date(currentDateOfBirth)
@@ -41,18 +46,18 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }) => {
   const disableButton = isIncomplete || isSameDate
 
   const { mutate } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: { dateOfBirth: string }) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
       console.log("Display Name Updated")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: DateOfBirthFormData) => {
     const dateString = `${data.year}-${data.month}-${data.day}`
     const currentFormattedDate = currentDateOfBirth ? new Date(currentDateOfBirth).toISOString().split("T")[0] : ""
 

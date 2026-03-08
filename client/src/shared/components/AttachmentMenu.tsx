@@ -1,7 +1,13 @@
 import { createPortal } from "react-dom"
 import { attachmentMenuOptions } from "@shared/utils/dynamicData"
+import type { FileType } from "@shared/types/components"
 
-const AttachmentMenu = ({ onSelect, onClose }) => {
+interface AttachmentMenuProps {
+  onSelect: (type: FileType) => void
+  onClose: () => void
+}
+
+const AttachmentMenu = ({ onSelect, onClose: _onClose }: AttachmentMenuProps) => {
   return createPortal(
     <div
       className="font-poppins fixed right-10 bottom-16 z-50 w-48 rounded-lg bg-white p-4 shadow-xl"
@@ -11,7 +17,7 @@ const AttachmentMenu = ({ onSelect, onClose }) => {
         {attachmentMenuOptions.map((menu, index) => (
           <button
             key={index}
-            onClick={() => onSelect(menu.type)}
+            onClick={() => onSelect(menu.type as FileType)}
             className="flex flex-col items-center space-y-2 rounded p-3 text-gray-800 transition hover:bg-green-50"
           >
             <div className="bg-custom-green/40 rounded-full p-3">

@@ -1,5 +1,5 @@
-import { useState, useRef } from "react"
-import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop } from "react-image-crop"
+import { useState, useRef, type ChangeEvent, type SyntheticEvent } from "react"
+import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop, type Crop, type PixelCrop } from "react-image-crop"
 import "react-image-crop/dist/ReactCrop.css"
 import setCanvasPreview from "@shared/utils/setCanvasPreview"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
@@ -11,23 +11,25 @@ import LoadingSpinner from "@shared/components/LoadingSpinner"
 import { ROOT_FOLDER } from "@shared/constants/constantValues"
 
 const ProfileUpload = () => {
-  const [profilePhoto, setProfilePhoto] = useState(null)
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null)
+  const [profilePreview, setProfilePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [upImg, setUpImg] = useState(null)
+  const [upImg, setUpImg] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [crop, setCrop] = useState(null)
-  const imageRef = useRef(null)
-  const fileInputRef = useRef(null)
-  const previewCanvasRef = useRef(null)
+  const [crop, setCrop] = useState<Crop | undefined>(undefined)
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null)
+  const imageRef = useRef<HTMLImageElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const navigate = useNavigate()
 
   const { uploadFile } = useCloudinaryUpload()
 
   const { mutate } = useMutation({
-    mutationFn: async (profileData) => {
+    mutationFn: async (profileData: { secure_url: string; public_id: string; username: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.SAVE_PROFILE_PIC, profileData)
     },
-    onSuccess: (res) => {
+    onSuccess: (res: unknown) => {
       setIsLoading(false)
       console.log("Profile pic saved successfully!", res)
       localStorage.removeItem("currentForm")
@@ -35,14 +37,14 @@ const ProfileUpload = () => {
       localStorage.removeItem("verificationEmail")
       navigate("/chat")
     },
-    onError: (err) => {
+    onError: (err: unknown) => {
       if (import.meta.env.PROD) return
       console.error("Error saving profile pic:", err)
       setIsLoading(false)
     }
   })
 
-  const onSelectFile = (e) => {
+  const onSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
 
     if (!file) {
@@ -55,7 +57,7 @@ const ProfileUpload = () => {
       return
     }
 
-    setCrop(null)
+    setCrop(undefined)
     imageRef.current = null
     setUpImg(null)
 
@@ -71,7 +73,7 @@ const ProfileUpload = () => {
     setModalOpen(true)
   }
 
-  const onImageLoaded = (e) => {
+  const onImageLoaded = (e: SyntheticEvent<HTMLImageElement>) => {
     imageRef.current = e.currentTarget
     const { width, height } = e.currentTarget
     const cropWidthInPercent = (150 / width) * 100
@@ -89,26 +91,33 @@ const ProfileUpload = () => {
     setCrop(centeredCrop)
   }
 
-  const confirmCrop = () => {
-    setCanvasPreview(
-      imageRef.current,
-      previewCanvasRef.current,
-      convertToPixelCrop(crop, imageRef.current.width, imageRef.current.height)
-    )
-    const dataUrl = previewCanvasRef.current.toDataURL()
-    setProfilePhoto(dataUrl)
+  const confirmCrop = async () => {
+    if (!crop || !imageRef.current || !previewCanvasRef.current) return
+
+    const pixelCrop = convertToPixelCrop(crop, imageRef.current.width, imageRef.current.height)
+    setCompletedCrop(pixelCrop)
+    setCanvasPreview(imageRef.current, previewCanvasRef.current, pixelCrop)
+    const dataUrl = previewCanvasRef.current.toDataURL("image/png")
+    setProfilePreview(dataUrl)
+    const blob = previewCanvasRef.current.toBlob
+      ? await new Promise<Blob | null>((resolve) => previewCanvasRef.current?.toBlob(resolve, "image/png"))
+      : null
+    if (blob) {
+      setProfilePhoto(new File([blob], "profile.png", { type: "image/png" }))
+    }
     setModalOpen(false)
   }
 
   const clearImage = () => {
     setProfilePhoto(null)
+    setProfilePreview(null)
     setUpImg(null)
-    setCrop(null)
+    setCrop(undefined)
   }
 
   const closeModal = () => {
     setModalOpen(false)
-    setCrop(null)
+    setCrop(undefined)
     setUpImg(null)
     imageRef.current = null
   }
@@ -141,8 +150,8 @@ const ProfileUpload = () => {
           <label htmlFor="avatar" className="cursor-pointer">
             <div className="relative inline-block">
               <div className="size-72 overflow-hidden rounded-full border-2 border-slate-300">
-                {profilePhoto ? (
-                  <img src={profilePhoto} alt="Avatar Preview" className="size-full object-cover" />
+                {profilePreview ? (
+                  <img src={profilePreview} alt="Avatar Preview" className="size-full object-cover" />
                 ) : (
                   <div className="flex size-full flex-col items-center justify-center text-gray-400">
                     <svg
@@ -163,7 +172,7 @@ const ProfileUpload = () => {
                   </div>
                 )}
               </div>
-              {profilePhoto && (
+              {profilePreview && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -188,7 +197,7 @@ const ProfileUpload = () => {
           >
             <LoadingSpinner loading={isLoading} loadingText="Please wait..." finalText="Confirm" size="size-5" />
           </button>
-          {!profilePhoto && (
+          {!profilePreview && (
             <input ref={fileInputRef} type="file" id="avatar" className="hidden" onChange={onSelectFile} accept="image/*" />
           )}
         </div>
@@ -232,7 +241,7 @@ const ProfileUpload = () => {
           </div>
         </div>
       )}
-      {crop && <canvas ref={previewCanvasRef} className="hidden size-40 object-contain" />}
+      {(crop || completedCrop) && <canvas ref={previewCanvasRef} className="hidden size-40 object-contain" />}
     </div>
   )
 }

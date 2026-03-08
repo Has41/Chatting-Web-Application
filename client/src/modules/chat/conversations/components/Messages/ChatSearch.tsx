@@ -4,25 +4,27 @@ import SearchDropdown from "@shared/components/SearchDropdown"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import useAuth from "@auth/hooks/useAuth"
+import type { ChangeEvent } from "react"
+import type { SearchConversation, SearchFriend } from "@shared/types/components"
 
 const ChatSearch = () => {
   const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
-  const [conversationResults, setConversationResults] = useState([])
-  const [friendResults, setfriendResults] = useState([])
+  const [conversationResults, setConversationResults] = useState<SearchConversation[]>([])
+  const [friendResults, setfriendResults] = useState<SearchFriend[]>([])
 
   const { mutate } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: { dataToSearch: string }) => {
       return await axiosInstance.get(USER_PATHS.SEARCH_USER_CONVO_DATA, {
         params: { dataToSearch: data.dataToSearch }
       })
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ data }: { data: { conversation?: SearchConversation[]; friendsData?: SearchFriend[] } }) => {
       console.log("Search results:", data)
       setConversationResults(data.conversation || [])
       setfriendResults(data.friendsData || [])
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       setConversationResults([])
       setfriendResults([])
       if (import.meta.env.PROD) return
@@ -30,7 +32,7 @@ const ChatSearch = () => {
     }
   })
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value)
     if (value?.length < 3) {
@@ -80,7 +82,7 @@ const ChatSearch = () => {
         <SearchDropdown
           conversationData={conversationResults}
           friendsData={friendResults}
-          currentUserId={user?._id}
+          currentUserId={user?._id ?? ""}
           onClear={handleClearSearch}
         />
       )}

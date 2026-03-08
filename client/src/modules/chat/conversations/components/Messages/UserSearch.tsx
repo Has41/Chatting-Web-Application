@@ -1,14 +1,20 @@
-import { useState } from "react"
+import { useState, type ChangeEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import { getNewChatRoute } from "@shared/constants/routePaths"
 import { Link } from "react-router-dom"
+import type { User } from "@shared/types"
+
+interface UserSearchResult extends User {
+  isFriend?: boolean
+  isRequestSent?: boolean
+}
 
 const UserSearch = () => {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
-  const [userResults, setUserResults] = useState([])
+  const [userResults, setUserResults] = useState<UserSearchResult[]>([])
 
   useQuery({
     queryKey: ["userSearch"],
@@ -17,11 +23,11 @@ const UserSearch = () => {
         params: { dataToSearch: searchQuery }
       })
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ data }: { data: UserSearchResult[] }) => {
       setUserResults(data)
       console.log(data)
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error fetching user search results:", error)
       setUserResults([])
     },
@@ -29,20 +35,20 @@ const UserSearch = () => {
   })
 
   const { mutate: sendFriendRequest } = useMutation({
-    mutationFn: async (userId) => {
+    mutationFn: async (userId: string) => {
       return await axiosInstance.post(`${USER_PATHS.SEND_FRIEND_REQUEST}/${userId}`)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: unknown) => {
       console.log("Friend request sent successfully:", data)
       queryClient.invalidateQueries(["userSearch"])
       //   setUserResults((prev) => prev.map((user) => (user._id === data._id ? { ...user, isRequestSent: true } : user)))
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error sending friend request:", error)
     }
   })
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
     if (e.target.value.length < 3) {
       setUserResults([])

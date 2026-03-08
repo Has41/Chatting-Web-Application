@@ -1,7 +1,8 @@
 import { Navigate } from "react-router-dom"
 import useAuth from "@auth/hooks/useAuth"
+import type { AppWrapperProps } from "@shared/types/components"
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children }: AppWrapperProps) => {
   const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {

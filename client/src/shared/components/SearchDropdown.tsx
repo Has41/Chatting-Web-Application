@@ -1,8 +1,16 @@
 import moment from "moment"
 import { Link } from "react-router-dom"
 import { getNewChatRoute } from "@shared/constants/routePaths"
+import type { SearchConversation, SearchFriend } from "@shared/types/components"
 
-const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId, onClear }) => {
+interface SearchDropdownProps {
+  friendsData?: SearchFriend[]
+  conversationData?: SearchConversation[]
+  currentUserId: string
+  onClear: () => void
+}
+
+const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId, onClear }: SearchDropdownProps) => {
   return (
     <div className="absolute top-full right-0 left-0 z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
       <div className="flex items-center justify-between border-b border-gray-200 px-2 py-1">
@@ -17,8 +25,9 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
           <h4 className="mt-3 mb-1 px-2 text-xs font-semibold text-gray-500 uppercase">Conversations</h4>
           <ul>
             {conversationData.map((conversation) => {
-              const otherUser = conversation.participants.find((p) => p._id !== currentUserId)
+              const otherUser = conversation.participants.find((p) => typeof p !== "string" && p._id !== currentUserId)
               const lastMessage = conversation.lastMessageData
+              if (!otherUser || typeof otherUser === "string") return null
 
               return (
                 <Link
@@ -58,7 +67,9 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
               <Link
                 //! Besure to update the route path
                 to={
-                  friend?.conversation?.length > 0 ? `conversation/${friend.conversation[0]}` : getNewChatRoute(friend._id)
+                  (friend?.conversation ?? []).length > 0
+                    ? `conversation/${(friend.conversation ?? [])[0]}`
+                    : getNewChatRoute(friend._id)
                 }
                 key={friend._id}
                 className="mt-1 flex items-center space-x-2 p-4 hover:bg-gray-100"

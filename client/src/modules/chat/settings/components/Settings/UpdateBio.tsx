@@ -1,4 +1,3 @@
-import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
@@ -6,7 +5,15 @@ import { bioSchema } from "@shared/utils/zodSchema"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
 
-const UpdateBio = ({ currentBio }) => {
+interface UpdateBioProps {
+  currentBio?: string
+}
+
+interface BioFormData {
+  bio?: string
+}
+
+const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
   const {
     watch,
     register,
@@ -21,18 +28,18 @@ const UpdateBio = ({ currentBio }) => {
   const disableButton = !bio || bio === currentBio
 
   const { mutate } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: BioFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
       console.log("Display Name Updated")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: BioFormData) => {
     mutate(data)
   }
 

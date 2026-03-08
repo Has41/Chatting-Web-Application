@@ -1,11 +1,12 @@
 import { Navigate } from "react-router-dom"
 import useAuth from "@auth/hooks/useAuth"
+import type { AppWrapperProps } from "@shared/types/components"
 
-const AuthWrapper = ({ children }) => {
+const AuthWrapper = ({ children }: AppWrapperProps) => {
   const { isAuthenticated, isLoading } = useAuth()
 
   if (isLoading) {
-    return
+    return null
   }
 
   if (isAuthenticated) {

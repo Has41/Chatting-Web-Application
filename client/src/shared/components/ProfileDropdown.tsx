@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { profileInfo } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"
 import { useMutation } from "@tanstack/react-query"
@@ -21,12 +21,12 @@ const ProfileDropdown = () => {
       setIsAuthenticated(false)
       navigate("/")
     },
-    onError: (err) => {
+    onError: (err: unknown) => {
       console.error(err)
     }
   })
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: { name: string }) => {
     if (option.name === "Logout") {
       mutate()
     } else {
@@ -40,7 +40,7 @@ const ProfileDropdown = () => {
         className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-slate-300"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
-        <img className="h-full w-full rounded-full object-cover" src={user?.profilePicture.url} alt="User Profile" />
+        <img className="h-full w-full rounded-full object-cover" src={user?.profilePicture?.url} alt="User Profile" />
       </div>
 
       {isDropdownOpen && (

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import DarkModeSwitch from "@shared/components/DarkModeSwitch"
 
 const ThemeSettings = () => {
@@ -16,7 +16,7 @@ const ThemeSettings = () => {
   const [darkMode, setDarkMode] = useState(false)
 
   // Handle when a user selects a theme color
-  const handleColorChange = (color) => {
+  const handleColorChange = (color: string) => {
     setSelectedColor(color)
     // Optionally update a context or global CSS variable here
     // document.documentElement.style.setProperty('--theme-color', color)

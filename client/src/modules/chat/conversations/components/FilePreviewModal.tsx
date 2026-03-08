@@ -4,14 +4,23 @@ import { ROOT_FOLDER } from "@shared/constants/constantValues"
 import useAuth from "@auth/hooks/useAuth"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import PDFPreview from "@shared/components/PDFPreview"
+import type { FilePreviewModalProps } from "@shared/types/components"
 
-const FilePreviewModal = ({ file, type, onCancel, recipientId, onSend, conversationId, conversationType }) => {
+const FilePreviewModal = ({
+  file,
+  type,
+  onCancel,
+  recipientId,
+  onSend,
+  conversationId,
+  conversationType
+}: FilePreviewModalProps) => {
   const { user } = useAuth()
   const { uploadFile } = useCloudinaryUpload()
   const [isVisible, setIsVisible] = useState(false)
   const [caption, setCaption] = useState("")
   const [isSending, setIsSending] = useState(false)
-  const [url, setUrl] = useState(null)
+  const [url, setUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (file) {
@@ -41,7 +50,7 @@ const FilePreviewModal = ({ file, type, onCancel, recipientId, onSend, conversat
       type
     )
 
-    if (res.secure_url) {
+    if (res?.secure_url) {
       const fileMeta = {
         public_url: res?.public_id,
         media_url: res?.secure_url,

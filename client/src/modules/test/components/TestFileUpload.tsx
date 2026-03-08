@@ -1,17 +1,17 @@
-import { useState } from "react"
+import { useState, type ChangeEvent } from "react"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
 import { ROOT_FOLDER } from "@shared/constants/constantValues"
 
 const TestFileUpload = () => {
-  const [file, setFile] = useState(null)
+  const [file, setFile] = useState<File | null>(null)
   const [fileType, setFileType] = useState("image")
   const { uploadFile, isUploading, error: uploadError, uploadedFileUrl } = useCloudinaryUpload()
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0])
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target.files?.[0] ?? null)
   }
 
-  const handleFileTypeChange = (e) => {
+  const handleFileTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setFileType(e.target.value)
   }
 

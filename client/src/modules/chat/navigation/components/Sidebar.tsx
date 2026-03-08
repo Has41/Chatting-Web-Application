@@ -2,7 +2,11 @@ import { navOptions } from "@shared/utils/dynamicData"
 import ProfileDropdown from "@shared/components/ProfileDropdown"
 import ChatLogo from "@shared/components/ChatLogo"
 
-const Sidebar = ({ setSelectedMenu }) => {
+interface SidebarProps {
+  setSelectedMenu: (menu: string) => void
+}
+
+const Sidebar = ({ setSelectedMenu }: SidebarProps) => {
   return (
     <nav className="font-poppins flex h-screen w-[6%] flex-col items-center justify-between bg-white transition-all duration-500">
       <div className="mt-5 flex justify-center">

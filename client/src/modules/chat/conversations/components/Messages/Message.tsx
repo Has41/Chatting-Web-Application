@@ -8,6 +8,35 @@ import axiosInstance from "@shared/utils/axiosInstance"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
 import EditMessageModal from "@shared/components/EditMessageModal"
 import FileMessagePreview from "@shared/components/FileMessagePreview"
+import type { Dispatch, RefObject, SetStateAction } from "react"
+
+interface SeenUser {
+  _id?: string
+  user: { _id?: string; username?: string; profilePicture?: { url?: string } }
+  seenAt?: string
+}
+
+interface ChatMessage {
+  _id: string
+  sender: string | { _id?: string }
+  content?: string
+  messageType?: string
+  media?: { mediaUrl?: string; caption?: string; thumbnailUrl?: string }
+  createdAt: string
+  editedAt?: string
+  seenBy?: SeenUser[]
+}
+
+interface MessageProps {
+  isSender: boolean
+  message: ChatMessage
+  setMessages: Dispatch<SetStateAction<ChatMessage[]>>
+  lastMessage?: ChatMessage
+  recipientData?: Array<{ _id: string; username?: string }>
+  conversationId?: string
+  conversationType?: "private" | "group"
+  socket: RefObject<{ emit: (...args: any[]) => void } | null>
+}
 
 const Message = ({
   isSender,
@@ -18,21 +47,24 @@ const Message = ({
   conversationId,
   conversationType,
   socket
-}) => {
-  const messageRef = useRef(null)
+}: MessageProps) => {
+  const messageRef = useRef<HTMLDivElement | null>(null)
   const hasMarkedSeenRef = useRef(false)
   const { user } = useAuth()
-  const isVisible = useIntersectionObserver(messageRef)
+  const isVisible = useIntersectionObserver(messageRef as RefObject<Element>)
   const [messageId, _] = useState(message._id)
-  const [editContent, setEditContent] = useState(message.content)
+  const [editContent, setEditContent] = useState<string>(message.content ?? "")
   const [showDropdown, setShowDropdown] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showSeenUsernames, setShowSeenUsernames] = useState(false)
-  const dropdownRef = useRef(null)
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  if (!user) return null
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setShowDropdown(false)
       }
     }
@@ -40,26 +72,26 @@ const Message = ({
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const updateMessageInState = (id, newContent) => {
+  const updateMessageInState = (id: string, newContent: string) => {
     setMessages((prev) => prev.map((msg) => (msg._id === id ? { ...msg, content: newContent, editedAt: "Edited" } : msg)))
   }
 
   const { mutate: editMessage } = useMutation({
-    mutationFn: async ({ messageId, content }) => {
+    mutationFn: async ({ messageId, content }: { messageId: string; content: string }) => {
       return await axiosInstance.patch(`${MESSAGE_PATHS.EDIT_MESSAGE}/${messageId}`, { content })
     },
     onSuccess: () => {
-      updateMessageInState(messageId, editContent)
+      updateMessageInState(messageId, editContent ?? "")
       setShowDropdown(false)
       console.log("Message edited successfully")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error editing message:", error)
     }
   })
 
   const { mutate: deleteMessage } = useMutation({
-    mutationFn: async (messageId) => {
+    mutationFn: async (messageId: string) => {
       return await axiosInstance.delete(`${MESSAGE_PATHS.DELETE_MESSAGE}/${messageId}`)
     },
     onSuccess: () => {
@@ -68,13 +100,15 @@ const Message = ({
       setShowDropdown(false)
       console.log("Message deleted successfully")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error deleting message:", error)
     }
   })
 
   useEffect(() => {
-    const hasCurrentUserSeen = lastMessage?.seenBy?.some((seen) => seen.user._id === user._id || seen.user?._id === user._id)
+    const hasCurrentUserSeen = lastMessage?.seenBy?.some(
+      (seen: SeenUser) => seen.user._id === user._id || seen.user?._id === user._id
+    )
     if (
       message?._id === lastMessage?._id &&
       isVisible &&
@@ -82,7 +116,7 @@ const Message = ({
       !hasMarkedSeenRef.current &&
       message?.sender !== user?._id
     ) {
-      socket.current.emit("markMessageAsSeen", conversationId, user._id, conversationType, lastMessage._id)
+      socket.current?.emit("markMessageAsSeen", conversationId, user._id, conversationType, lastMessage._id)
       hasMarkedSeenRef.current = true
       console.log("Marked message as seen:", lastMessage)
     }
@@ -94,7 +128,7 @@ const Message = ({
         <div className="group relative flex items-center gap-x-1">
           <div
             ref={messageRef}
-            className={`inline-block max-w-full overflow-x-hidden break-words whitespace-normal ${message?.messageType === "file" ? "p-1" : "px-4 py-3"} text-sm shadow ${
+            className={`inline-block max-w-full overflow-x-hidden wrap-break-word whitespace-normal ${message?.messageType === "file" ? "p-1" : "px-4 py-3"} text-sm shadow ${
               message.messageType === "text"
                 ? isSender
                   ? "rounded-sent bg-custom-green text-white"
@@ -106,11 +140,17 @@ const Message = ({
           >
             {!isSender && conversationType === "group" && (
               <p className={`mb-2 ${message?.media?.mediaUrl && "p-2"} text-xs font-semibold text-green-600`}>
-                {recipientData.find((r) => r._id === message.sender || r._id === message.sender?._id)?.username}
+                {
+                  recipientData.find(
+                    (r) =>
+                      r._id === message.sender ||
+                      r._id === (typeof message.sender === "string" ? undefined : message.sender?._id)
+                  )?.username
+                }
               </p>
             )}
             {message.messageType === "file" ? (
-              <FileMessagePreview fileMeta={message.media} isSender={isSender} />
+              <FileMessagePreview fileMeta={message.media ?? { mediaUrl: "" }} isSender={isSender} />
             ) : (
               <div className="flex max-w-96 flex-wrap items-end justify-between gap-x-4 gap-y-4">
                 <div className="break-all">{message.content}</div>
@@ -198,51 +238,53 @@ const Message = ({
                 editingMessageId={messageId}
                 setShowEditModal={setShowEditModal}
                 editMessage={editMessage}
-                editContent={editContent}
+                editContent={editContent ?? ""}
               />
             )}
           </div>
         </div>
-        {message?._id === lastMessage?._id && lastMessage?.sender === user?._id && lastMessage?.seenBy?.length > 0 && (
-          <div className="mt-2 flex flex-col items-end text-xs font-medium text-gray-600">
-            {conversationType === "group" ? (
-              <>
-                <div
-                  className="flex cursor-pointer -space-x-2"
-                  onClick={() => setShowSeenUsernames((prev) => !prev)}
-                  title="Seen by"
-                >
-                  {lastMessage.seenBy.map((seen) => (
-                    <img
-                      key={seen._id}
-                      src={seen.user?.profilePicture?.url || "/default-avatar.png"}
-                      alt={seen.user?.username}
-                      className="size-7 rounded-full border-2 border-white object-cover"
-                    />
-                  ))}
-                </div>
-
-                {showSeenUsernames && (
-                  <div className="animate-fadeIn mt-2 flex max-w-[12rem] rounded bg-gray-100 px-2 py-1 transition-all duration-300 ease-in-out">
-                    <p className="">Seen by: </p>
-                    <ul className="flex flex-wrap justify-end text-right">
-                      {lastMessage.seenBy.map((seen, index) => (
-                        <>
-                          <li className="ml-1" key={seen._id}>
-                            {seen.user?.username}
-                          </li>
-                          {index < lastMessage?.seenBy?.length - 1 && ", "}
-                        </>
-                      ))}
-                    </ul>
+        {message?._id === lastMessage?._id &&
+          lastMessage?.sender === user?._id &&
+          (lastMessage?.seenBy?.length ?? 0) > 0 && (
+            <div className="mt-2 flex flex-col items-end text-xs font-medium text-gray-600">
+              {conversationType === "group" ? (
+                <>
+                  <div
+                    className="flex cursor-pointer -space-x-2"
+                    onClick={() => setShowSeenUsernames((prev) => !prev)}
+                    title="Seen by"
+                  >
+                    {(lastMessage.seenBy ?? []).map((seen) => (
+                      <img
+                        key={seen._id}
+                        src={seen.user?.profilePicture?.url || "/default-avatar.png"}
+                        alt={seen.user?.username}
+                        className="size-7 rounded-full border-2 border-white object-cover"
+                      />
+                    ))}
                   </div>
-                )}
-              </>
-            ) : (
-              <>{getSeenText(lastMessage.seenBy[0].seenAt)}</>
-            )}
-          </div>
-        )}
+
+                  {showSeenUsernames && (
+                    <div className="animate-fadeIn mt-2 flex max-w-48 rounded bg-gray-100 px-2 py-1 transition-all duration-300 ease-in-out">
+                      <p className="">Seen by: </p>
+                      <ul className="flex flex-wrap justify-end text-right">
+                        {(lastMessage.seenBy ?? []).map((seen, index) => (
+                          <>
+                            <li className="ml-1" key={seen._id}>
+                              {seen.user?.username}
+                            </li>
+                            {index < (lastMessage?.seenBy?.length ?? 0) - 1 && ", "}
+                          </>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>{getSeenText(lastMessage.seenBy?.[0]?.seenAt ?? new Date().toISOString())}</>
+              )}
+            </div>
+          )}
       </div>
     </div>
   )

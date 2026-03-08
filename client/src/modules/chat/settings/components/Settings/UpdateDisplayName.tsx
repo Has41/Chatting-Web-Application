@@ -1,4 +1,3 @@
-import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
@@ -6,7 +5,15 @@ import { displayNameSchema } from "@shared/utils/zodSchema"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 
-const UpdateDisplayName = ({ currentDisplayName }) => {
+interface UpdateDisplayNameProps {
+  currentDisplayName?: string
+}
+
+interface DisplayNameFormData {
+  displayName: string
+}
+
+const UpdateDisplayName = ({ currentDisplayName = "" }: UpdateDisplayNameProps) => {
   const {
     register,
     handleSubmit,
@@ -17,18 +24,18 @@ const UpdateDisplayName = ({ currentDisplayName }) => {
   })
 
   const { mutate } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: DisplayNameFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
       console.log("Display Name Updated")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: DisplayNameFormData) => {
     mutate(data)
   }
 

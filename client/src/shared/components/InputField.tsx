@@ -49,7 +49,7 @@ const InputField = ({
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 100 }, (_, i) => (currentYear - i).toString())
 
-  const monthDays = {
+  const monthDays: Record<string, number> = {
     January: 31,
     February: 28,
     March: 31,

@@ -4,16 +4,16 @@ import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import Message from "./Message"
 import useAuth from "@auth/hooks/useAuth"
 import getGroupRecipients from "@shared/utils/getGroupRecipients"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type UIEvent } from "react"
 
 interface ChatMessagesProps {
   conversationId?: string
   userData?: any
-  setMessages: (value: any) => void
+  setMessages: (value: any[] | ((prev: any[]) => any[])) => void
   socketMessages: any[]
   lastMessage?: any
   socket?: any
-  conversationType?: string
+  conversationType?: "private" | "group"
   user?: any
 }
 
@@ -27,7 +27,9 @@ const ChatMessages = ({
   conversationType
 }: ChatMessagesProps) => {
   const { user } = useAuth()
-  const scrollRef = useRef(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+
+  if (!user) return null
 
   const {
     data: infiniteData,
@@ -43,20 +45,20 @@ const ChatMessages = ({
       return response.data
     },
     {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         console.log(data)
       }
     },
     {
-      onError: (error) => {
+      onError: (error: unknown) => {
         if (!import.meta.env.PROD) console.error("Error fetching messages:", error)
       },
-      getNextPageParam: (lastPage, pages) => (lastPage.messages.length === 20 ? pages.length + 1 : undefined),
+      getNextPageParam: (lastPage: any, pages: any[]) => (lastPage.messages.length === 20 ? pages.length + 1 : undefined),
       enabled: !!conversationId
     }
   )
 
-  const fetchedMessages = infiniteData?.pages.flatMap((page) => page.messages) || []
+  const fetchedMessages = infiniteData?.pages.flatMap((page: any) => page.messages) || []
   const combinedMessages = [...fetchedMessages, ...socketMessages]
 
   // De-duplicate by message ID
@@ -65,8 +67,8 @@ const ChatMessages = ({
 
   deduplicatedMessages.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
 
-  const handleScroll = (e) => {
-    const { scrollTop } = e.target
+  const handleScroll = (e: UIEvent<HTMLDivElement>) => {
+    const { scrollTop } = e.currentTarget
     if (scrollTop === 0 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage()
     }
@@ -92,7 +94,7 @@ const ChatMessages = ({
               <div className="mt-4 mr-2 flex flex-col items-center">
                 {(() => {
                   const sender = recipients.find(
-                    (recipient) => recipient._id === msg.sender || recipient._id === msg.sender?._id
+                    (recipient: any) => recipient._id === msg.sender || recipient._id === msg.sender?._id
                   )
                   return sender ? (
                     <img
@@ -118,7 +120,7 @@ const ChatMessages = ({
             <Message
               isSender={isSender}
               message={msg}
-              recipientData={conversationType === "group" && getGroupRecipients(userData, user._id)}
+              recipientData={conversationType === "group" ? getGroupRecipients(userData, user._id) : []}
               lastMessage={lastMessage}
               setMessages={setMessages}
               conversationId={conversationId}

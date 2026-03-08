@@ -10,9 +10,11 @@ import LoadingSpinner from "@shared/components/LoadingSpinner"
 import { useState } from "react"
 import useAuth from "@auth/hooks/useAuth"
 import { useNavigate } from "react-router-dom"
+import type { AuthSwitchProps, LoginFormData } from "@auth/types/forms"
+import type { AxiosError } from "axios"
 
-const Login = ({ onButtonClick }) => {
-  const [errorMessage, setErrorMessage] = useState(null)
+const Login = ({ onButtonClick }: AuthSwitchProps) => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { setIsAuthenticated, setUser, refetch } = useAuth()
   const navigate = useNavigate()
   const {
@@ -26,7 +28,7 @@ const Login = ({ onButtonClick }) => {
   })
 
   const { mutate, isLoading } = useMutation({
-    mutationFn: async (credentials) => {
+    mutationFn: async (credentials: LoginFormData) => {
       return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
     },
     onSuccess: () => {
@@ -35,8 +37,8 @@ const Login = ({ onButtonClick }) => {
       refetch()
       navigate("/chat")
     },
-    onError: (error) => {
-      setErrorMessage(error?.response?.data?.message || "An unexpected error occurred")
+    onError: (error: AxiosError<{ message?: string }>) => {
+      setErrorMessage(error?.response?.data?.message ?? "An unexpected error occurred")
       setIsAuthenticated(false)
       setUser(null)
       if (import.meta.env.PROD) return
@@ -103,7 +105,7 @@ const Login = ({ onButtonClick }) => {
             <div className="py-4 text-center">
               <p className="text-sm text-black/80">
                 Not signed in yet?{" "}
-                <span onClick={() => onButtonClick("Register")} className="cursor-pointer font-bold">
+                <span onClick={() => onButtonClick?.("Register")} className="cursor-pointer font-bold">
                   Sign up now!
                 </span>
               </p>

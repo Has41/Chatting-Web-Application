@@ -3,15 +3,6 @@ import { io, Socket } from "socket.io-client"
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
 
-interface CallSignal {
-  from: string
-  to: string
-  type: string
-  offer?: RTCSessionDescriptionInit
-  answer?: RTCSessionDescriptionInit
-  candidate?: RTCIceCandidateInit
-}
-
 export const useCallSocket = (userId: string | undefined) => {
   const socketRef = useRef<Socket | null>(null)
 

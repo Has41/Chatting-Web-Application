@@ -6,9 +6,12 @@ import Register from "@auth/components/Register"
 import InfoForm from "@auth/components/InfoForm"
 import ProfileUpload from "@auth/components/ProfileUpload"
 import OtpAuthPage from "./OtpAuthPage"
+import type { AuthFormView } from "@auth/types/forms"
 
 const GetStarted = () => {
-  const [currentForm, setCurrentForm] = useState(localStorage.getItem("currentForm") || "Login")
+  const [currentForm, setCurrentForm] = useState<AuthFormView>(
+    (localStorage.getItem("currentForm") as AuthFormView) || "Login"
+  )
   const shouldAnimateRef = useRef(false)
 
   const formPickerRefs = {
@@ -21,7 +24,7 @@ const GetStarted = () => {
 
   const { greenSectionRef, greenSectionTextRef, subGreenSectionRef, formContainerRef, isFirstRender } = formPickerRefs
 
-  const handleFormSwitch = useCallback((formSwitch) => {
+  const handleFormSwitch = useCallback((formSwitch: AuthFormView) => {
     setCurrentForm(formSwitch)
     localStorage.setItem("currentForm", formSwitch)
     shouldAnimateRef.current = true

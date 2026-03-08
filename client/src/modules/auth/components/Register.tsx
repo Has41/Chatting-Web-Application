@@ -7,8 +7,9 @@ import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerSchema } from "@shared/utils/zodSchema"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
+import type { AuthSwitchProps, RegisterFormData } from "@auth/types/forms"
 
-const Register = ({ onButtonClick }) => {
+const Register = ({ onButtonClick }: AuthSwitchProps) => {
   const {
     register,
     clearErrors,
@@ -21,23 +22,23 @@ const Register = ({ onButtonClick }) => {
   })
 
   const { mutate, isLoading } = useMutation({
-    mutationFn: async (formData) => {
+    mutationFn: async (formData: RegisterFormData) => {
       return await axiosInstance.post(AUTH_PATHS.REGISTER, formData)
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ data }: { data: { user: { email: string; username: string; id: string } } }) => {
       reset()
       localStorage.setItem("verificationEmail", data?.user.email)
       localStorage.setItem("newUser", data?.user.username)
       localStorage.setItem("userId", data?.user.id)
-      onButtonClick("OtpPage")
+      onButtonClick?.("OtpPage")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       if (import.meta.env.PROD) return
       console.error("Registration error:", error)
     }
   })
 
-  const onRegister = async (data) => {
+  const onRegister = async (data: RegisterFormData) => {
     const isValid = await trigger()
     if (!isValid) {
       return
@@ -64,6 +65,7 @@ const Register = ({ onButtonClick }) => {
                 {firstStepRegister.map((field) => {
                   return (
                     <InputField
+                      key={field.id}
                       field={field}
                       error={errors}
                       register={register}
@@ -88,7 +90,7 @@ const Register = ({ onButtonClick }) => {
                 <div className="py-6 text-center">
                   <p className="text-sm text-black/80">
                     Already have an account?{" "}
-                    <span onClick={() => onButtonClick("Login")} className="cursor-pointer font-bold">
+                    <span onClick={() => onButtonClick?.("Login")} className="cursor-pointer font-bold">
                       Log in!
                     </span>
                   </p>

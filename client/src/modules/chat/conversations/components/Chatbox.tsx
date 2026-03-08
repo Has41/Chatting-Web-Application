@@ -10,13 +10,16 @@ import SendMessage from "./Messages/SendMessage"
 import ProfileSidebar from "./ProfileSidebar"
 import useChatSocket from "@chat/conversations/hooks/useChatSocket"
 import { chatBoxReducer, initialChatBoxState } from "@chat/states/chatBoxState"
+import type { User } from "@shared/types"
 
 const Chatbox = () => {
   const { user } = useAuth()
   const { conversationId, userId } = useParams()
   const [state, dispatch] = useReducer(chatBoxReducer, initialChatBoxState)
 
-  const setMessages = (payload) => dispatch({ type: "SET_MESSAGES", payload })
+  const setMessages = (payload: any[] | ((prev: any[]) => any[])) => dispatch({ type: "SET_MESSAGES", payload })
+
+  if (!user) return null
 
   const { socketRef, sendMessage } = useChatSocket({
     userId: user._id,
@@ -34,16 +37,18 @@ const Chatbox = () => {
       }
       return null
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ data }: { data: any }) => {
       if (conversationId) {
         dispatch({ type: "SET_LAST_MESSAGE", payload: data.conversation.lastMessage })
-        const filteredParticipants = data.conversation.participants.filter((participant) => participant._id !== user._id)
+        const filteredParticipants = data.conversation.participants.filter(
+          (participant: User) => participant._id !== user._id
+        )
         dispatch({ type: "SET_USER_DATA", payload: filteredParticipants[0] || null })
       } else {
         dispatch({ type: "SET_USER_DATA", payload: data })
       }
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       if (import.meta.env.PROD) return
       console.error(error)
     },

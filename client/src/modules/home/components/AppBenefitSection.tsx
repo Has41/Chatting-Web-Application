@@ -6,19 +6,19 @@ import { SlidingCard } from "@shared/components/Cards"
 
 const AppBenefits = () => {
   const tileRefs = {
-    containerRef: useRef(null),
-    tile1Ref: useRef(null),
-    subTileLogo1Ref: useRef(null),
-    subTileSection1Ref: useRef(null),
-    tile2Ref: useRef(null),
-    subTileLogo2Ref: useRef(null),
-    subTileSection2Ref: useRef(null),
-    tile3Ref: useRef(null),
-    subTileLogo3Ref: useRef(null),
-    subTileSection3Ref: useRef(null),
-    tile4Ref: useRef(null),
-    subTileLogo4Ref: useRef(null),
-    subTileSection4Ref: useRef(null)
+    containerRef: useRef<HTMLDivElement | null>(null),
+    tile1Ref: useRef<HTMLDivElement | null>(null),
+    subTileLogo1Ref: useRef<HTMLDivElement | null>(null),
+    subTileSection1Ref: useRef<HTMLDivElement | null>(null),
+    tile2Ref: useRef<HTMLDivElement | null>(null),
+    subTileLogo2Ref: useRef<HTMLDivElement | null>(null),
+    subTileSection2Ref: useRef<HTMLDivElement | null>(null),
+    tile3Ref: useRef<HTMLDivElement | null>(null),
+    subTileLogo3Ref: useRef<HTMLDivElement | null>(null),
+    subTileSection3Ref: useRef<HTMLDivElement | null>(null),
+    tile4Ref: useRef<HTMLDivElement | null>(null),
+    subTileLogo4Ref: useRef<HTMLDivElement | null>(null),
+    subTileSection4Ref: useRef<HTMLDivElement | null>(null)
   }
 
   const {
@@ -40,11 +40,15 @@ const AppBenefits = () => {
   gsap.registerPlugin(ScrollTrigger)
 
   useGSAP(() => {
+    if (!containerRef.current || !tile4Ref.current) return
+    const containerEl = containerRef.current
+    const tile4El = tile4Ref.current
+
     const timeLine = gsap.timeline({
       scrollTrigger: {
-        trigger: containerRef.current,
+        trigger: containerEl,
         start: "top 50%",
-        end: () => `bottom+=${tile4Ref.current.offsetTop + tile4Ref.current.offsetHeight - containerRef.current.offsetTop}`,
+        end: () => `bottom+=${tile4El.offsetTop + tile4El.offsetHeight - containerEl.offsetTop}`,
         once: true
         // markers: true
       }

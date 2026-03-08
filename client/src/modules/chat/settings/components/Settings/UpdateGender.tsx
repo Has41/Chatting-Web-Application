@@ -1,4 +1,3 @@
-import React from "react"
 import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -6,32 +5,40 @@ import { genderSchema } from "@shared/utils/zodSchema"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
 
-const UpdateGender = ({ currentGender }) => {
+interface UpdateGenderProps {
+  currentGender?: string
+}
+
+interface GenderFormData {
+  gender: "Male" | "Female" | "Prefer not to say"
+}
+
+const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
   const {
     setValue,
     handleSubmit,
     watch,
     formState: { errors }
-  } = useForm({
+  } = useForm<GenderFormData>({
     resolver: zodResolver(genderSchema),
-    defaultValues: { gender: currentGender }
+    defaultValues: { gender: (currentGender as GenderFormData["gender"]) || "Prefer not to say" }
   })
 
   const selectedGender = watch("gender")
 
   const { mutate } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: GenderFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
       console.log("Gender Updated")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: GenderFormData) => {
     mutate(data)
   }
 
@@ -39,7 +46,7 @@ const UpdateGender = ({ currentGender }) => {
     { label: "Male", value: "Male", icon: "M12 6V4m0 0V4m0 2a4 4 0 100 8 4 4 0 100-8zM6 20h12" },
     { label: "Female", value: "Female", icon: "M12 4a4 4 0 014 4 4 4 0 01-8 0 4 4 0 014-4zm0 6v6m-4 0h8" },
     { label: "Other", value: "Prefer not to say", icon: "M12 6V4m0 0V4m0 2a4 4 0 100 8 4 4 0 100-8zM6 20h12" }
-  ]
+  ] as const
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-4">

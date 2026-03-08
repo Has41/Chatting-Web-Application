@@ -1,6 +1,11 @@
 import usePDFMetadata from "@shared/hooks/usePDFMetaData"
 
-const PDFPreview = ({ fileUrl, width = 250 }) => {
+interface PDFPreviewProps {
+  fileUrl: string
+  width?: number
+}
+
+const PDFPreview = ({ fileUrl, width = 250 }: PDFPreviewProps) => {
   const { canvasRef } = usePDFMetadata(fileUrl, width)
 
   return (

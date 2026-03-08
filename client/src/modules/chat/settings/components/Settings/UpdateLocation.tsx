@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
@@ -7,10 +7,23 @@ import { locationSchema } from "@shared/utils/zodSchema"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 
-const UpdateLocation = ({ currentLocation }) => {
+interface UpdateLocationProps {
+  currentLocation?: string
+}
+
+interface LocationFormData {
+  location: string
+}
+
+interface CountryOption {
+  value: string
+  label: string
+}
+
+const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
   const options = useMemo(() => countryList().getData(), [])
   const defaultCountry = useMemo(() => {
-    const found = options.find((option) => option.label === currentLocation)
+    const found = options.find((option: CountryOption) => option.label === currentLocation)
     return found ? found.value : ""
   }, [currentLocation, options])
 
@@ -27,18 +40,18 @@ const UpdateLocation = ({ currentLocation }) => {
   const disableButton = !location || location === defaultCountry
 
   const { mutate } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: LocationFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
       console.log("Location Updated")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: LocationFormData) => {
     mutate(data)
   }
 
@@ -49,7 +62,7 @@ const UpdateLocation = ({ currentLocation }) => {
       </label>
       <select id="location" {...register("location")} className="mt-1 block w-full border-b border-gray-300 p-2 text-sm">
         <option value="">Select your country</option>
-        {options.map((option) => (
+        {options.map((option: CountryOption) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

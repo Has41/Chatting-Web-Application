@@ -9,16 +9,19 @@ import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
 import ProfileSidebar from "./ProfileSidebar"
 import useChatSocket from "@chat/conversations/hooks/useChatSocket"
+import type { Conversation } from "@shared/types"
 
 const GroupChatbox = () => {
   const { user } = useAuth()
   const { conversationId } = useParams()
 
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState<any[]>([])
   const [lastMessage, setLastMessage] = useState("")
   const [messageContent, setMessageContent] = useState("")
-  const [groupData, setGroupData] = useState(null)
+  const [groupData, setGroupData] = useState<Conversation | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  if (!user) return null
 
   const { socketRef, sendMessage } = useChatSocket({
     userId: user._id,
@@ -30,11 +33,11 @@ const GroupChatbox = () => {
   useQuery({
     queryKey: ["groupConversation", conversationId],
     queryFn: async () => await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`),
-    onSuccess: ({ data }) => {
+    onSuccess: ({ data }: { data: any }) => {
       setGroupData(data.conversation)
       setLastMessage(data.conversation.lastMessage)
     },
-    onError: (err) => console.error("Failed to load group:", err),
+    onError: (err: unknown) => console.error("Failed to load group:", err),
     enabled: !!conversationId
   })
 

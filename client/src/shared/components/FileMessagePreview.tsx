@@ -1,9 +1,20 @@
 import getFileType from "@shared/utils/getFileType"
 import PDFMeta from "./PDFMeta"
 
-const FileMessagePreview = ({ fileMeta, isSender }) => {
+interface FileMeta {
+  mediaUrl?: string
+  caption?: string
+  thumbnailUrl?: string
+}
+
+interface FileMessagePreviewProps {
+  fileMeta: FileMeta
+  isSender: boolean
+}
+
+const FileMessagePreview = ({ fileMeta, isSender }: FileMessagePreviewProps) => {
   const { mediaUrl, caption } = fileMeta
-  const fileType = getFileType(mediaUrl)
+  const fileType = getFileType(mediaUrl ?? "")
 
   return (
     <div className="flex flex-col">
@@ -18,7 +29,7 @@ const FileMessagePreview = ({ fileMeta, isSender }) => {
       {fileType === "pdf" && (
         <div className="">
           <img src={fileMeta?.thumbnailUrl} alt="PDF thumbnail" className="h-48 w-full rounded border shadow" />
-          <PDFMeta mediaUrl={mediaUrl} fileName={mediaUrl} />
+          <PDFMeta mediaUrl={mediaUrl ?? ""} fileName={mediaUrl ?? ""} />
         </div>
       )}
 

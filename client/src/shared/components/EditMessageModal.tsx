@@ -1,6 +1,21 @@
 import { createPortal } from "react-dom"
+import type { Dispatch, SetStateAction } from "react"
 
-const EditMessageModal = ({ setEditContent, setShowEditModal, editMessage, editContent, editingMessageId }) => {
+interface EditMessageModalProps {
+  setEditContent: Dispatch<SetStateAction<string>>
+  setShowEditModal: Dispatch<SetStateAction<boolean>>
+  editMessage: (payload: { messageId: string; content: string }) => void
+  editContent: string
+  editingMessageId: string
+}
+
+const EditMessageModal = ({
+  setEditContent,
+  setShowEditModal,
+  editMessage,
+  editContent,
+  editingMessageId
+}: EditMessageModalProps) => {
   return createPortal(
     <div className="bg-opacity-50 font-poppins fixed inset-0 z-50 flex items-center justify-center bg-black">
       <div className="w-96 rounded-2xl bg-white p-6 shadow-2xl">

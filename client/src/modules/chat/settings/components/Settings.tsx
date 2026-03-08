@@ -6,9 +6,9 @@ import ThemeSettings from "./Settings/ThemeSettings"
 
 const Settings = () => {
   const { user } = useAuth()
-  const [openSection, setOpenSection] = useState("")
+  const [openSection, setOpenSection] = useState<string | null>("")
 
-  const toggleSection = (section) => {
+  const toggleSection = (section: string) => {
     setOpenSection((prevSection) => (prevSection === section ? null : section))
   }
 
@@ -22,7 +22,7 @@ const Settings = () => {
         <div className="mb-8 flex flex-col items-center">
           <div className="relative">
             <img
-              src={user?.profilePicture.url}
+              src={user?.profilePicture?.url}
               alt="Profile"
               className="h-20 w-20 rounded-full border-2 border-white shadow"
             />

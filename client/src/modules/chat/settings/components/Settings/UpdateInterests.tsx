@@ -1,47 +1,51 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
 
-const UpdateInterests = ({ currentInterests }) => {
-  const [interests, setInterests] = useState(currentInterests || [])
+interface UpdateInterestsProps {
+  currentInterests?: string[]
+}
+
+const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
+  const [interests, setInterests] = useState<string[]>(currentInterests)
   const [input, setInput] = useState("")
 
   const { mutate: insertInterest } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: { newInterest: string }) => {
       return await axiosInstance.post(USER_PATHS.ADD_INTEREST, data)
     },
     onSuccess: () => {
       console.log("Interest Added!")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
   const { mutate: removeInterest } = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: { interestToRemove: string }) => {
       return await axiosInstance.delete(USER_PATHS.REMOVE_INTEREST, { data })
     },
     onSuccess: () => {
       console.log("Interest Removed")
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error(error)
     }
   })
 
   const addUserInterest = () => {
     if (input.trim()) {
-      setInterests((prev) => [...prev, input.trim()])
+      setInterests((prev: string[]) => [...prev, input.trim()])
       const newInterest = input.trim()
       setInput("")
       insertInterest({ newInterest })
     }
   }
 
-  const removeUserInterest = (userInterest) => {
-    const updatedInterest = interests.filter((interest) => interest !== userInterest)
+  const removeUserInterest = (userInterest: string) => {
+    const updatedInterest = interests.filter((interest: string) => interest !== userInterest)
     setInterests(updatedInterest)
     removeInterest({ interestToRemove: userInterest })
   }
@@ -78,7 +82,7 @@ const UpdateInterests = ({ currentInterests }) => {
         </button>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {interests.map((interest, idx) => (
+        {interests.map((interest: string, idx: number) => (
           <span key={idx} className="bg-custom-white inline-flex items-center rounded-2xl px-3 py-1 text-sm shadow-md">
             {interest}
             <button type="button" onClick={() => removeUserInterest(interest)} className="ml-2" aria-label="Remove Interest">

@@ -1,20 +1,20 @@
-import { useEffect, useRef, useState } from "react"
-import PropTypes from "prop-types"
+import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type ClipboardEvent } from "react"
 import ChatLogo from "@shared/components/ChatLogo"
 import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
+import type { AuthSwitchProps } from "@auth/types/forms"
 
-const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: string) => void }) => {
+const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
   const [otpValues, setOtpValues] = useState(Array(6).fill(""))
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
   const { mutate, isLoading } = useMutation({
-    mutationFn: async ({ otp, email }) => {
+    mutationFn: async ({ otp, email }: { otp: string; email: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.VERIFY_OTP, { otp, email })
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       if (import.meta.env.PROD) return
       console.error("OTP verification error:", error)
     }
@@ -31,11 +31,11 @@ const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: str
     mutate(
       { otp, email },
       {
-        onSuccess: (response) => {
+        onSuccess: (response: unknown) => {
           console.log("OTP verified successfully!", response)
-          onButtonClick("InfoForm")
+          onButtonClick?.("InfoForm")
         },
-        onError: (error) => {
+        onError: (error: unknown) => {
           if (import.meta.env.PROD) return
           console.error("OTP verification failed:", error)
           alert("OTP verification failed. Please try again.")
@@ -44,8 +44,8 @@ const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: str
     )
   }
 
-  const handleInputChange = (e, index) => {
-    const { value } = e.target
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    const { value } = e.currentTarget
 
     const updatedOtp = [...otpValues]
     updatedOtp[index] = value
@@ -53,14 +53,14 @@ const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: str
     // console.log(updatedOtp)
 
     if (value.length === 1 && index < inputRefs.current.length - 1) {
-      inputRefs.current[index + 1].focus()
+      inputRefs.current[index + 1]?.focus()
     }
   }
 
-  const handleKeyDown = (e, index) => {
-    const { value } = e.target
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
+    const { value } = e.currentTarget
     if (e.key === "Backspace" && !value && index > 0) {
-      inputRefs.current[index - 1].focus()
+      inputRefs.current[index - 1]?.focus()
       const updatedOtp = [...otpValues]
       updatedOtp[index] = ""
       setOtpValues(updatedOtp)
@@ -68,7 +68,7 @@ const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: str
     }
   }
 
-  const handlePaste = (e, index) => {
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement>, index: number) => {
     const pastedValue = e.clipboardData.getData("Text").slice(0, 6)
     const updatedOtp = [...otpValues]
     const newOtp = pastedValue.split("")
@@ -77,11 +77,11 @@ const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: str
     setOtpValues(updatedOtp)
 
     if (newOtp.length === 6) {
-      inputRefs.current[5].focus()
+      inputRefs.current[5]?.focus()
     } else {
       let nextIndex = index + newOtp.length
       if (nextIndex < inputRefs.current.length) {
-        inputRefs.current[nextIndex].focus()
+        inputRefs.current[nextIndex]?.focus()
       }
     }
     e.preventDefault()
@@ -153,10 +153,6 @@ const OtpAuthPage = ({ onButtonClick = () => {} }: { onButtonClick?: (value: str
       </div>
     </div>
   )
-}
-
-OtpAuthPage.propTypes = {
-  onButtonClick: PropTypes.func
 }
 
 export default OtpAuthPage

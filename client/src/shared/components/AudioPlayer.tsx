@@ -1,7 +1,11 @@
 import { useRef, useState } from "react"
 
-const AudioPlayer = ({ mediaUrl }) => {
-  const audioRef = useRef(null)
+interface AudioPlayerProps {
+  mediaUrl: string
+}
+
+const AudioPlayer = ({ mediaUrl }: AudioPlayerProps) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
 
@@ -16,6 +20,7 @@ const AudioPlayer = ({ mediaUrl }) => {
   }
 
   const handleTimeUpdate = () => {
+    if (!audioRef.current) return
     const current = audioRef.current.currentTime
     const total = audioRef.current.duration
     setProgress((current / total) * 100)

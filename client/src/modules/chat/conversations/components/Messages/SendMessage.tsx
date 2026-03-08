@@ -1,15 +1,16 @@
-import { useRef, useState } from "react"
+import { useRef, useState, type ChangeEvent } from "react"
 import AttachmentMenu from "@shared/components/AttachmentMenu"
 import FilePreviewModal from "../FilePreviewModal"
 import useAuth from "@auth/hooks/useAuth"
 import AudioRecorder from "@shared/components/AudioRecorder"
+import type { ConversationType, FileType, MessageFileMeta } from "@shared/types/components"
 
 interface SendMessageProps {
   setMessageContent: (value: string) => void
   messageContent: string
   recipientId?: string
   socketRef: any
-  conversationType?: string
+  conversationType?: ConversationType
   conversationId?: string
   sendMessage: (payload: any) => void
 }
@@ -26,25 +27,37 @@ const SendMessage = ({
   const { user } = useAuth()
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
-  const [previewFile, setPreviewFile] = useState(null)
-  const [attachmentType, setAttachmentType] = useState(null)
-  const fileInputRef = useRef(null)
+  const [previewFile, setPreviewFile] = useState<File | null>(null)
+  const [attachmentType, setAttachmentType] = useState<FileType | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const handleAttachmentSelect = (type) => {
+  if (!user) return null
+
+  const handleAttachmentSelect = (type: FileType) => {
     setAttachmentType(type)
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     setPreviewFile(file)
     // handleSendFile({ type: attachmentType, file })
-    e.target.value = null
+    e.target.value = ""
   }
 
-  const handleSendMessage = ({ conversationId, messageContent, messageType, fileMeta = null }) => {
+  const handleSendMessage = ({
+    conversationId,
+    messageContent,
+    messageType,
+    fileMeta = null
+  }: {
+    conversationId?: string
+    messageContent?: string
+    messageType: "text" | "file"
+    fileMeta?: MessageFileMeta | null
+  }) => {
     // console.log(conversationId)
 
     if (!messageContent?.trim() && !fileMeta) return
@@ -75,7 +88,7 @@ const SendMessage = ({
     setMessageContent("")
   }
 
-  const getAcceptedTypes = (type) => {
+  const getAcceptedTypes = (type: FileType | null) => {
     switch (type) {
       case "image":
         return "image/*"
@@ -95,7 +108,7 @@ const SendMessage = ({
       {previewFile && (
         <FilePreviewModal
           file={previewFile}
-          type={attachmentType}
+          type={attachmentType ?? "document"}
           recipientId={recipientId}
           conversationId={conversationId}
           conversationType={conversationType}
