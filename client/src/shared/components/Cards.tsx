@@ -84,7 +84,15 @@ const CustomerCard = ({
   </div>
 )
 
-const SlidingCard = ({ tileRef, subTileSectionRef, subTileLogoRef, iconPath, tileName, tileDetail, tileQuote }: SlidingCardProps) => (
+const SlidingCard = ({
+  tileRef,
+  subTileSectionRef,
+  subTileLogoRef,
+  iconPath,
+  tileName,
+  tileDetail,
+  tileQuote
+}: SlidingCardProps) => (
   <div ref={tileRef} className="mx-auto flex h-[250px] max-w-[90%] items-center gap-x-4 rounded-3xl bg-white shadow-lg">
     <div ref={subTileSectionRef} className="flex w-[40%] items-center justify-center gap-x-10 opacity-0">
       <div className="ml-7 rounded-full bg-black/80 p-4 text-white shadow-md">
