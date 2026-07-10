@@ -1,9 +1,12 @@
 import { useRef, useState, type ChangeEvent } from "react"
+import { Send } from "lucide-react"
 import AttachmentMenu from "@shared/components/AttachmentMenu"
 import FilePreviewModal from "../FilePreviewModal"
 import useAuth from "@auth/hooks/useAuth"
 import AudioRecorder from "@shared/components/AudioRecorder"
 import type { ConversationType, FileType, MessageFileMeta } from "@shared/types/components"
+
+const createTempMessageId = () => `temp-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`
 
 interface SendMessageProps {
   setMessageContent: (value: string) => void
@@ -13,6 +16,7 @@ interface SendMessageProps {
   conversationType?: ConversationType
   conversationId?: string
   sendMessage: (payload: any) => void
+  setMessages: (value: any[] | ((prev: any[]) => any[])) => void
 }
 
 const SendMessage = ({
@@ -22,7 +26,8 @@ const SendMessage = ({
   socketRef,
   conversationType = "private",
   conversationId,
-  sendMessage
+  sendMessage,
+  setMessages
 }: SendMessageProps) => {
   const { user } = useAuth()
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
@@ -51,23 +56,43 @@ const SendMessage = ({
     conversationId,
     messageContent,
     messageType,
-    fileMeta = null
+    fileMeta = null,
+    clientTempId,
+    optimisticOnly = false,
+    markFailed = false
   }: {
     conversationId?: string
     messageContent?: string
     messageType: "text" | "file"
     fileMeta?: MessageFileMeta | null
+    clientTempId?: string
+    optimisticOnly?: boolean
+    markFailed?: boolean
   }) => {
     // console.log(conversationId)
 
+    if (markFailed && clientTempId) {
+      setMessages((prev) =>
+        prev.map((message) =>
+          message._id === clientTempId && message.localStatus === "sending"
+            ? { ...message, localStatus: "failed" }
+            : message
+        )
+      )
+      return
+    }
+
     if (!messageContent?.trim() && !fileMeta) return
 
+    const resolvedClientTempId = clientTempId ?? createTempMessageId()
+    const trimmedContent = messageContent?.trim() || ""
     let fileData = {}
 
     const messageData = {
+      clientTempId: resolvedClientTempId,
       conversationId,
       sender: user._id,
-      content: messageContent || "",
+      content: trimmedContent,
       recipient: recipientId,
       messageType,
       conversationType
@@ -78,12 +103,66 @@ const SendMessage = ({
         publicId: fileMeta.public_url,
         url: fileMeta.media_url,
         caption: fileMeta.caption || "",
-        thumbnailUrl: fileMeta.thumbnailUrl || ""
+        thumbnailUrl: fileMeta.thumbnailUrl || "",
+        mediaType: fileMeta.mediaType || attachmentType || "",
+        mimeType: fileMeta.mimeType || "",
+        fileName: fileMeta.fileName || ""
       }
     }
 
+    const optimisticMessage = {
+      _id: resolvedClientTempId,
+      clientTempId: resolvedClientTempId,
+      conversation: conversationId,
+      conversationId,
+      sender: user._id,
+      recipient: recipientId,
+      content: trimmedContent,
+      messageType,
+      conversationType,
+      media:
+        messageType === "file" && fileMeta
+          ? {
+              publicId: fileMeta.public_url,
+              mediaUrl: fileMeta.media_url,
+              caption: fileMeta.caption || "",
+              thumbnailUrl: fileMeta.thumbnailUrl || "",
+              mediaType: fileMeta.mediaType || attachmentType || "",
+              mimeType: fileMeta.mimeType || "",
+              fileName: fileMeta.fileName || ""
+            }
+          : undefined,
+      seenBy: [],
+      createdAt: new Date().toISOString(),
+      localStatus: "sending"
+    }
+
+    setMessages((prev) => {
+      const existingIndex = prev.findIndex((message) => message._id === resolvedClientTempId)
+      if (existingIndex === -1) return [...prev, optimisticMessage]
+
+      return prev.map((message) =>
+        message._id === resolvedClientTempId
+          ? {
+              ...message,
+              content: optimisticMessage.content,
+              media: optimisticMessage.media,
+              localStatus: "sending"
+            }
+          : message
+      )
+    })
+
+    if (optimisticOnly) return
+
     if (socketRef.current) {
       sendMessage({ messageData, fileData })
+    } else {
+      setMessages((prev) =>
+        prev.map((message) =>
+          message._id === resolvedClientTempId ? { ...message, localStatus: "failed" } : message
+        )
+      )
     }
     setMessageContent("")
   }
@@ -205,21 +284,9 @@ const SendMessage = ({
           <button
             onClick={() => handleSendMessage({ conversationId, messageContent, messageType: "text" })}
             className="bg-custom-green rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
+            aria-label="Send message"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-              />
-            </svg>
+            <Send className="size-6" strokeWidth={1.8} />
           </button>
         </div>
       )}

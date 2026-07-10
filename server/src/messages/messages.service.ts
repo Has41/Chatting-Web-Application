@@ -33,23 +33,42 @@ export class MessagesService {
     return { message: 'Reaction added successfully!' }
   }
 
-  async editMessage(messageId: string, content: string) {
+  async editMessage(messageId: string, userId: string, data: { content?: string; caption?: string }) {
     const editedAt = new Date()
 
-    const editMessage = await this.messageModel.findOneAndUpdate(
-      { _id: messageId },
-      { $set: { content, editedAt } },
-      { new: true },
-    )
+    const message = await this.messageModel.findById(messageId)
 
-    if (!editMessage) {
+    if (!message) {
       throw new HttpException('Message not found', HttpStatus.NOT_FOUND)
     }
+
+    if (message.sender.toString() !== userId.toString()) {
+      throw new HttpException('Not authorized to edit this message', HttpStatus.FORBIDDEN)
+    }
+
+    if (message.messageType === 'file') {
+      if (typeof data.caption !== 'string') {
+        throw new HttpException('Caption is required to edit a file message', HttpStatus.BAD_REQUEST)
+      }
+      message.media = {
+        ...message.media,
+        caption: data.caption,
+      }
+    } else {
+      if (typeof data.content !== 'string' || !data.content.trim()) {
+        throw new HttpException('Content is required to edit a text message', HttpStatus.BAD_REQUEST)
+      }
+      message.content = data.content
+    }
+
+    message.editedAt = editedAt
+    const editMessage = await message.save()
 
     return {
       message: 'Message edited successfully!',
       messageId: editMessage._id,
       content: editMessage.content,
+      caption: editMessage.media?.caption,
     }
   }
 

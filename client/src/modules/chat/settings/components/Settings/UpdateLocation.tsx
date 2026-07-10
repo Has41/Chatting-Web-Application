@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
@@ -6,6 +6,7 @@ import countryList from "react-select-country-list"
 import { locationSchema } from "@shared/utils/zodSchema"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
+import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateLocationProps {
   currentLocation?: string
@@ -21,30 +22,37 @@ interface CountryOption {
 }
 
 const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
+  const { refetch } = useAuth()
   const options = useMemo(() => countryList().getData(), [])
-  const defaultCountry = useMemo(() => {
-    const found = options.find((option: CountryOption) => option.label === currentLocation)
-    return found ? found.value : ""
+  const currentCountry = useMemo(() => {
+    const found = options.find((option: CountryOption) => option.label === currentLocation || option.value === currentLocation)
+    return found?.label || currentLocation
   }, [currentLocation, options])
 
   const {
     watch,
     register,
+    reset,
     handleSubmit,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(locationSchema),
-    defaultValues: { location: defaultCountry }
+    defaultValues: { location: currentCountry }
   })
+
+  useEffect(() => {
+    reset({ location: currentCountry })
+  }, [currentCountry, reset])
+
   const location = watch("location")
-  const disableButton = !location || location === defaultCountry
+  const disableButton = !location || location === currentCountry
 
   const { mutate } = useMutation({
     mutationFn: async (data: LocationFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
-      console.log("Location Updated")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -63,7 +71,7 @@ const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
       <select id="location" {...register("location")} className="mt-1 block w-full border-b border-gray-300 p-2 text-sm">
         <option value="">Select your country</option>
         {options.map((option: CountryOption) => (
-          <option key={option.value} value={option.value}>
+          <option key={option.value} value={option.label}>
             {option.label}
           </option>
         ))}
@@ -73,7 +81,7 @@ const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
         type="submit"
         disabled={disableButton}
         className={`bg-custom-green absolute top-6 right-1 flex size-8 items-center justify-center rounded-full text-center ${disableButton ? "cursor-not-allowed" : "cursor-pointer"}`}
-        aria-label="Add Interest"
+        aria-label="Save location"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

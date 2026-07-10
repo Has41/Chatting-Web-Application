@@ -1,9 +1,11 @@
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
+import useAuth from "@auth/hooks/useAuth"
 
 const dateOfBirthSchema = z.object({
   day: z.string().nonempty("Day is required"),
@@ -18,19 +20,17 @@ interface UpdateDateOfBirthProps {
 }
 
 const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
-  let defaultValues = { day: "", month: "", year: "" }
-  if (currentDateOfBirth) {
-    const date = new Date(currentDateOfBirth)
-    defaultValues = {
-      day: String(date.getDate()).padStart(2, "0"),
-      month: String(date.getMonth() + 1).padStart(2, "0"),
-      year: String(date.getFullYear())
-    }
-  }
+  const { refetch } = useAuth()
+  const currentFormattedDate = currentDateOfBirth?.split("T")[0] ?? ""
+  const defaultValues = useMemo(() => {
+    const [year = "", month = "", day = ""] = currentFormattedDate.split("-")
+    return { day, month, year }
+  }, [currentFormattedDate])
 
   const {
     watch,
     register,
+    reset,
     handleSubmit,
     formState: { errors }
   } = useForm({
@@ -38,10 +38,13 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
     defaultValues
   })
 
+  useEffect(() => {
+    reset(defaultValues)
+  }, [defaultValues, reset])
+
   const { day, month, year } = watch()
   const isIncomplete = !day || !month || !year
   const newDateString = day && month && year ? `${year}-${month}-${day}` : ""
-  const currentFormattedDate = currentDateOfBirth ? new Date(currentDateOfBirth).toISOString().split("T")[0] : ""
   const isSameDate = newDateString === currentFormattedDate
   const disableButton = isIncomplete || isSameDate
 
@@ -50,7 +53,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
-      console.log("Display Name Updated")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -59,7 +62,6 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
 
   const onSubmit = (data: DateOfBirthFormData) => {
     const dateString = `${data.year}-${data.month}-${data.day}`
-    const currentFormattedDate = currentDateOfBirth ? new Date(currentDateOfBirth).toISOString().split("T")[0] : ""
 
     if (dateString === currentFormattedDate) {
       console.log("No changes detected. Not submitting.")
@@ -125,7 +127,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
         type="submit"
         disabled={disableButton}
         className={`mt-4 ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} bg-custom-green flex items-center gap-2 rounded-full px-4 py-2 text-center`}
-        aria-label="Save Interest"
+        aria-label="Save date of birth"
       >
         <span className="text-sm font-semibold text-white">Save</span>
         <svg

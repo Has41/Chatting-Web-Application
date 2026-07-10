@@ -46,7 +46,7 @@ export class UsersService {
 
   async getUserById(userId: string) {
     const userData = await this.userModel.findById(userId).select(
-      'username profilePicture displayName',
+      'username profilePicture displayName bio',
     )
 
     if (!userData) {
@@ -145,13 +145,46 @@ export class UsersService {
       )
     }
 
-    const recipient = await this.userModel.findOneAndUpdate(
-      { _id: recipientId, 'friendRequests.from': { $ne: senderId } },
-      { $push: { friendRequests: { from: new Types.ObjectId(senderId) } } },
+    const sender = await this.userModel.findById(senderId).select('friends friendRequests')
+    const recipient = await this.userModel.findById(recipientId).select('friends friendRequests')
+
+    if (!sender || !recipient) {
+      throw new HttpException('User not found!', HttpStatus.NOT_FOUND)
+    }
+
+    const alreadyFriends =
+      sender.friends.some((friend) => friend.toString() === recipientId) ||
+      recipient.friends.some((friend) => friend.toString() === senderId)
+
+    if (alreadyFriends) {
+      throw new HttpException('You are already friends!', HttpStatus.BAD_REQUEST)
+    }
+
+    const incomingRequest = sender.friendRequests.some(
+      (request) => request.from.toString() === recipientId && request.status === 'pending',
+    )
+
+    if (incomingRequest) {
+      throw new HttpException('This user already sent you a friend request!', HttpStatus.BAD_REQUEST)
+    }
+
+    const updatedRecipient = await this.userModel.findOneAndUpdate(
+      {
+        _id: recipientId,
+        friendRequests: {
+          $not: {
+            $elemMatch: {
+              from: new Types.ObjectId(senderId),
+              status: 'pending',
+            },
+          },
+        },
+      },
+      { $push: { friendRequests: { from: new Types.ObjectId(senderId), status: 'pending' } } },
       { new: true },
     )
 
-    if (!recipient) {
+    if (!updatedRecipient) {
       throw new HttpException(
         'Recipient not found or request already sent!',
         HttpStatus.NOT_FOUND,
@@ -162,6 +195,10 @@ export class UsersService {
   }
 
   async respondFriendRequest(userId: string, senderId: string, response: string) {
+    if (!['accepted', 'rejected'].includes(response)) {
+      throw new HttpException('Invalid friend request response.', HttpStatus.BAD_REQUEST)
+    }
+
     const userData = await this.userModel.findById(userId)
     const recipientData = await this.userModel.findById(senderId)
 
@@ -171,7 +208,12 @@ export class UsersService {
 
     const verifyFriendRequest = await this.userModel.findOne({
       _id: userId,
-      'friendRequests.from': new Types.ObjectId(senderId),
+      friendRequests: {
+        $elemMatch: {
+          from: new Types.ObjectId(senderId),
+          status: 'pending',
+        },
+      },
     })
 
     if (!verifyFriendRequest) {
@@ -179,7 +221,7 @@ export class UsersService {
     }
 
     const specificRequestIndex = userData.friendRequests.findIndex(
-      (result) => result.from.toString() === senderId.toString(),
+      (result) => result.from.toString() === senderId.toString() && result.status === 'pending',
     )
 
     if (specificRequestIndex === -1) {
@@ -187,9 +229,14 @@ export class UsersService {
     }
 
     if (response === 'accepted') {
-      userData.friends.push(new Types.ObjectId(senderId))
-      recipientData.friends.push(new Types.ObjectId(userId))
-      await recipientData.save()
+      await this.userModel.updateOne(
+        { _id: userId },
+        { $addToSet: { friends: new Types.ObjectId(senderId) } },
+      )
+      await this.userModel.updateOne(
+        { _id: senderId },
+        { $addToSet: { friends: new Types.ObjectId(userId) } },
+      )
     }
 
     userData.friendRequests.splice(specificRequestIndex, 1)
@@ -312,18 +359,14 @@ export class UsersService {
       throw new HttpException('Friend not found!', HttpStatus.NOT_FOUND)
     }
 
-    const specificUserFriendIndex = currentuserData.friends.findIndex(
-      (id) => id.toString() === friendId.toString(),
+    await this.userModel.updateOne(
+      { _id: userId },
+      { $pull: { friends: new Types.ObjectId(friendId) } },
     )
-    currentuserData.friends.splice(specificUserFriendIndex, 1)
-
-    const specificFriendIndex = friendData.friends.findIndex(
-      (id) => id.toString() === userId.toString(),
+    await this.userModel.updateOne(
+      { _id: friendId },
+      { $pull: { friends: new Types.ObjectId(userId) } },
     )
-    friendData.friends.splice(specificFriendIndex, 1)
-
-    await currentuserData.save()
-    await friendData.save()
 
     return { message: 'Friend removed successfully!' }
   }
@@ -415,7 +458,7 @@ export class UsersService {
   }
 
   async searchUsersOrFriends(userId: string, dataToSearch: string) {
-    const currentUser = await this.userModel.findById(userId).select('friends')
+    const currentUser = await this.userModel.findById(userId).select('friends friendRequests')
     if (!currentUser) {
       throw new HttpException('User not found!', HttpStatus.NOT_FOUND)
     }
@@ -443,6 +486,9 @@ export class UsersService {
       isFriend: friendsIds.includes(user._id.toString()),
       isRequestSent: user.friendRequests.some(
         (req) => req.from.toString() === userId && req.status === 'pending',
+      ),
+      hasIncomingRequest: currentUser.friendRequests?.some(
+        (req) => req.from.toString() === user._id.toString() && req.status === 'pending',
       ),
     }))
 

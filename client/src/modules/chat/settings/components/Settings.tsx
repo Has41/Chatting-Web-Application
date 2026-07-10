@@ -7,6 +7,7 @@ import ThemeSettings from "./Settings/ThemeSettings"
 const Settings = () => {
   const { user } = useAuth()
   const [openSection, setOpenSection] = useState<string | null>("")
+  const profilePictureUrl = user?.profilePicture?.url
 
   const toggleSection = (section: string) => {
     setOpenSection((prevSection) => (prevSection === section ? null : section))
@@ -21,11 +22,13 @@ const Settings = () => {
         <h2 className="mb-4 p-3 text-xl font-semibold text-black/80">Settings</h2>
         <div className="mb-8 flex flex-col items-center">
           <div className="relative">
-            <img
-              src={user?.profilePicture?.url}
-              alt="Profile"
-              className="h-20 w-20 rounded-full border-2 border-white shadow"
-            />
+            {profilePictureUrl ? (
+              <img src={profilePictureUrl} alt="Profile" className="h-20 w-20 rounded-full border-2 border-white shadow" />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-white bg-slate-300 text-xl font-semibold text-white shadow">
+                {user?.username?.charAt(0).toUpperCase() || "U"}
+              </div>
+            )}
             <button
               className="absolute right-1 bottom-1 rounded-full border border-gray-300 bg-gray-100 p-1 shadow-sm hover:bg-gray-200"
               aria-label="Change Profile Picture"

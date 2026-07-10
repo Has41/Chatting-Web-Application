@@ -4,9 +4,10 @@ import type { Dispatch, SetStateAction } from "react"
 interface EditMessageModalProps {
   setEditContent: Dispatch<SetStateAction<string>>
   setShowEditModal: Dispatch<SetStateAction<boolean>>
-  editMessage: (payload: { messageId: string; content: string }) => void
+  editMessage: (payload: { messageId: string; content: string; field?: "content" | "caption" }) => void
   editContent: string
   editingMessageId: string
+  editField?: "content" | "caption"
 }
 
 const EditMessageModal = ({
@@ -14,7 +15,8 @@ const EditMessageModal = ({
   setShowEditModal,
   editMessage,
   editContent,
-  editingMessageId
+  editingMessageId,
+  editField = "content"
 }: EditMessageModalProps) => {
   return createPortal(
     <div className="bg-opacity-50 font-poppins fixed inset-0 z-50 flex items-center justify-center bg-black">
@@ -30,7 +32,7 @@ const EditMessageModal = ({
         <div className="mt-6 flex flex-col gap-2">
           <button
             onClick={() => {
-              editMessage({ messageId: editingMessageId, content: editContent })
+              editMessage({ messageId: editingMessageId, content: editContent, field: editField })
               setShowEditModal(false)
             }}
             className="bg-custom-green w-full rounded-md px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"

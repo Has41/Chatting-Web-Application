@@ -2,14 +2,15 @@ import usePDFMetaData from "@shared/hooks/usePDFMetaData"
 import truncateText from "@shared/utils/truncateText"
 import pdfIcon from "@/assets/pdf_icon.png"
 
-const PDFMeta = ({ mediaUrl }: { mediaUrl: string; fileName?: string }) => {
-  const { numPages, fileName } = usePDFMetaData(mediaUrl)
+const PDFMeta = ({ mediaUrl, fileName }: { mediaUrl: string; fileName?: string }) => {
+  const { numPages, fileName: fallbackFileName } = usePDFMetaData(mediaUrl)
+  const displayFileName = fileName || fallbackFileName
 
   return (
     <div className="flex items-center gap-x-4 rounded-lg bg-green-400 p-2 shadow">
       <img src={pdfIcon} alt="PDF icon" className="size-8 flex-shrink-0" />
       <div className="flex flex-col gap-y-2">
-        <span className="max-w-xs truncate text-sm font-medium text-white">{truncateText(fileName, 20, 20)}</span>
+        <span className="max-w-xs truncate text-sm font-medium text-white">{truncateText(displayFileName, 20, 20)}</span>
         {numPages != null ? (
           <span className="text-xs text-white">
             {numPages} page{numPages > 1 ? "s" : ""}

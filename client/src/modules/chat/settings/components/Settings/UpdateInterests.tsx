@@ -1,22 +1,28 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
+import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateInterestsProps {
   currentInterests?: string[]
 }
 
 const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
+  const { refetch } = useAuth()
   const [interests, setInterests] = useState<string[]>(currentInterests)
   const [input, setInput] = useState("")
+
+  useEffect(() => {
+    setInterests(currentInterests)
+  }, [currentInterests])
 
   const { mutate: insertInterest } = useMutation({
     mutationFn: async (data: { newInterest: string }) => {
       return await axiosInstance.post(USER_PATHS.ADD_INTEREST, data)
     },
     onSuccess: () => {
-      console.log("Interest Added!")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -28,7 +34,7 @@ const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
       return await axiosInstance.delete(USER_PATHS.REMOVE_INTEREST, { data })
     },
     onSuccess: () => {
-      console.log("Interest Removed")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -36,9 +42,9 @@ const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
   })
 
   const addUserInterest = () => {
-    if (input.trim()) {
-      setInterests((prev: string[]) => [...prev, input.trim()])
-      const newInterest = input.trim()
+    const newInterest = input.trim()
+    if (newInterest && !interests.includes(newInterest)) {
+      setInterests((prev: string[]) => [...prev, newInterest])
       setInput("")
       insertInterest({ newInterest })
     }

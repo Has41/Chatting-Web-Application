@@ -1,5 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
 @import "./variables.css";
 @import "tailwindcss";
+
+@theme {
+  --color-custom-green: #96e6a1;
+  --color-custom-white: #faf9f6;
+  --color-custom-text: #96e6a1;
+  --color-custom-border: #96e6a1;
+  --background-image-dusty-grass: linear-gradient(15deg, #d4fc79 0%, #96e6a1 100%);
+  --background-image-button-color: linear-gradient(1deg, #d4fc79 0%, #96e6a1 100%);
+  --font-poppins: "Poppins", sans-serif;
+  --font-mont: "Montserrat", sans-serif;
+  --shadow-right: 10px 0 15px -3px rgba(0, 0, 0, 0.3);
+  --radius-sent: 18px 18px 0 18px;
+  --radius-recieved: 18px 18px 18px 0;
+  --animate-ping-slow: ping-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-slideInRight: slideInRight 0.5s ease-in-out forwards;
+  --animate-slideInLeft: slideInLeft 0.5s ease-in-out backwards;
+  --animate-fadeIn: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes ping-slow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 *:focus {
   outline: none !important;

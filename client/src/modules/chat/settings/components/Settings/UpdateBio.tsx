@@ -1,9 +1,11 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { bioSchema } from "@shared/utils/zodSchema"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
+import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateBioProps {
   currentBio?: string
@@ -14,15 +16,21 @@ interface BioFormData {
 }
 
 const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
+  const { refetch } = useAuth()
   const {
     watch,
     register,
+    reset,
     handleSubmit,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(bioSchema),
     defaultValues: { bio: currentBio }
   })
+
+  useEffect(() => {
+    reset({ bio: currentBio })
+  }, [currentBio, reset])
 
   const bio = watch("bio")
   const disableButton = !bio || bio === currentBio
@@ -32,7 +40,7 @@ const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
-      console.log("Display Name Updated")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -60,7 +68,7 @@ const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
         disabled={disableButton}
         type="submit"
         className={`bg-custom-green absolute top-6 right-2 flex h-8 w-8 items-center justify-center rounded-full ${disableButton ? "cursor-not-allowed" : "cursor-pointer"} text-center`}
-        aria-label="Add Interest"
+        aria-label="Save bio"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

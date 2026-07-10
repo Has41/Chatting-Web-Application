@@ -9,6 +9,9 @@ export interface MessageFileMeta {
   media_url: string
   caption?: string
   thumbnailUrl?: string
+  mediaType?: FileType
+  mimeType?: string
+  fileName?: string
 }
 
 export interface SendMessagePayload {
@@ -17,6 +20,9 @@ export interface SendMessagePayload {
   fileMeta?: MessageFileMeta
   content?: string
   messageContent?: string
+  clientTempId?: string
+  optimisticOnly?: boolean
+  markFailed?: boolean
 }
 
 export interface FilePreviewModalProps {

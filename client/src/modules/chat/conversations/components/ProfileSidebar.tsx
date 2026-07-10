@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import useChatList from "@chat/conversations/hooks/useChatList"
+import ChatInfoFiles from "./ChatInfoFiles"
 import type { Dispatch, SetStateAction } from "react"
 import type { Conversation, User } from "@shared/types"
 
@@ -16,10 +17,11 @@ interface ProfileSidebarProps {
   isOpen: boolean
   onClose: () => void
   data: ProfileSidebarData | null
+  conversationId?: string
   setData?: Dispatch<SetStateAction<Conversation | null>>
 }
 
-const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSidebarProps) => {
+const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () => {} }: ProfileSidebarProps) => {
   const { chatList, setChatList } = useChatList()
   const [isEditing, setIsEditing] = useState(false)
   const [isEditingInfo, setIsEditingInfo] = useState(false)
@@ -67,19 +69,6 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
     }
   })
 
-  // const { data: mediaURL = [] } = useQuery({
-  //   queryKey: CONVERSATION_PATHS.GET_CURRENT_MEDIA,
-  //   queryFn: async (convoId) => {
-  //     return axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_MEDIA}/${convoId}`)
-  //   },
-  //   onSuccess: () => {
-  //     console.log("Successfully got media!")
-  //   },
-  //   onError: (error) => {
-  //     console.error(error)
-  //   }
-  // })
-
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
   }
@@ -95,6 +84,8 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
 
   const ownerUser = data?.groupOwner && typeof data.groupOwner !== "string" ? data.groupOwner : null
   const ownerMatch = Boolean(searchQuery && ownerUser?.username?.toLowerCase().includes(searchQuery.toLowerCase()))
+  const profilePictureUrl = "profilePicture" in (data ?? {}) ? data?.profilePicture?.url : undefined
+  const aboutText = data?.conversationType ? data?.groupInfo : "bio" in (data ?? {}) ? data?.bio : ""
 
   return (
     <>
@@ -110,12 +101,12 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
       )}
 
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-80 transform bg-white shadow-lg transition-transform duration-300 ${
+        className={`fixed top-0 right-0 z-50 h-full w-80 transform overflow-y-auto bg-white shadow-lg transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between border-b p-4">
-          <h3 className="text-lg font-semibold">{data?.conversationType ? "Group Info" : "Profile Info"}</h3>
+          <h3 className="text-lg font-semibold">{data?.conversationType ? "Group Info" : "Chat Info"}</h3>
           <button
             onClick={() => {
               setIsEditingInfo(false)
@@ -133,12 +124,12 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
             <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-gray-300 text-xl font-semibold text-white">
               {data?.groupName?.charAt(0).toUpperCase()}
             </div>
+          ) : profilePictureUrl ? (
+            <img src={profilePictureUrl} alt="Profile" className="mx-auto h-24 w-24 rounded-full object-cover" />
           ) : (
-            <img
-              src={"profilePicture" in (data ?? {}) ? data?.profilePicture?.url : undefined}
-              alt="Profile"
-              className="mx-auto h-24 w-24 rounded-full object-cover"
-            />
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-300 text-xl font-semibold text-white">
+              {("username" in (data ?? {}) ? data?.username?.charAt(0).toUpperCase() : undefined) || "U"}
+            </div>
           )}
           <div className="mt-4 flex items-center justify-center gap-2">
             {isEditing && data?.conversationType ? (
@@ -225,7 +216,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
               </>
             ) : (
               <div className="flex items-center justify-center gap-2">
-                <p>{data?.groupInfo || "No bio available"}</p>
+                <p>{aboutText || (data?.conversationType ? "No group info available" : "No bio available")}</p>
                 {data?.conversationType && (
                   <button
                     onClick={() => setIsEditingInfo(true)}
@@ -272,7 +263,8 @@ const ProfileSidebar = ({ isOpen, onClose, data, setData = () => {} }: ProfileSi
             ))}
           </div>
         </div>
-        {/* Media is here */}
+        <ChatInfoFiles conversationId={conversationId} />
+
         {data?.conversationType && (
           <div className="mt-6 max-h-[35%] overflow-y-auto border-t px-4 pt-4">
             <h4 className="text-md mb-2 font-semibold">Members ({(data?.participants?.length || 0) + 1})</h4>

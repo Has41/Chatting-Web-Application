@@ -1,185 +1,232 @@
-import { useState, type ChangeEvent } from "react"
+import { useEffect, useState, type ChangeEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import { getNewChatRoute } from "@shared/constants/routePaths"
 import { Link } from "react-router-dom"
+import { Check, Clock, MessageCircle, Search, UserPlus, UserRound, X } from "lucide-react"
 import type { User } from "@shared/types"
 
 interface UserSearchResult extends User {
   isFriend?: boolean
   isRequestSent?: boolean
+  hasIncomingRequest?: boolean
 }
 
-const UserSearch = () => {
+interface UserSearchProps {
+  variant?: "dropdown" | "panel"
+  placeholder?: string
+  autoFocus?: boolean
+}
+
+const UserSearch = ({
+  variant = "dropdown",
+  placeholder = "Search people to start a chat",
+  autoFocus = false
+}: UserSearchProps) => {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
   const [userResults, setUserResults] = useState<UserSearchResult[]>([])
+  const isPanel = variant === "panel"
 
-  useQuery({
-    queryKey: ["userSearch"],
+  const { data: searchData, error: searchError, isFetching } = useQuery({
+    queryKey: ["userSearch", searchQuery],
     queryFn: async () => {
-      return await axiosInstance.get(USER_PATHS.SEARCH_FRIENDS_USERS, {
-        params: { dataToSearch: searchQuery }
+      const response = await axiosInstance.get(USER_PATHS.SEARCH_FRIENDS_USERS, {
+        params: { dataToSearch: searchQuery.trim() }
       })
+      return response.data as UserSearchResult[]
     },
-    onSuccess: ({ data }: { data: UserSearchResult[] }) => {
-      setUserResults(data)
-      console.log(data)
-    },
-    onError: (error: unknown) => {
-      console.error("Error fetching user search results:", error)
-      setUserResults([])
-    },
-    enabled: searchQuery.length >= 3
+    enabled: searchQuery.trim().length >= 3
   })
 
-  const { mutate: sendFriendRequest } = useMutation({
-    mutationFn: async (userId: string) => {
-      return await axiosInstance.post(`${USER_PATHS.SEND_FRIEND_REQUEST}/${userId}`)
-    },
-    onSuccess: (data: unknown) => {
-      console.log("Friend request sent successfully:", data)
-      queryClient.invalidateQueries(["userSearch"])
-      //   setUserResults((prev) => prev.map((user) => (user._id === data._id ? { ...user, isRequestSent: true } : user)))
-    },
-    onError: (error: unknown) => {
-      console.error("Error sending friend request:", error)
-    }
-  })
+  useEffect(() => {
+    if (!searchData) return
+    setUserResults(searchData)
+  }, [searchData])
+
+  useEffect(() => {
+    if (!searchError) return
+    console.error("Error fetching user search results:", searchError)
+    setUserResults([])
+  }, [searchError])
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    if (e.target.value.length < 3) {
+    const value = e.target.value
+    setSearchQuery(value)
+
+    if (value.trim().length < 3) {
       setUserResults([])
     }
   }
+
   const handleClearSearch = () => {
     setSearchQuery("")
     setUserResults([])
   }
 
+  const { mutate: sendFriendRequest, isPending: isSendingRequest } = useMutation({
+    mutationFn: async (userId: string) => {
+      return axiosInstance.post(`${USER_PATHS.SEND_FRIEND_REQUEST}/${userId}`)
+    },
+    onSuccess: (_data, userId) => {
+      setUserResults((prev) => prev.map((result) => (result._id === userId ? { ...result, isRequestSent: true } : result)))
+      queryClient.invalidateQueries({ queryKey: ["userSearch"] })
+      queryClient.invalidateQueries({ queryKey: ["friendList&Requests"] })
+    },
+    onError: (error) => {
+      console.error("Error sending friend request:", error)
+    }
+  })
+
+  const shouldShowResults = searchQuery.trim().length >= 3
+  const resultsContent = (
+    <div className={isPanel ? "mt-4" : "absolute top-full right-0 left-0 z-10 mt-3 rounded-md bg-white p-3 shadow-lg"}>
+      <div className="flex items-center justify-between border-b border-slate-200 px-2 py-2">
+        <h3 className="text-sm font-semibold text-slate-800">People</h3>
+        {!isPanel && (
+          <button className="text-slate-500 hover:text-slate-700" onClick={handleClearSearch} aria-label="Clear search">
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
+
+      {isFetching ? (
+        <div className="space-y-2 px-2 py-3">
+          {[0, 1, 2].map((item) => (
+            <div key={item} className="flex animate-pulse items-center gap-3 rounded-md p-2">
+              <div className="size-10 rounded-full bg-slate-200" />
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 h-3 w-2/3 rounded bg-slate-200" />
+                <div className="h-2 w-1/3 rounded bg-slate-100" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : userResults.length > 0 ? (
+        <ul className={isPanel ? "max-h-72 overflow-y-auto py-2" : "max-h-80 overflow-y-auto py-2"}>
+          {userResults.map((result) => {
+            const canSendRequest = !result.isFriend && !result.isRequestSent && !result.hasIncomingRequest
+
+            return (
+              <li key={result._id} className="flex items-center gap-2 rounded-md p-2 transition hover:bg-slate-100">
+                <Link
+                  to={getNewChatRoute(result._id)}
+                  onClick={handleClearSearch}
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                >
+                  {result.profilePicture?.url ? (
+                    <img
+                      src={result.profilePicture.url}
+                      alt={result.displayName || result.username}
+                      className="size-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <UserRound className="size-5" />
+                    </div>
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-slate-800">
+                        {result.displayName || result.username}
+                      </p>
+                      {result.isFriend && (
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[0.65rem] font-semibold text-emerald-700">
+                          Friend
+                        </span>
+                      )}
+                    </div>
+                    <p className="truncate text-xs text-slate-500">@{result.username}</p>
+                  </div>
+
+                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-emerald-400 text-white">
+                    <MessageCircle className="size-4" />
+                  </span>
+                </Link>
+
+                {canSendRequest ? (
+                  <button
+                    type="button"
+                    onClick={() => sendFriendRequest(result._id)}
+                    disabled={isSendingRequest}
+                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-emerald-300 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    title="Send friend request"
+                    aria-label={`Send friend request to ${result.username}`}
+                  >
+                    <UserPlus className="size-4" />
+                  </button>
+                ) : result.isRequestSent ? (
+                  <span
+                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700"
+                    title="Friend request sent"
+                    aria-label="Friend request sent"
+                  >
+                    <Clock className="size-4" />
+                  </span>
+                ) : result.hasIncomingRequest ? (
+                  <span
+                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700"
+                    title="They sent you a request"
+                    aria-label="Incoming friend request"
+                  >
+                    <Clock className="size-4" />
+                  </span>
+                ) : (
+                  <span
+                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
+                    title="Already friends"
+                    aria-label="Already friends"
+                  >
+                    <Check className="size-4" />
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <div className="px-3 py-6 text-center text-sm text-slate-500">No matching users found</div>
+      )}
+    </div>
+  )
+
   return (
-    <>
-      <div className="relative mx-auto mb-4 w-11/12">
+    <div className={`relative ${isPanel ? "mx-auto w-full max-w-xl" : "mx-auto mb-4 w-11/12"}`}>
+      <div className="relative">
         <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-5 w-5 text-gray-400"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-4.35-4.35m2.7-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0z"
-            />
-          </svg>
+          <Search className="size-5 text-slate-400" aria-hidden="true" />
         </span>
         <input
           value={searchQuery}
           onChange={handleSearchChange}
           type="text"
-          placeholder="Search friends or users"
-          className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
-          aria-label="Search Chats"
+          placeholder={placeholder}
+          autoFocus={autoFocus}
+          className={`w-full rounded bg-white p-3 pl-11 text-sm text-slate-800 shadow-sm ring-1 ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-300 focus:outline-none ${
+            isPanel ? "h-12" : "bg-slate-100 shadow-none"
+          }`}
+          aria-label="Search users"
         />
-        {searchQuery.length >= 3 && userResults.length > 0 && (
-          <div className="absolute top-full right-0 left-0 z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
-            <div className="flex items-center justify-between border-b border-gray-200 px-2 py-1">
-              <h3 className="font-semibold text-gray-800">Search Results</h3>
-              <button className="text-gray-500 hover:text-gray-700" onClick={handleClearSearch} aria-label="Clear search">
-                &#x2715;
-              </button>
-            </div>
-            <ul>
-              {userResults.map((u) => (
-                <Link
-                  to={getNewChatRoute(u._id)}
-                  key={u._id}
-                  className="mt-1 flex items-center justify-between space-x-2 p-4 hover:bg-gray-100"
-                >
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src={u?.profilePicture?.url || "https://via.placeholder.com/40"}
-                      alt={u?.username}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">{u.username}</span>
-                    </div>
-                  </div>
-
-                  {u.isFriend ? (
-                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-                        />
-                      </svg>
-                    </span>
-                  ) : u.isRequestSent ? (
-                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                        />
-                      </svg>
-                    </span>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        sendFriendRequest(u._id)
-                        console.log("Send friend request to:", u.username)
-                      }}
-                      className="rounded-full bg-green-400 px-2 py-1 text-xs text-white hover:bg-green-500"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </Link>
-              ))}
-            </ul>
-          </div>
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={handleClearSearch}
+            className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+            aria-label="Clear search"
+          >
+            <X className="size-4" />
+          </button>
         )}
       </div>
-    </>
+
+      {shouldShowResults ? (
+        resultsContent
+      ) : isPanel ? (
+        <p className="mt-3 text-center text-xs text-slate-500">Type at least 3 characters to find someone.</p>
+      ) : null}
+    </div>
   )
 }
 

@@ -5,6 +5,9 @@ import useAuth from "@auth/hooks/useAuth"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import PDFPreview from "@shared/components/PDFPreview"
 import type { FilePreviewModalProps } from "@shared/types/components"
+import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
+
+const createTempMessageId = () => `temp-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`
 
 const FilePreviewModal = ({
   file,
@@ -21,12 +24,19 @@ const FilePreviewModal = ({
   const [caption, setCaption] = useState("")
   const [isSending, setIsSending] = useState(false)
   const [url, setUrl] = useState<string | null>(null)
+  const resolvedFileType = file
+    ? resolveFilePreviewType({
+        mimeType: file.type,
+        fileName: file.name
+      })
+    : "other"
+  const actualAttachmentType =
+    resolvedFileType === "image" || resolvedFileType === "video" || resolvedFileType === "audio" ? resolvedFileType : "document"
 
   useEffect(() => {
     if (file) {
       const objectUrl = URL.createObjectURL(file)
       setUrl(objectUrl)
-      console.log(file)
 
       setIsVisible(true)
       return () => URL.revokeObjectURL(objectUrl)
@@ -40,33 +50,71 @@ const FilePreviewModal = ({
 
   const handleFileSend = async () => {
     if (!file) return
-    setIsSending(true)
-    const res = await uploadFile(
-      file,
-      conversationType === "private"
-        ? `${ROOT_FOLDER}/${user?._id}/chat-uploads/chat-with-${recipientId}`
-        : `${ROOT_FOLDER}/${user?._id}/chat-uploads/group-${conversationId}`,
-      file.type,
-      type
-    )
+    const clientTempId = createTempMessageId()
+    const localPreviewUrl = URL.createObjectURL(file)
 
-    if (res?.secure_url) {
-      const fileMeta = {
-        public_url: res?.public_id,
-        media_url: res?.secure_url,
+    onSend({
+      messageType: "file",
+      fileMeta: {
+        media_url: localPreviewUrl,
         caption,
-        thumbnailUrl: res?.eager?.[0]?.secure_url || ""
-      }
+        thumbnailUrl: "",
+        mediaType: actualAttachmentType,
+        mimeType: file.type,
+        fileName: file.name
+      },
+      conversationId,
+      clientTempId,
+      optimisticOnly: true
+    })
 
+    setIsSending(true)
+    handleClose()
+
+    try {
+      const res = await uploadFile(
+        file,
+        conversationType === "private"
+          ? `${ROOT_FOLDER}/${user?._id}/chat-uploads/chat-with-${recipientId}`
+          : `${ROOT_FOLDER}/${user?._id}/chat-uploads/group-${conversationId}`,
+        file.type,
+        actualAttachmentType
+      )
+
+      if (res?.secure_url) {
+        const fileMeta = {
+          public_url: res?.public_id,
+          media_url: res?.secure_url,
+          caption,
+          thumbnailUrl: res?.eager?.[0]?.secure_url || "",
+          mediaType: actualAttachmentType,
+          mimeType: file.type,
+          fileName: file.name
+        }
+
+        onSend({
+          messageType: "file",
+          fileMeta,
+          conversationId,
+          clientTempId
+        })
+      } else {
+        onSend({
+          messageType: "file",
+          conversationId,
+          clientTempId,
+          markFailed: true
+        })
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error)
       onSend({
         messageType: "file",
-        fileMeta,
-        conversationId
+        conversationId,
+        clientTempId,
+        markFailed: true
       })
     }
-
-    setIsSending(false)
-    handleClose()
   }
 
   if (!file || !url) return null
@@ -84,14 +132,14 @@ const FilePreviewModal = ({
         </button>
       </div>
       <div className="my-4 flex justify-center">
-        {type === "image" && (
+        {resolvedFileType === "image" && (
           <div className="flex h-64 w-full items-center justify-center overflow-hidden">
             <img src={url} alt="preview" className="max-h-full max-w-full rounded object-contain" />
           </div>
         )}
-        {type === "video" && <video src={url} controls className="max-h-48 rounded" />}
-        {type === "audio" && <audio src={url} controls className="w-full" />}
-        {type === "document" && (
+        {resolvedFileType === "video" && <video src={url} controls className="max-h-48 rounded" />}
+        {resolvedFileType === "audio" && <audio src={url} controls className="w-full" />}
+        {actualAttachmentType === "document" && (
           <div className="flex h-72 w-full items-center justify-center rounded p-4">
             {file.type === "application/pdf" ? (
               <PDFPreview fileUrl={url} />

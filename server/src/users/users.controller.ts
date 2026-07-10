@@ -9,11 +9,18 @@ import {
   Query,
   UseGuards,
   Res,
+  Req,
   HttpStatus,
 } from '@nestjs/common'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { UsersService } from './users.service.js'
 import { JwtAuthGuard } from '../auth/jwt.strategy.js'
+
+type AuthenticatedRequest = Request & {
+  user?: {
+    id: string
+  }
+}
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -21,8 +28,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('get-info')
-  async getUserInfo(@Body() body: { userId: string }, @Res() response: Response) {
-    const user = await this.usersService.getUserInfo(body.userId)
+  async getUserInfo(@Req() request: AuthenticatedRequest, @Res() response: Response) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const user = await this.usersService.getUserInfo(userId)
     return response.status(HttpStatus.OK).json(user)
   }
 
@@ -35,109 +48,185 @@ export class UsersController {
   @Patch('edit-info')
   async editUserInfo(
     @Body() body: any,
-    @Body('userId') userId: string,
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.usersService.editUserInfo(userId, body)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Delete('delete-account')
-  async deleteUserAcc(@Body() body: { userId: string }, @Res() response: Response) {
-    const result = await this.usersService.deleteUserAcc(body.userId)
+  async deleteUserAcc(@Req() request: AuthenticatedRequest, @Res() response: Response) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.deleteUserAcc(userId)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Post('add-interests')
   async addUserInterest(
-    @Body() body: { userId: string; newInterest: string },
+    @Body() body: { newInterest: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
-    const result = await this.usersService.addUserInterest(body.userId, body.newInterest)
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.addUserInterest(userId, body.newInterest)
     return response.status(HttpStatus.CREATED).json(result)
   }
 
   @Delete('remove-interests')
   async removeUserInterest(
-    @Body() body: { userId: string; interestToRemove: string },
+    @Body() body: { interestToRemove: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
-    const result = await this.usersService.removeUserInterest(body.userId, body.interestToRemove)
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.removeUserInterest(userId, body.interestToRemove)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Patch('toggle-darkmode')
   async toggleDarkMode(
-    @Body() body: { userId: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
-    const result = await this.usersService.toggleDarkMode(body.userId)
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.toggleDarkMode(userId)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Post('send-friend-request/:userId')
   async sendFriendRequest(
     @Param('userId') recipientId: string,
-    @Body() body: { senderId: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
-    const result = await this.usersService.sendFriendRequest(body.senderId, recipientId)
+    const senderId = request.user?.id
+
+    if (!senderId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.sendFriendRequest(senderId, recipientId)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Post('respond-friend-request/:userId')
   async respondFriendRequest(
     @Param('userId') senderId: string,
-    @Body() body: { userId: string; response: string },
+    @Body() body: { response: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
-    const result = await this.usersService.respondFriendRequest(body.userId, senderId, body.response)
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.respondFriendRequest(userId, senderId, body.response)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Get('get-friends-and-requests')
   async getFriendsAndRequests(
-    @Query('userId') userId: string,
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.usersService.getFriendsAndRequests(userId)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Get('get-friends-and-conversations')
   async getFriendsAndConversations(
-    @Query('userId') userId: string,
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.usersService.getFriendsAndConversations(userId)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Delete('remove-friend')
   async removeFriends(
-    @Body() body: { userId: string; friendId: string },
+    @Body() body: { friendId: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
-    const result = await this.usersService.removeFriends(body.userId, body.friendId)
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.usersService.removeFriends(userId, body.friendId)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Get('search-user-conversations-data')
   async searchConversationUsersAndContent(
-    @Query('userId') userId: string,
     @Query('dataToSearch') dataToSearch: string,
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.usersService.searchConversationUsersAndContent(userId, dataToSearch)
     return response.status(HttpStatus.OK).json(result)
   }
 
   @Get('search-friends-users')
   async searchUsersOrFriends(
-    @Query('userId') userId: string,
     @Query('dataToSearch') dataToSearch: string,
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.usersService.searchUsersOrFriends(userId, dataToSearch)
     return response.status(HttpStatus.OK).json(result)
   }

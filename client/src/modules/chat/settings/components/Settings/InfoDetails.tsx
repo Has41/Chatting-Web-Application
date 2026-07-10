@@ -1,4 +1,3 @@
-import React, { useMemo, useState } from "react"
 import useAuth from "@auth/hooks/useAuth"
 import UpdateDisplayName from "./UpdateDisplayName"
 import UpdateDateOfBirth from "./UpdateDateOfBirth"

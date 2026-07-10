@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
@@ -30,16 +30,25 @@ const GroupChatbox = () => {
     type: "group"
   })
 
-  useQuery({
+  const { data: groupResponse, error: groupError } = useQuery({
     queryKey: ["groupConversation", conversationId],
-    queryFn: async () => await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`),
-    onSuccess: ({ data }: { data: any }) => {
-      setGroupData(data.conversation)
-      setLastMessage(data.conversation.lastMessage)
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`)
+      return response.data
     },
-    onError: (err: unknown) => console.error("Failed to load group:", err),
     enabled: !!conversationId
   })
+
+  useEffect(() => {
+    if (!groupResponse) return
+    setGroupData(groupResponse.conversation)
+    setLastMessage(groupResponse.conversation.lastMessage)
+  }, [groupResponse])
+
+  useEffect(() => {
+    if (!groupError) return
+    console.error("Failed to load group:", groupError)
+  }, [groupError])
 
   // const handleSendMessage = () => {
   //   if (!messageContent.trim()) return
@@ -101,6 +110,7 @@ const GroupChatbox = () => {
         setData={setGroupData}
         onClose={() => setIsSidebarOpen(false)}
         data={groupData}
+        conversationId={conversationId}
       />
 
       <ChatMessages
@@ -115,6 +125,7 @@ const GroupChatbox = () => {
 
       <SendMessage
         sendMessage={sendMessage}
+        setMessages={setMessages}
         conversationId={conversationId}
         socketRef={socketRef}
         conversationType={"group"}

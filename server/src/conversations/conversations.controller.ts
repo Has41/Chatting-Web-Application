@@ -9,11 +9,18 @@ import {
   Query,
   UseGuards,
   Res,
+  Req,
   HttpStatus,
 } from '@nestjs/common'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { ConversationsService } from './conversations.service.js'
 import { JwtAuthGuard } from '../auth/jwt.strategy.js'
+
+type AuthenticatedRequest = Request & {
+  user?: {
+    id: string
+  }
+}
 
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)
@@ -64,9 +71,15 @@ export class ConversationsController {
 
   @Get('get-conversations')
   async getConversationsOfUser(
-    @Query('userId') userId: string,
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.getConversationsOfUser(userId)
     return response.status(HttpStatus.OK).json(result)
   }
@@ -74,16 +87,22 @@ export class ConversationsController {
   @Post('create-group')
   async createGroupConversation(
     @Body() body: {
-      groupOwnerId: string
       participants: string[]
       groupName?: string
       groupPicture?: any
       groupInfo?: string
     },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const groupOwnerId = request.user?.id
+
+    if (!groupOwnerId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.createGroupConversation(
-      body.groupOwnerId,
+      groupOwnerId,
       {
         participants: body.participants,
         groupName: body.groupName,
@@ -97,12 +116,19 @@ export class ConversationsController {
   @Patch('edit-group-info/:convoId')
   async updateGroupConversation(
     @Param('convoId') convoId: string,
-    @Body() body: { groupOwnerId: string; groupName?: string; groupPicture?: any; groupInfo?: string },
+    @Body() body: { groupName?: string; groupPicture?: any; groupInfo?: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const groupOwnerId = request.user?.id
+
+    if (!groupOwnerId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.updateGroupConversation(
       convoId,
-      body.groupOwnerId,
+      groupOwnerId,
       {
         groupName: body.groupName,
         groupPicture: body.groupPicture,
@@ -115,12 +141,18 @@ export class ConversationsController {
   @Patch('leave-group/:convoId')
   async leaveGroupConversation(
     @Param('convoId') convoId: string,
-    @Body() body: { userId: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.leaveGroupConversation(
       convoId,
-      body.userId,
+      userId,
     )
     return response.status(HttpStatus.OK).json(result)
   }
@@ -128,12 +160,19 @@ export class ConversationsController {
   @Post('add-participants/:convoId')
   async addGroupParticipants(
     @Param('convoId') convoId: string,
-    @Body() body: { groupOwnerId: string; participants: string[] },
+    @Body() body: { participants: string[] },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const groupOwnerId = request.user?.id
+
+    if (!groupOwnerId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.addGroupParticipants(
       convoId,
-      body.groupOwnerId,
+      groupOwnerId,
       body.participants,
     )
     return response.status(HttpStatus.OK).json(result)
@@ -142,12 +181,19 @@ export class ConversationsController {
   @Delete('remove-participants/:convoId')
   async removeGroupParticipants(
     @Param('convoId') convoId: string,
-    @Body() body: { groupOwnerId: string; participants: string[] },
+    @Body() body: { participants: string[] },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const groupOwnerId = request.user?.id
+
+    if (!groupOwnerId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.removeGroupParticipants(
       convoId,
-      body.groupOwnerId,
+      groupOwnerId,
       body.participants,
     )
     return response.status(HttpStatus.OK).json(result)
@@ -157,12 +203,18 @@ export class ConversationsController {
   async changeGroupOwnership(
     @Param('convoId') convoId: string,
     @Param('newOwnerId') newOwnerId: string,
-    @Body() body: { userId: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.changeGroupOwnership(
       convoId,
-      body.userId,
+      userId,
       newOwnerId,
     )
     return response.status(HttpStatus.OK).json(result)
@@ -171,12 +223,18 @@ export class ConversationsController {
   @Delete('remove-group/:convoId')
   async removeGroupConversation(
     @Param('convoId') convoId: string,
-    @Body() body: { groupOwnerId: string },
+    @Req() request: AuthenticatedRequest,
     @Res() response: Response,
   ) {
+    const groupOwnerId = request.user?.id
+
+    if (!groupOwnerId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
     const result = await this.conversationsService.removeGroupConversation(
       convoId,
-      body.groupOwnerId,
+      groupOwnerId,
     )
     return response.status(HttpStatus.OK).json(result)
   }

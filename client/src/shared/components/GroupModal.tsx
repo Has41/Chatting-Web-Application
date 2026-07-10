@@ -25,19 +25,11 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
   const [filteredConversations, setFilteredConversations] = useState<FriendConversation[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["userFriendsAndConversations"],
     queryFn: async () => {
       const res = await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_CONVERSATIONS)
       return res.data
-    },
-    onSuccess: ({ friends, conversations }: GroupModalData) => {
-      console.log("Fetched friends and conversations:", friends, conversations)
-      setFilteredFriends(friends)
-      setFilteredConversations(conversations)
-    },
-    onError: (error: unknown) => {
-      console.error("Error fetching data:", error)
     }
   })
 
@@ -72,6 +64,11 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
       })
     )
   }, [searchQuery, data])
+
+  useEffect(() => {
+    if (!error) return
+    console.error("Error fetching data:", error)
+  }, [error])
 
   const handleToggle = (userId: string) => {
     setSelectedIds((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]))

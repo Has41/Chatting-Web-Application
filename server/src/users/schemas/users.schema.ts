@@ -56,7 +56,7 @@ export class User {
   @Prop({ default: false })
   verification: boolean
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
   friends: Types.ObjectId[]
 
   @Prop({
@@ -77,7 +77,7 @@ export class User {
     status: 'pending' | 'accepted' | 'rejected'
   }[]
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Conversation' }] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Conversation' }], default: [] })
   conversations: Types.ObjectId[]
 }
 

@@ -1,10 +1,13 @@
-import getFileType from "@shared/utils/getFileType"
 import PDFMeta from "./PDFMeta"
+import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
 
 interface FileMeta {
   mediaUrl?: string
   caption?: string
   thumbnailUrl?: string
+  mediaType?: string
+  mimeType?: string
+  fileName?: string
 }
 
 interface FileMessagePreviewProps {
@@ -13,33 +16,39 @@ interface FileMessagePreviewProps {
 }
 
 const FileMessagePreview = ({ fileMeta, isSender }: FileMessagePreviewProps) => {
-  const { mediaUrl, caption } = fileMeta
-  const fileType = getFileType(mediaUrl ?? "")
+  const { mediaUrl, caption, mediaType, mimeType, fileName } = fileMeta
+  const fileType = resolveFilePreviewType({ mediaType, mimeType, fileName, mediaUrl })
+  const displayName = fileName || mediaUrl?.split("?")[0]?.split("/").pop() || "Download file"
 
   return (
-    <div className="flex flex-col">
-      {fileType === "image" && (
+    <div className="flex min-w-0 flex-col">
+      {fileType === "image" && mediaUrl && (
         <img src={mediaUrl} alt={caption || "Image"} className="max-h-60 max-w-full rounded object-contain" />
       )}
 
-      {fileType === "video" && <video src={mediaUrl} controls className="max-h-60 w-full rounded-md" />}
+      {fileType === "video" && mediaUrl && <video src={mediaUrl} controls className="max-h-60 w-full rounded-md" />}
 
-      {fileType === "audio" && <audio src={mediaUrl} controls className="max-w-full" />}
+      {fileType === "audio" && mediaUrl && <audio src={mediaUrl} controls className="w-full min-w-64 max-w-full" />}
 
-      {fileType === "pdf" && (
-        <div className="">
-          <img src={fileMeta?.thumbnailUrl} alt="PDF thumbnail" className="h-48 w-full rounded border shadow" />
-          <PDFMeta mediaUrl={mediaUrl ?? ""} fileName={mediaUrl ?? ""} />
+      {fileType === "pdf" && mediaUrl && (
+        <div className="space-y-2">
+          {fileMeta.thumbnailUrl ? (
+            <img src={fileMeta.thumbnailUrl} alt="PDF thumbnail" className="h-48 w-full rounded border object-cover shadow" />
+          ) : null}
+          <PDFMeta mediaUrl={mediaUrl ?? ""} fileName={fileName} />
         </div>
       )}
 
-      {fileType === "word" && <div></div>}
-
-      {fileType === "archive" || fileType === "other" ? (
-        <div className="flex flex-col items-center">
-          <img src="/file-icon.svg" alt="File" className="mb-2 h-12 w-12" />
-          <a href={mediaUrl} target="_blank" rel="noopener noreferrer" className="text-sm underline">
-            Download File
+      {["word", "excel", "powerpoint", "archive", "text", "code", "other"].includes(fileType) ? (
+        <div className="flex min-w-64 items-center gap-3 rounded-md bg-black/5 p-3">
+          <img src="/file-icon.svg" alt="" className="size-10 shrink-0" />
+          <a
+            href={mediaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`min-w-0 truncate text-sm font-medium underline ${isSender ? "text-white" : "text-slate-800"}`}
+          >
+            {displayName}
           </a>
         </div>
       ) : null}

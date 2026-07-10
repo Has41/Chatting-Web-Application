@@ -66,9 +66,16 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { messageData: any; fileData?: any },
+    @MessageBody() data: { messageData?: any; fileData?: any } | Array<{ messageData?: any; fileData?: any }>,
   ) {
-    const { messageData, fileData } = data
+    const payload = Array.isArray(data) ? data[0] : data
+    const { messageData, fileData } = payload ?? {}
+
+    if (!messageData) {
+      console.error('Invalid sendMessage payload:', data)
+      return
+    }
+
     const { conversationType, conversationId, sender, recipient } = messageData
 
     // Generate conversation key
@@ -292,6 +299,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         mediaUrl: fileData.url,
         caption: fileData.caption || '',
         thumbnailUrl: fileData.thumbnailUrl || '',
+        mediaType: fileData.mediaType || '',
+        mimeType: fileData.mimeType || '',
+        fileName: fileData.fileName || '',
       }
     }
 
@@ -368,18 +378,24 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       )
     }
 
+    const emittedMessage = {
+      ...createdMessage.toObject(),
+      conversation: conversation?._id,
+      clientTempId: messageData.clientTempId,
+    }
+
     // Emit the message
     const senderSocketId = gatewayUtils.getUserSocketId(sender)
     if (conversationType === 'private') {
       const recipientSocketId = gatewayUtils.getUserSocketId(recipient)
       if (recipientSocketId) {
-        this.server.to(recipientSocketId).emit('receiveMessage', createdMessage)
+        this.server.to(recipientSocketId).emit('receiveMessage', emittedMessage)
       }
       if (senderSocketId) {
-        this.server.to(senderSocketId).emit('receiveMessage', createdMessage)
+        this.server.to(senderSocketId).emit('receiveMessage', emittedMessage)
       }
     } else if (conversationType === 'group') {
-      client.to(conversationId).emit('receive-group-messages', createdMessage, conversation._id)
+      this.server.to(conversationId).emit('receive-group-messages', emittedMessage, conversation._id)
     }
 
     return { message: createdMessage, conversation }

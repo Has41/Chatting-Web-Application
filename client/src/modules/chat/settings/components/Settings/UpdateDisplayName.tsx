@@ -1,9 +1,11 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { displayNameSchema } from "@shared/utils/zodSchema"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
+import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateDisplayNameProps {
   currentDisplayName?: string
@@ -14,8 +16,10 @@ interface DisplayNameFormData {
 }
 
 const UpdateDisplayName = ({ currentDisplayName = "" }: UpdateDisplayNameProps) => {
+  const { refetch } = useAuth()
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors }
   } = useForm({
@@ -23,12 +27,16 @@ const UpdateDisplayName = ({ currentDisplayName = "" }: UpdateDisplayNameProps) 
     defaultValues: { displayName: currentDisplayName }
   })
 
+  useEffect(() => {
+    reset({ displayName: currentDisplayName })
+  }, [currentDisplayName, reset])
+
   const { mutate } = useMutation({
     mutationFn: async (data: DisplayNameFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
-      console.log("Display Name Updated")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -55,7 +63,7 @@ const UpdateDisplayName = ({ currentDisplayName = "" }: UpdateDisplayNameProps) 
       <button
         type="submit"
         className="bg-custom-green absolute top-6 right-2 flex h-8 w-8 items-center justify-center rounded-full text-center"
-        aria-label="Add Interest"
+        aria-label="Save display name"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

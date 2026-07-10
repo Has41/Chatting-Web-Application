@@ -95,13 +95,23 @@ export class ConversationsService {
   }
 
   async getMediaOfConversation(convoId: string) {
-    const convo = await this.conversationModel.findById(convoId).select('mediaUrls')
+    const convo = await this.conversationModel.findById(convoId).select('messages')
 
     if (!convo) {
       throw new HttpException('Conversation not found', HttpStatus.NOT_FOUND)
     }
 
-    return convo
+    const files = await this.messageModel
+      .find({
+        _id: { $in: convo.messages },
+        messageType: 'file',
+        'media.mediaUrl': { $exists: true, $ne: '' },
+      })
+      .select('media createdAt sender')
+      .sort({ createdAt: -1 })
+      .lean()
+
+    return { files }
   }
 
   async createGroupConversation(

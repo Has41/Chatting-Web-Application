@@ -17,15 +17,14 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": false,
     "allowJs": false,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@app/*": ["src/app/*"],
-      "@auth/*": ["src/modules/auth/*"],
-      "@chat/*": ["src/modules/chat/*"],
-      "@profile/*": ["src/modules/profile/*"],
-      "@shared/*": ["src/shared/*"],
-      "@styles/*": ["src/styles/*"]
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@auth/*": ["./src/modules/auth/*"],
+      "@chat/*": ["./src/modules/chat/*"],
+      "@profile/*": ["./src/modules/profile/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@styles/*": ["./src/styles/*"]
     }
   },
   "include": ["src", "src/**/*.ts", "src/**/*.tsx"],

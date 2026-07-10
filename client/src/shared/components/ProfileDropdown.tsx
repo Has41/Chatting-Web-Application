@@ -10,6 +10,7 @@ const ProfileDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const { user, setUser, setIsAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const profilePictureUrl = user?.profilePicture?.url
 
   const { mutate } = useMutation({
     mutationFn: async () => {
@@ -40,7 +41,11 @@ const ProfileDropdown = () => {
         className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-slate-300"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
       >
-        <img className="h-full w-full rounded-full object-cover" src={user?.profilePicture?.url} alt="User Profile" />
+        {profilePictureUrl ? (
+          <img className="h-full w-full rounded-full object-cover" src={profilePictureUrl} alt="User Profile" />
+        ) : (
+          <span className="text-sm font-semibold text-white">{user?.username?.charAt(0).toUpperCase() || "U"}</span>
+        )}
       </div>
 
       {isDropdownOpen && (

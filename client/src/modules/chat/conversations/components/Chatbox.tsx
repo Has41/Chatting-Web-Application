@@ -1,4 +1,4 @@
-import { useReducer } from "react"
+import { useEffect, useReducer } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"
 import { useQuery } from "@tanstack/react-query"
@@ -27,33 +27,40 @@ const Chatbox = () => {
     setMessages
   })
 
-  useQuery({
+  const { data: chatData, error: chatError } = useQuery({
     queryKey: ["chatData", userId, conversationId],
     queryFn: async () => {
       if (userId) {
-        return await axiosInstance.get(`${USER_PATHS.GET_INFO}/${userId}`)
+        const response = await axiosInstance.get(`${USER_PATHS.GET_INFO}/${userId}`)
+        return response.data
       } else if (conversationId) {
-        return await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`)
+        const response = await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`)
+        return response.data
       }
       return null
     },
-    onSuccess: ({ data }: { data: any }) => {
-      if (conversationId) {
-        dispatch({ type: "SET_LAST_MESSAGE", payload: data.conversation.lastMessage })
-        const filteredParticipants = data.conversation.participants.filter(
-          (participant: User) => participant._id !== user._id
-        )
-        dispatch({ type: "SET_USER_DATA", payload: filteredParticipants[0] || null })
-      } else {
-        dispatch({ type: "SET_USER_DATA", payload: data })
-      }
-    },
-    onError: (error: unknown) => {
-      if (import.meta.env.PROD) return
-      console.error(error)
-    },
     enabled: !!userId || !!conversationId
   })
+
+  useEffect(() => {
+    if (!chatData) return
+
+    if (conversationId) {
+      dispatch({ type: "SET_LAST_MESSAGE", payload: chatData.conversation.lastMessage })
+      const filteredParticipants = chatData.conversation.participants.filter(
+        (participant: User) => participant._id !== user._id
+      )
+      dispatch({ type: "SET_USER_DATA", payload: filteredParticipants[0] || null })
+      return
+    }
+
+    dispatch({ type: "SET_USER_DATA", payload: chatData })
+  }, [chatData, conversationId, user._id])
+
+  useEffect(() => {
+    if (!chatError || import.meta.env.PROD) return
+    console.error(chatError)
+  }, [chatError])
 
   return (
     <section className="font-poppins flex h-screen w-[69%] flex-col">
@@ -91,6 +98,7 @@ const Chatbox = () => {
         isOpen={state.isSidebarOpen}
         onClose={() => dispatch({ type: "SET_SIDEBAR", payload: false })}
         data={state.userData}
+        conversationId={conversationId}
       />
 
       <ChatMessages
@@ -106,6 +114,7 @@ const Chatbox = () => {
 
       <SendMessage
         sendMessage={sendMessage}
+        setMessages={setMessages}
         conversationId={conversationId}
         socketRef={socketRef}
         recipientId={userId || state.userData?._id}

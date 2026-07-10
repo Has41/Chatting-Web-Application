@@ -7,6 +7,14 @@ import { MessagesModule } from './messages/messages.module'
 import { FilesModule } from './files/files.module'
 import { GatewayModule } from './gateway/gateway.module'
 
+try {
+  process.loadEnvFile?.()
+} catch (error) {
+  if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+    throw error
+  }
+}
+
 @Module({
   imports: [
     MongooseModule.forRoot(process.env.DB_CONNECT || 'mongodb://localhost/nest'),

@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import UserSearch from "./Messages/UserSearch"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
+import { getNewChatRoute } from "@shared/constants/routePaths"
+import { Link } from "react-router-dom"
+import { Bell, Check, MessageCircle, UserRound, X } from "lucide-react"
 import type { User } from "@shared/types"
 
 interface FriendRequest {
@@ -10,26 +13,31 @@ interface FriendRequest {
 }
 
 const FriendList = () => {
+  const queryClient = useQueryClient()
   const [openNotifcation, setOpenNotification] = useState(false)
   const [friendList, setFriendList] = useState<User[]>([])
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
 
   const toggleNotification = () => setOpenNotification((prev) => !prev)
 
-  useQuery({
+  const { data: friendsData, error: friendsError } = useQuery({
     queryKey: ["friendList&Requests"],
     queryFn: async () => {
-      return await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_REQUESTS)
-    },
-    onSuccess: ({ data }: { data: { friends: User[]; friendRequests: FriendRequest[] } }) => {
-      setFriendList(data.friends || [])
-      setFriendRequests(data.friendRequests || [])
-      console.log("Friend List and Requests:", data)
-    },
-    onError: (error: unknown) => {
-      console.error("Error fetching friend list and requests:", error)
+      const response = await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_REQUESTS)
+      return response.data as { friends: User[]; friendRequests: FriendRequest[] }
     }
   })
+
+  useEffect(() => {
+    if (!friendsData) return
+    setFriendList(friendsData.friends || [])
+    setFriendRequests(friendsData.friendRequests || [])
+  }, [friendsData])
+
+  useEffect(() => {
+    if (!friendsError) return
+    console.error("Error fetching friend list and requests:", friendsError)
+  }, [friendsError])
 
   const { mutate: respondFriendRequest } = useMutation({
     mutationFn: async ({ userId, response }: { userId: string; response: "accepted" | "rejected" }) => {
@@ -37,8 +45,9 @@ const FriendList = () => {
         response
       })
     },
-    onSuccess: (data: unknown) => {
-      console.log("Friend request response successful:", data)
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friendList&Requests"] })
+      queryClient.invalidateQueries({ queryKey: ["userSearch"] })
     },
     onError: (error: unknown) => {
       console.error("Error responding to friend request:", error)
@@ -53,79 +62,64 @@ const FriendList = () => {
       <section className="p-4">
         <div className="relative mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-black/80">Friends</h2>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
+          <button
+            type="button"
             onClick={toggleNotification}
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6 cursor-pointer text-gray-500 hover:text-gray-700"
+            className="relative rounded-full p-1 text-gray-500 transition hover:bg-slate-100 hover:text-gray-700"
+            aria-label="Friend requests"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-            />
-          </svg>
+            <Bell className="size-6" />
+            {friendRequests.length > 0 && (
+              <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-emerald-500 text-[0.65rem] font-bold text-white">
+                {friendRequests.length}
+              </span>
+            )}
+          </button>
           {openNotifcation && (
-            <div className="absolute top-full right-0 z-10 mt-2 w-64 rounded-md bg-white p-3 shadow-lg ring-1 ring-black/5">
+            <div className="absolute top-full right-0 z-10 mt-2 w-72 rounded-md bg-white p-3 shadow-lg ring-1 ring-black/5">
               {friendRequests.length > 0 ? (
-                <div className="mb-6">
+                <div>
                   <h1 className="mb-4 font-semibold text-black/80">Friend Requests</h1>
                   <ul className="space-y-3">
                     {friendRequests.map((req) => (
                       <li
                         key={req?.from._id}
-                        className="flex items-center justify-between rounded px-2 py-2 hover:bg-gray-100"
+                        className="flex items-center justify-between gap-3 rounded px-2 py-2 hover:bg-gray-100"
                       >
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={req?.from?.profilePicture?.url || "https://via.placeholder.com/36"}
-                            alt={req.from.username}
-                            className="h-9 w-9 rounded-full object-cover"
-                          />
-                          <span className="font-medium">{req.from.username}</span>
+                        <div className="flex min-w-0 items-center gap-3">
+                          {req.from.profilePicture?.url ? (
+                            <img
+                              src={req.from.profilePicture.url}
+                              alt={req.from.username}
+                              className="size-9 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                              <UserRound className="size-4" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold">{req.from.displayName || req.from.username}</p>
+                            <p className="truncate text-xs text-slate-500">@{req.from.username}</p>
+                          </div>
                         </div>
                         <div className="flex gap-2">
                           <button
+                            type="button"
                             onClick={() => respondFriendRequest({ userId: req.from._id, response: "accepted" })}
-                            className="rounded-full bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600"
+                            className="rounded-full bg-emerald-500 p-2 text-white hover:bg-emerald-600"
+                            aria-label={`Accept request from ${req.from.username}`}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="size-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                              />
-                            </svg>
+                            <Check className="size-4" />
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => respondFriendRequest({ userId: req.from._id, response: "rejected" })}
-                            className="rounded-full bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600"
+                            className="rounded-full bg-red-500 p-2 text-white hover:bg-red-600"
+                            aria-label={`Reject request from ${req.from.username}`}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="size-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                              />
-                            </svg>
+                            <X className="size-4" />
                           </button>
                         </div>
                       </li>
@@ -140,17 +134,7 @@ const FriendList = () => {
         </div>
 
         <UserSearch />
-        <div className="my-8">
-          <div className="relative flex h-14 w-20 flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
-            <div className="relative">
-              <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
-              {/* <img className="cursor-pointer size-12 mb-1 rounded-full -mt-5" src={onlineUser} alt="User" /> */}
-              <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
-            </div>
-            <p className="text-sm font-semibold text-black/80">User</p>
-          </div>
-        </div>
-        <div className="max-w-full">
+        <div className="mt-8 max-w-full">
           <div>
             <h1 className="mb-4 font-semibold text-black/80">All Friends</h1>
           </div>
@@ -158,36 +142,33 @@ const FriendList = () => {
             <ul className="space-y-4">
               {friendList.length > 0 ? (
                 friendList.map((friend) => (
-                  <li
+                  <Link
+                    to={getNewChatRoute(friend._id)}
                     key={friend._id}
-                    className="flex cursor-pointer items-center rounded p-2 transition-all duration-500 hover:bg-gray-100"
+                    className="flex cursor-pointer items-center rounded p-2 transition-all duration-300 hover:bg-gray-100"
                   >
-                    <img
-                      src={friend?.profilePicture?.url || "https://via.placeholder.com/48"}
-                      alt={friend.username}
-                      className="mr-4 size-12 rounded-full object-cover"
-                    />
-                    <div className="font-semibold text-gray-800">{friend.username}</div>
-                    <div className="ml-auto">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
-                        />
-                      </svg>
+                    {friend.profilePicture?.url ? (
+                      <img
+                        src={friend.profilePicture.url}
+                        alt={friend.username}
+                        className="mr-4 size-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="mr-4 flex size-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                        <UserRound className="size-5" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-gray-800">{friend.displayName || friend.username}</p>
+                      <p className="truncate text-xs text-slate-500">@{friend.username}</p>
                     </div>
-                  </li>
+                    <MessageCircle className="ml-auto size-5 text-slate-400" />
+                  </Link>
                 ))
               ) : (
-                <li className="text-sm text-gray-500 italic">No friends found. Find friends by searching them.</li>
+                <li className="rounded-md bg-slate-100 px-3 py-4 text-center text-sm text-gray-500">
+                  No friends yet. Search users and send a request.
+                </li>
               )}
             </ul>
           </div>

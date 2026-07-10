@@ -6,11 +6,12 @@ import {
   Delete,
   Body,
   Param,
+  Req,
   UseGuards,
   Res,
   HttpStatus,
 } from '@nestjs/common'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 import { MessagesService } from './messages.service.js'
 import { JwtAuthGuard } from '../auth/jwt.strategy.js'
 
@@ -37,10 +38,11 @@ export class MessagesController {
   @UseGuards(JwtAuthGuard)
   async editMessage(
     @Param('messageId') messageId: string,
-    @Body() body: { content: string },
+    @Body() body: { content?: string; caption?: string },
+    @Req() request: Request & { user: { id: string } },
     @Res() response: Response,
   ) {
-    const result = await this.messagesService.editMessage(messageId, body.content)
+    const result = await this.messagesService.editMessage(messageId, request.user.id, body)
     return response.status(HttpStatus.OK).json(result)
   }
 
@@ -48,10 +50,10 @@ export class MessagesController {
   @UseGuards(JwtAuthGuard)
   async removeMessage(
     @Param('messageId') messageId: string,
-    @Body() body: { userId: string },
+    @Req() request: Request & { user: { id: string } },
     @Res() response: Response,
   ) {
-    const result = await this.messagesService.removeMessage(messageId, body.userId)
+    const result = await this.messagesService.removeMessage(messageId, request.user.id)
     return response.status(HttpStatus.OK).json(result)
   }
 }

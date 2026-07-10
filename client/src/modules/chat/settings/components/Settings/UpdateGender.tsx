@@ -1,9 +1,11 @@
+import { useEffect } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { genderSchema } from "@shared/utils/zodSchema"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/utils/axiosInstance"
+import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateGenderProps {
   currentGender?: string
@@ -14,24 +16,35 @@ interface GenderFormData {
 }
 
 const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
+  const { refetch } = useAuth()
+  const normalizedGender = ["Male", "Female", "Prefer not to say"].includes(currentGender)
+    ? (currentGender as GenderFormData["gender"])
+    : "Prefer not to say"
+
   const {
     setValue,
+    reset,
     handleSubmit,
     watch,
     formState: { errors }
   } = useForm<GenderFormData>({
     resolver: zodResolver(genderSchema),
-    defaultValues: { gender: (currentGender as GenderFormData["gender"]) || "Prefer not to say" }
+    defaultValues: { gender: normalizedGender }
   })
 
+  useEffect(() => {
+    reset({ gender: normalizedGender })
+  }, [normalizedGender, reset])
+
   const selectedGender = watch("gender")
+  const disableButton = selectedGender === normalizedGender
 
   const { mutate } = useMutation({
     mutationFn: async (data: GenderFormData) => {
       return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
     },
     onSuccess: () => {
-      console.log("Gender Updated")
+      refetch()
     },
     onError: (error: unknown) => {
       console.error(error)
@@ -79,8 +92,9 @@ const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
       </div>
       <button
         type="submit"
-        className="bg-custom-green mt-4 flex items-center gap-2 rounded-full px-4 py-2 text-center"
-        aria-label="Save Interest"
+        disabled={disableButton}
+        className={`bg-custom-green mt-4 flex items-center gap-2 rounded-full px-4 py-2 text-center ${disableButton ? "cursor-not-allowed" : "cursor-pointer"}`}
+        aria-label="Save gender"
       >
         <span className="text-sm font-semibold text-white">Save</span>
         <svg

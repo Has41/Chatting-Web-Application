@@ -14,6 +14,9 @@ export class Message {
       mediaUrl: { type: String, default: '' },
       thumbnailUrl: { type: String, default: '' },
       caption: { type: String, default: '' },
+      mediaType: { type: String, default: '' },
+      mimeType: { type: String, default: '' },
+      fileName: { type: String, default: '' },
     }),
   )
   media: {
@@ -21,6 +24,9 @@ export class Message {
     mediaUrl: string
     thumbnailUrl: string
     caption: string
+    mediaType: string
+    mimeType: string
+    fileName: string
   }
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })

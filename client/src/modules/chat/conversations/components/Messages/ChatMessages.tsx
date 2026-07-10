@@ -29,34 +29,25 @@ const ChatMessages = ({
   const { user } = useAuth()
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
-  if (!user) return null
-
   const {
     data: infiniteData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useInfiniteQuery(
-    ["getUserMessages", conversationId],
-    async ({ pageParam = 1 }) => {
+  } = useInfiniteQuery({
+    queryKey: ["getUserMessages", conversationId],
+    queryFn: async ({ pageParam = 1 }) => {
       const response = await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_MESSAGES}/${conversationId}`, {
         params: { page: pageParam, limit: 20 }
       })
       return response.data
     },
-    {
-      onSuccess: (data: any) => {
-        console.log(data)
-      }
-    },
-    {
-      onError: (error: unknown) => {
-        if (!import.meta.env.PROD) console.error("Error fetching messages:", error)
-      },
-      getNextPageParam: (lastPage: any, pages: any[]) => (lastPage.messages.length === 20 ? pages.length + 1 : undefined),
-      enabled: !!conversationId
-    }
-  )
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: any, pages: any[]) => (lastPage.messages.length === 20 ? pages.length + 1 : undefined),
+    enabled: !!conversationId && !!user
+  })
+
+  if (!user) return null
 
   const fetchedMessages = infiniteData?.pages.flatMap((page: any) => page.messages) || []
   const combinedMessages = [...fetchedMessages, ...socketMessages]
@@ -81,11 +72,12 @@ const ChatMessages = ({
   }, [deduplicatedMessages])
 
   return (
-    <div ref={scrollRef} onScroll={handleScroll} className="flex-grow overflow-y-auto bg-gray-100 p-4">
+    <div ref={scrollRef} onScroll={handleScroll} className="grow overflow-y-auto bg-gray-100 p-4">
       {isFetchingNextPage && <div className="text-center text-sm text-gray-500">Loading more messages...</div>}
 
       {deduplicatedMessages.map((msg) => {
-        const isSender = msg.sender === user._id
+        const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id
+        const isSender = senderId === user._id
         const recipients = conversationType === "group" ? getGroupRecipients(userData, user._id) : userData
 
         return (
@@ -94,7 +86,7 @@ const ChatMessages = ({
               <div className="mt-4 mr-2 flex flex-col items-center">
                 {(() => {
                   const sender = recipients.find(
-                    (recipient: any) => recipient._id === msg.sender || recipient._id === msg.sender?._id
+                    (recipient: any) => recipient._id === senderId
                   )
                   return sender ? (
                     <img

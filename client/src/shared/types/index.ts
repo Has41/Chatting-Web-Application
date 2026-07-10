@@ -9,7 +9,7 @@ export interface User {
   profilePicture?: { url?: string; public_id?: string }
   bio?: string
   dateOfBirth?: string
-  gender?: "male" | "female" | "other"
+  gender?: "Male" | "Female" | "Prefer not to say"
   location?: string
   interests?: string[]
   isVerified?: boolean
@@ -32,6 +32,9 @@ export interface Message {
     mediaUrl?: string
     fileName?: string
     thumbnailUrl?: string
+    caption?: string
+    mediaType?: string
+    mimeType?: string
   }
   seenBy?: Array<{ user: User | string; seenAt?: string }>
   text?: string
@@ -132,7 +135,7 @@ export interface ProfileUpdateData {
   username?: string
   bio?: string
   dateOfBirth?: string
-  gender?: "male" | "female" | "other"
+  gender?: "Male" | "Female" | "Prefer not to say"
   location?: string
   interests?: string[]
 }
