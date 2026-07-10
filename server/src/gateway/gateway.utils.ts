@@ -8,8 +8,8 @@ export const GATEWAY_CONFIG = {
 } as const
 
 // ============== MAPS ==============
-// Map to store userId -> socketId
-export const userSocketMap = new Map<string, string>()
+// Map to store userId -> socketIds. A user can have multiple sockets open in different app surfaces.
+export const userSocketMap = new Map<string, Set<string>>()
 
 // Cache for conversations with TTL (conversationKey -> { data: conversation, timestamp: number })
 export const conversationCache = new Map<string, { data: any; timestamp: number }>()
@@ -134,14 +134,29 @@ export function setProcessing(conversationKey: string, processing: boolean): voi
  * Get socket ID for a user
  */
 export function getUserSocketId(userId: string): string | undefined {
-  return userSocketMap.get(userId)
+  return userSocketMap.get(userId)?.values().next().value
 }
 
 /**
- * Set socket ID for a user
+ * Get all socket IDs for a user
  */
-export function setUserSocket(userId: string, socketId: string): void {
-  userSocketMap.set(userId, socketId)
+export function getUserSocketIds(userId: string): string[] {
+  return [...(userSocketMap.get(userId) ?? [])]
+}
+
+/**
+ * Set socket ID for a user. Returns true when this is the user's first active socket.
+ */
+export function setUserSocket(userId: string, socketId: string): boolean {
+  const existingSockets = userSocketMap.get(userId)
+
+  if (existingSockets) {
+    existingSockets.add(socketId)
+    return false
+  }
+
+  userSocketMap.set(userId, new Set([socketId]))
+  return true
 }
 
 /**
@@ -152,13 +167,19 @@ export function removeUserSocket(userId: string): void {
 }
 
 /**
- * Remove socket and get user ID if found
+ * Remove socket and get user ID if found. Returns whether this was the user's last active socket.
  */
-export function removeSocketUser(socketId: string): string | null {
-  for (const [userId, sId] of userSocketMap.entries()) {
-    if (sId === socketId) {
-      userSocketMap.delete(userId)
-      return userId
+export function removeSocketUser(socketId: string): { userId: string; isLastSocket: boolean } | null {
+  for (const [userId, socketIds] of userSocketMap.entries()) {
+    if (socketIds.has(socketId)) {
+      socketIds.delete(socketId)
+
+      if (socketIds.size === 0) {
+        userSocketMap.delete(userId)
+        return { userId, isLastSocket: true }
+      }
+
+      return { userId, isLastSocket: false }
     }
   }
   return null
@@ -169,4 +190,11 @@ export function removeSocketUser(socketId: string): string | null {
  */
 export function isUserOnline(userId: string): boolean {
   return userSocketMap.has(userId)
+}
+
+/**
+ * Get online user IDs from a provided list
+ */
+export function getOnlineUserIds(userIds: string[]): string[] {
+  return userIds.filter((userId) => isUserOnline(userId))
 }

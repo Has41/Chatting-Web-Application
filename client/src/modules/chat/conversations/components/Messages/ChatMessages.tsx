@@ -5,6 +5,10 @@ import Message from "./Message"
 import useAuth from "@auth/hooks/useAuth"
 import getGroupRecipients from "@shared/utils/getGroupRecipients"
 import { useEffect, useRef, type UIEvent } from "react"
+import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
+import type { MediaViewerItem } from "@shared/components/MediaViewerModal"
+import TypingIndicator from "./TypingIndicator"
+import type { TypingUser } from "@chat/conversations/hooks/useChatSocket"
 
 interface ChatMessagesProps {
   conversationId?: string
@@ -15,6 +19,7 @@ interface ChatMessagesProps {
   socket?: any
   conversationType?: "private" | "group"
   user?: any
+  typingUsers?: TypingUser[]
 }
 
 const ChatMessages = ({
@@ -24,7 +29,8 @@ const ChatMessages = ({
   socketMessages,
   lastMessage,
   socket,
-  conversationType
+  conversationType,
+  typingUsers = []
 }: ChatMessagesProps) => {
   const { user } = useAuth()
   const scrollRef = useRef<HTMLDivElement | null>(null)
@@ -58,6 +64,31 @@ const ChatMessages = ({
 
   deduplicatedMessages.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
 
+  const mediaGallery: MediaViewerItem[] = []
+  const mediaGalleryIndexByMessageId = new Map<string, number>()
+
+  deduplicatedMessages.forEach((msg) => {
+    const media = msg.media
+    const mediaUrl = media?.mediaUrl
+    if (msg.messageType !== "file" || !mediaUrl) return
+
+    const mediaType = resolveFilePreviewType({
+      mediaType: media.mediaType,
+      mimeType: media.mimeType,
+      fileName: media.fileName,
+      mediaUrl
+    })
+
+    if (mediaType !== "image" && mediaType !== "video") return
+
+    mediaGalleryIndexByMessageId.set(msg._id, mediaGallery.length)
+    mediaGallery.push({
+      mediaUrl,
+      mediaType,
+      title: media.caption || media.fileName || mediaUrl.split("?")[0]?.split("/").pop() || "Media"
+    })
+  })
+
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const { scrollTop } = e.currentTarget
     if (scrollTop === 0 && hasNextPage && !isFetchingNextPage) {
@@ -69,7 +100,7 @@ const ChatMessages = ({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [deduplicatedMessages])
+  }, [deduplicatedMessages, typingUsers.length])
 
   return (
     <div ref={scrollRef} onScroll={handleScroll} className="grow overflow-y-auto bg-gray-100 p-4">
@@ -118,10 +149,14 @@ const ChatMessages = ({
               conversationId={conversationId}
               socket={socket}
               conversationType={conversationType}
+              mediaGallery={mediaGallery}
+              mediaGalleryIndex={mediaGalleryIndexByMessageId.get(msg._id)}
             />
           </div>
         )
       })}
+
+      <TypingIndicator typingUsers={typingUsers} />
     </div>
   )
 }

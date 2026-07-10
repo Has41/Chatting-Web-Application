@@ -83,6 +83,20 @@ export interface Conversation {
   updatedAt: string
 }
 
+export interface Story {
+  _id: string
+  owner: User
+  media: {
+    mediaUrl: string
+    publicId?: string
+    mediaType: "image" | "video"
+    mimeType?: string
+    caption?: string
+  }
+  createdAt: string
+  expiresAt: string
+}
+
 // Call Types
 export interface Call {
   _id: string

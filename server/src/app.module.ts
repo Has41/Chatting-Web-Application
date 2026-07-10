@@ -6,6 +6,7 @@ import { ConversationsModule } from './conversations/conversations.module'
 import { MessagesModule } from './messages/messages.module'
 import { FilesModule } from './files/files.module'
 import { GatewayModule } from './gateway/gateway.module'
+import { StoriesModule } from './stories/stories.module'
 
 try {
   process.loadEnvFile?.()
@@ -24,6 +25,7 @@ try {
     MessagesModule,
     FilesModule,
     GatewayModule,
+    StoriesModule,
   ],
   controllers: [],
   providers: [],

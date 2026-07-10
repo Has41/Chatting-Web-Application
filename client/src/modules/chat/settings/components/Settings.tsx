@@ -3,15 +3,35 @@ import StatusDropdown from "@shared/components/StatusDropdown"
 import InfoDetails from "./Settings/InfoDetails"
 import useAuth from "@auth/hooks/useAuth"
 import ThemeSettings from "./Settings/ThemeSettings"
+import { useMutation } from "@tanstack/react-query"
+import axiosInstance from "@shared/utils/axiosInstance"
+import { AUTH_PATHS } from "@shared/constants/apiPaths"
+import { useNavigate } from "react-router-dom"
+import { Loader2, LogOut } from "lucide-react"
 
 const Settings = () => {
-  const { user } = useAuth()
+  const { user, setUser, setIsAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [openSection, setOpenSection] = useState<string | null>("")
   const profilePictureUrl = user?.profilePicture?.url
 
   const toggleSection = (section: string) => {
     setOpenSection((prevSection) => (prevSection === section ? null : section))
   }
+
+  const { mutate: logout, isPending: isLoggingOut } = useMutation({
+    mutationFn: async () => {
+      return await axiosInstance.post(AUTH_PATHS.LOG_OUT)
+    },
+    onSuccess: () => {
+      setUser(null)
+      setIsAuthenticated(false)
+      navigate("/auth", { replace: true })
+    },
+    onError: (error: unknown) => {
+      console.error("Error logging out:", error)
+    }
+  })
 
   return (
     <aside
@@ -171,6 +191,20 @@ const Settings = () => {
             {openSection === "help" && (
               <div className="mt-2 pl-4 text-sm text-gray-600">Find FAQs and support resources.</div>
             )}
+          </div>
+
+          <div className="border-t border-gray-100 pt-3">
+            <button
+              type="button"
+              onClick={() => logout()}
+              disabled={isLoggingOut}
+              className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span className="inline-flex items-center gap-2">
+                {isLoggingOut ? <Loader2 className="size-4 animate-spin" /> : <LogOut className="size-4" />}
+                {isLoggingOut ? "Logging out..." : "Logout"}
+              </span>
+            </button>
           </div>
         </div>
       </section>

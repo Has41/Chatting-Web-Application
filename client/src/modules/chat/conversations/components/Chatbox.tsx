@@ -21,7 +21,7 @@ const Chatbox = () => {
 
   if (!user) return null
 
-  const { socketRef, sendMessage } = useChatSocket({
+  const { socketRef, sendMessage, typingUsers, emitTypingStart, emitTypingStop } = useChatSocket({
     userId: user._id,
     conversationId,
     setMessages
@@ -63,7 +63,7 @@ const Chatbox = () => {
   }, [chatError])
 
   return (
-    <section className="font-poppins flex h-screen w-[69%] flex-col">
+    <section className="font-poppins relative flex h-screen w-[69%] flex-col">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
         <div onClick={() => dispatch({ type: "TOGGLE_SIDEBAR" })} className="flex cursor-pointer items-center gap-x-3">
           <img
@@ -110,6 +110,7 @@ const Chatbox = () => {
         userData={state.userData}
         socketMessages={state.messages}
         socket={socketRef}
+        typingUsers={typingUsers}
       />
 
       <SendMessage
@@ -120,6 +121,22 @@ const Chatbox = () => {
         recipientId={userId || state.userData?._id}
         messageContent={state.messageContent}
         setMessageContent={(value) => dispatch({ type: "SET_MESSAGE_CONTENT", payload: value })}
+        onTypingStart={() =>
+          emitTypingStart({
+            conversationId,
+            conversationType: "private",
+            recipientId: userId || state.userData?._id,
+            username: user.username
+          })
+        }
+        onTypingStop={() =>
+          emitTypingStop({
+            conversationId,
+            conversationType: "private",
+            recipientId: userId || state.userData?._id,
+            username: user.username
+          })
+        }
       />
       <div id="inline-preview-root" className="absolute bottom-20 left-0 z-50 w-full" />
     </section>

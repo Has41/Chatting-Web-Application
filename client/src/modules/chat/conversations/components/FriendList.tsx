@@ -3,13 +3,19 @@ import UserSearch from "./Messages/UserSearch"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS } from "@shared/constants/apiPaths"
-import { getNewChatRoute } from "@shared/constants/routePaths"
+import { getChatConversationRoute, getNewChatRoute } from "@shared/constants/routePaths"
 import { Link } from "react-router-dom"
 import { Bell, Check, MessageCircle, UserRound, X } from "lucide-react"
 import type { User } from "@shared/types"
 
 interface FriendRequest {
   from: User
+}
+
+interface FriendConversation {
+  _id: string
+  participants?: User[]
+  conversationType?: "private" | "group"
 }
 
 const FriendList = () => {
@@ -28,6 +34,14 @@ const FriendList = () => {
     }
   })
 
+  const { data: friendConversationData } = useQuery({
+    queryKey: ["friendConversations"],
+    queryFn: async () => {
+      const response = await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_CONVERSATIONS)
+      return response.data as { friends: User[]; conversations: FriendConversation[] }
+    }
+  })
+
   useEffect(() => {
     if (!friendsData) return
     setFriendList(friendsData.friends || [])
@@ -39,6 +53,14 @@ const FriendList = () => {
     console.error("Error fetching friend list and requests:", friendsError)
   }, [friendsError])
 
+  const getFriendChatRoute = (friendId: string) => {
+    const existingConversation = friendConversationData?.conversations?.find((conversation) =>
+      conversation.participants?.some((participant) => participant?._id === friendId)
+    )
+
+    return existingConversation ? getChatConversationRoute(existingConversation._id) : getNewChatRoute(friendId)
+  }
+
   const { mutate: respondFriendRequest } = useMutation({
     mutationFn: async ({ userId, response }: { userId: string; response: "accepted" | "rejected" }) => {
       return await axiosInstance.post(`${USER_PATHS.RESPOND_FRIEND_REQUEST}/${userId}`, {
@@ -47,6 +69,7 @@ const FriendList = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["friendList&Requests"] })
+      queryClient.invalidateQueries({ queryKey: ["friendConversations"] })
       queryClient.invalidateQueries({ queryKey: ["userSearch"] })
     },
     onError: (error: unknown) => {
@@ -143,7 +166,7 @@ const FriendList = () => {
               {friendList.length > 0 ? (
                 friendList.map((friend) => (
                   <Link
-                    to={getNewChatRoute(friend._id)}
+                    to={getFriendChatRoute(friend._id)}
                     key={friend._id}
                     className="flex cursor-pointer items-center rounded p-2 transition-all duration-300 hover:bg-gray-100"
                   >

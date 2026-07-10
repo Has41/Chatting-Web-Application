@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from "react"
+import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { Send } from "lucide-react"
 import AttachmentMenu from "@shared/components/AttachmentMenu"
 import FilePreviewModal from "../FilePreviewModal"
@@ -17,6 +17,8 @@ interface SendMessageProps {
   conversationId?: string
   sendMessage: (payload: any) => void
   setMessages: (value: any[] | ((prev: any[]) => any[])) => void
+  onTypingStart?: () => void
+  onTypingStop?: () => void
 }
 
 const SendMessage = ({
@@ -27,7 +29,9 @@ const SendMessage = ({
   conversationType = "private",
   conversationId,
   sendMessage,
-  setMessages
+  setMessages,
+  onTypingStart,
+  onTypingStop
 }: SendMessageProps) => {
   const { user } = useAuth()
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
@@ -35,8 +39,42 @@ const SendMessage = ({
   const [previewFile, setPreviewFile] = useState<File | null>(null)
   const [attachmentType, setAttachmentType] = useState<FileType | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isTypingRef = useRef(false)
+  const lastTypingPulseRef = useRef(0)
+  const onTypingStartRef = useRef(onTypingStart)
+  const onTypingStopRef = useRef(onTypingStop)
+
+  useEffect(() => {
+    onTypingStartRef.current = onTypingStart
+    onTypingStopRef.current = onTypingStop
+  }, [onTypingStart, onTypingStop])
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+
+      if (isTypingRef.current) {
+        onTypingStopRef.current?.()
+      }
+    }
+  }, [])
 
   if (!user) return null
+
+  const stopTyping = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current)
+      typingTimeoutRef.current = null
+    }
+
+    if (!isTypingRef.current) return
+
+    isTypingRef.current = false
+    onTypingStopRef.current?.()
+  }
 
   const handleAttachmentSelect = (type: FileType) => {
     setAttachmentType(type)
@@ -165,6 +203,30 @@ const SendMessage = ({
       )
     }
     setMessageContent("")
+    stopTyping()
+  }
+
+  const handleMessageInputChange = (value: string) => {
+    setMessageContent(value)
+
+    if (!value.trim()) {
+      stopTyping()
+      return
+    }
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      lastTypingPulseRef.current = Date.now()
+      onTypingStartRef.current?.()
+    } else if (Date.now() - lastTypingPulseRef.current > 1200) {
+      lastTypingPulseRef.current = Date.now()
+      onTypingStartRef.current?.()
+    }
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+    typingTimeoutRef.current = setTimeout(() => {
+      stopTyping()
+    }, 2200)
   }
 
   const getAcceptedTypes = (type: FileType | null) => {
@@ -212,7 +274,7 @@ const SendMessage = ({
           placeholder="Type a message..."
           className="w-3/4 rounded-md border border-slate-200 p-3 text-sm focus:outline-none"
           value={messageContent}
-          onChange={(e) => setMessageContent(e.target.value)}
+          onChange={(e) => handleMessageInputChange(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault()

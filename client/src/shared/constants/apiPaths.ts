@@ -50,4 +50,10 @@ const FILE_PATHS = {
   GENERATE_SIGNATURE: "/api/files/generate-signature"
 }
 
-export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS }
+const STORY_PATHS = {
+  GET_ACTIVE: "/api/stories/active",
+  CREATE: "/api/stories",
+  DELETE: "/api/stories"
+}
+
+export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS, STORY_PATHS }

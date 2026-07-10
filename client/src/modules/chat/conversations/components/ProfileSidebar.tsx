@@ -101,7 +101,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
       )}
 
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-80 transform overflow-y-auto bg-white shadow-lg transition-transform duration-300 ${
+        className={`fixed top-0 right-0 z-50 h-full w-96 transform overflow-y-auto bg-white shadow-lg transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

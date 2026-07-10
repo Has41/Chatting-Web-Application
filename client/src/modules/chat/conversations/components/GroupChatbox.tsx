@@ -23,7 +23,7 @@ const GroupChatbox = () => {
 
   if (!user) return null
 
-  const { socketRef, sendMessage } = useChatSocket({
+  const { socketRef, sendMessage, typingUsers, emitTypingStart, emitTypingStop } = useChatSocket({
     userId: user._id,
     conversationId,
     setMessages,
@@ -68,7 +68,7 @@ const GroupChatbox = () => {
   // }
 
   return (
-    <section className="font-poppins flex h-screen w-[69%] flex-col">
+    <section className="font-poppins relative flex h-screen w-[69%] flex-col">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
         <div onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex cursor-pointer items-center gap-x-3">
           {groupData?.groupPicture?.url ? (
@@ -121,6 +121,7 @@ const GroupChatbox = () => {
         userData={groupData}
         socketMessages={messages}
         socket={socketRef}
+        typingUsers={typingUsers}
       />
 
       <SendMessage
@@ -131,6 +132,20 @@ const GroupChatbox = () => {
         conversationType={"group"}
         messageContent={messageContent}
         setMessageContent={setMessageContent}
+        onTypingStart={() =>
+          emitTypingStart({
+            conversationId,
+            conversationType: "group",
+            username: user.username
+          })
+        }
+        onTypingStop={() =>
+          emitTypingStop({
+            conversationId,
+            conversationType: "group",
+            username: user.username
+          })
+        }
       />
     </section>
   )

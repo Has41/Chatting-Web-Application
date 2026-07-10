@@ -9,6 +9,7 @@ import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
 import EditMessageModal from "@shared/components/EditMessageModal"
 import FileMessagePreview from "@shared/components/FileMessagePreview"
 import { AlertCircle, Send } from "lucide-react"
+import type { MediaViewerItem } from "@shared/components/MediaViewerModal"
 import type { Dispatch, RefObject, SetStateAction } from "react"
 
 interface SeenUser {
@@ -46,6 +47,8 @@ interface MessageProps {
   conversationId?: string
   conversationType?: "private" | "group"
   socket: RefObject<{ emit: (...args: any[]) => void } | null>
+  mediaGallery?: MediaViewerItem[]
+  mediaGalleryIndex?: number
 }
 
 const Message = ({
@@ -56,7 +59,9 @@ const Message = ({
   recipientData = [],
   conversationId,
   conversationType,
-  socket
+  socket,
+  mediaGallery,
+  mediaGalleryIndex
 }: MessageProps) => {
   const messageRef = useRef<HTMLDivElement | null>(null)
   const hasMarkedSeenRef = useRef(false)
@@ -236,7 +241,12 @@ const Message = ({
             )}
             {message.messageType === "file" ? (
               <div className="flex flex-col">
-                <FileMessagePreview fileMeta={message.media ?? { mediaUrl: "" }} isSender={isSender} />
+                <FileMessagePreview
+                  fileMeta={message.media ?? { mediaUrl: "" }}
+                  isSender={isSender}
+                  mediaGallery={mediaGallery}
+                  mediaGalleryIndex={mediaGalleryIndex}
+                />
                 <div
                   className={`mt-3 ml-auto px-2 pb-1 text-right text-xs select-none ${
                     isSender ? "text-white" : "text-black/60"

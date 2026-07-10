@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { io, Socket } from "socket.io-client"
 import { useAuth } from "@auth/hooks/useAuth"
@@ -6,11 +6,17 @@ import { useQueryClient } from "@tanstack/react-query"
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
 
+export interface TypingUser {
+  userId: string
+  username?: string
+}
+
 export const useChatSocket = (config?: any) => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const socketRef = useRef<Socket | null>(null)
+  const [typingUsers, setTypingUsers] = useState<TypingUser[]>([])
   const userId = config?.userId ?? user?._id
   const conversationId = config?.conversationId
   const type = config?.type ?? "private"
@@ -18,6 +24,7 @@ export const useChatSocket = (config?: any) => {
   const conversationIdRef = useRef(conversationId)
   const typeRef = useRef(type)
   const setMessagesRef = useRef(setMessages)
+  const typingTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   const mergeIncomingMessage = useCallback((incomingMessage: any) => {
     setMessagesRef.current?.((prev: any[]) => {
@@ -98,7 +105,40 @@ export const useChatSocket = (config?: any) => {
       refreshConversationFiles(messageData)
     })
 
+    socketRef.current.on("typing:start", (typingData: TypingUser & { conversationId?: string; conversationType?: string }) => {
+      if (!typingData?.userId || typingData.userId === userId) return
+
+      if (
+        typingData.conversationId &&
+        conversationIdRef.current &&
+        typingData.conversationId.toString() !== conversationIdRef.current.toString()
+      ) {
+        return
+      }
+
+      window.clearTimeout(typingTimeoutsRef.current[typingData.userId])
+      setTypingUsers((prev) => {
+        if (prev.some((typingUser) => typingUser.userId === typingData.userId)) return prev
+        return [...prev, { userId: typingData.userId, username: typingData.username }]
+      })
+
+      typingTimeoutsRef.current[typingData.userId] = window.setTimeout(() => {
+        setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
+        delete typingTimeoutsRef.current[typingData.userId]
+      }, 3000)
+    })
+
+    socketRef.current.on("typing:stop", (typingData: TypingUser) => {
+      if (!typingData?.userId) return
+
+      window.clearTimeout(typingTimeoutsRef.current[typingData.userId])
+      delete typingTimeoutsRef.current[typingData.userId]
+      setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
+    })
+
     return () => {
+      Object.values(typingTimeoutsRef.current).forEach((timeoutId) => window.clearTimeout(timeoutId))
+      typingTimeoutsRef.current = {}
       if (socketRef.current) {
         socketRef.current.disconnect()
         socketRef.current = null
@@ -140,10 +180,35 @@ export const useChatSocket = (config?: any) => {
     })
   }, [])
 
+  const emitTypingStart = useCallback(
+    (payload: { conversationId?: string; conversationType: "private" | "group"; recipientId?: string; username?: string }) => {
+      if (!userId) return
+      socketRef.current?.emit("typing:start", {
+        ...payload,
+        senderId: userId
+      })
+    },
+    [userId]
+  )
+
+  const emitTypingStop = useCallback(
+    (payload: { conversationId?: string; conversationType: "private" | "group"; recipientId?: string; username?: string }) => {
+      if (!userId) return
+      socketRef.current?.emit("typing:stop", {
+        ...payload,
+        senderId: userId
+      })
+    },
+    [userId]
+  )
+
   return {
     socket: socketRef.current,
     socketRef,
     sendMessage,
+    emitTypingStart,
+    emitTypingStop,
+    typingUsers,
     emit,
     on,
     off

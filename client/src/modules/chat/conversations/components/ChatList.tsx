@@ -6,12 +6,32 @@ import GroupModal from "@shared/components/GroupModal"
 import ChatSearch from "./Messages/ChatSearch"
 import { getChatConversationRoute, getGroupConversationRoute } from "@shared/constants/routePaths"
 import useChatList from "@chat/conversations/hooks/useChatList"
+import useFriendPresence from "@chat/conversations/hooks/useFriendPresence"
+import { useQuery } from "@tanstack/react-query"
+import axiosInstance from "@shared/utils/axiosInstance"
+import { USER_PATHS } from "@shared/constants/apiPaths"
+import type { User } from "@shared/types"
+import useStories from "@chat/stories/hooks/useStories"
+import StoryTray from "@chat/stories/components/StoryTray"
 
 const ChatList = () => {
   const { user } = useAuth()
   const { chatList } = useChatList()
   const [showDropdown, setShowDropdown] = useState(false)
   const [openGroupModal, setOpenGroupModal] = useState(false)
+
+  const { data: friendConversationData } = useQuery({
+    queryKey: ["friendConversations"],
+    queryFn: async () => {
+      const response = await axiosInstance.get(USER_PATHS.GET_FRIENDS_AND_CONVERSATIONS)
+      return response.data as { friends: User[] }
+    },
+    enabled: !!user
+  })
+
+  const friends = friendConversationData?.friends ?? []
+  const { onlineUserIds } = useFriendPresence(friends)
+  const { data: stories = [] } = useStories(!!user)
 
   const toggleDropdown = () => setShowDropdown((prev) => !prev)
 
@@ -58,15 +78,7 @@ const ChatList = () => {
         </div>
 
         <ChatSearch />
-        <div className="my-8">
-          <div className="relative flex h-14 w-20 flex-col items-center justify-center rounded-lg bg-slate-100 shadow-sm">
-            <div className="relative">
-              <div className="-mt-5 mb-1 size-12 cursor-pointer rounded-full bg-green-200"></div>
-              <span className="absolute right-0 bottom-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
-            </div>
-            <p className="text-sm font-semibold text-black/80">User</p>
-          </div>
-        </div>
+        <StoryTray stories={stories} friends={friends} onlineUserIds={onlineUserIds} />
 
         <div className="max-w-full">
           <div>
@@ -82,6 +94,7 @@ const ChatList = () => {
               const imageUrl = isGroup ? conversation.groupPicture?.url : otherUser?.profilePicture?.url
 
               const displayName = isGroup ? conversation.groupName : otherUser?.displayName || otherUser?.username
+              const isOtherUserOnline = !!otherUser?._id && onlineUserIds.has(otherUser._id)
 
               return (
                 <div key={conversation._id} className="my-4 w-full">
@@ -96,14 +109,32 @@ const ChatList = () => {
                         className="flex cursor-pointer items-center rounded p-2 transition-all duration-500 hover:bg-gray-100"
                       >
                         {imageUrl ? (
-                          <img
-                            className="mr-3 h-12 w-12 rounded-full bg-slate-200 object-cover"
-                            src={imageUrl}
-                            alt={displayName}
-                          />
+                          <div className="relative mr-3">
+                            <img
+                              className="h-12 w-12 rounded-full bg-slate-200 object-cover"
+                              src={imageUrl}
+                              alt={displayName}
+                            />
+                            {!isGroup && (
+                              <span
+                                className={`absolute right-0 bottom-0 size-3 rounded-full border-2 border-white ${
+                                  isOtherUserOnline ? "bg-emerald-500" : "bg-gray-300"
+                                }`}
+                              ></span>
+                            )}
+                          </div>
                         ) : (
-                          <div className="mr-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-lg font-semibold text-white">
-                            {displayName?.charAt(0).toUpperCase()}
+                          <div className="relative mr-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-lg font-semibold text-white">
+                              {displayName?.charAt(0).toUpperCase()}
+                            </div>
+                            {!isGroup && (
+                              <span
+                                className={`absolute right-0 bottom-0 size-3 rounded-full border-2 border-white ${
+                                  isOtherUserOnline ? "bg-emerald-500" : "bg-gray-300"
+                                }`}
+                              ></span>
+                            )}
                           </div>
                         )}
 

@@ -1,7 +1,11 @@
+import { useState } from "react"
+import { Search, X } from "lucide-react"
 import ChatLogo from "@shared/components/ChatLogo"
 import UserSearch from "@chat/conversations/components/Messages/UserSearch"
 
 const StartChat = () => {
+  const [showSearchModal, setShowSearchModal] = useState(false)
+
   const suggestions = [
     {
       title: "Pick a conversation",
@@ -52,8 +56,15 @@ const StartChat = () => {
           </p>
         </div>
 
-        <div className="mt-8 w-full">
-          <UserSearch variant="panel" placeholder="Search by username or display name" />
+        <div className="mt-8">
+          <button
+            type="button"
+            onClick={() => setShowSearchModal(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-400"
+          >
+            <Search className="size-4" />
+            Find people
+          </button>
         </div>
 
         <div className="mt-8 grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-3">
@@ -65,6 +76,40 @@ const StartChat = () => {
           ))}
         </div>
       </div>
+
+      {showSearchModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Find people"
+          onClick={() => setShowSearchModal(false)}
+        >
+          <div
+            className="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Find people</h2>
+                <p className="text-xs text-slate-500">Search users and open a private chat.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSearchModal(false)}
+                className="inline-flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                aria-label="Close"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="p-4">
+              <UserSearch variant="panel" placeholder="Search by username or display name" autoFocus />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

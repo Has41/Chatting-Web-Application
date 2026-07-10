@@ -41,7 +41,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = client.handshake.query.userId as string
 
     if (userId) {
-      gatewayUtils.setUserSocket(userId, client.id)
+      const isFirstSocket = gatewayUtils.setUserSocket(userId, client.id)
+      if (isFirstSocket) {
+        this.server.emit('userOnline', { userId })
+      }
     } else {
       client.disconnect(true)
     }
@@ -49,9 +52,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log(`Client Disconnected: ${client.id}`)
-    const userId = gatewayUtils.removeSocketUser(client.id)
-    if (userId) {
-      console.log(`User ${userId} disconnected`)
+    const removedSocket = gatewayUtils.removeSocketUser(client.id)
+    if (removedSocket) {
+      console.log(`User ${removedSocket.userId} disconnected`)
+      if (removedSocket.isLastSocket) {
+        this.server.emit('userOffline', { userId: removedSocket.userId })
+      }
     }
   }
 
@@ -61,6 +67,42 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleCheckIfOnline(@ConnectedSocket() client: Socket, @MessageBody() userId: string) {
     const isOnline = gatewayUtils.isUserOnline(userId)
     client.emit('checkIfOnlineResponse', isOnline)
+  }
+
+  @SubscribeMessage('checkOnlineUsers')
+  handleCheckOnlineUsers(@ConnectedSocket() client: Socket, @MessageBody() userIds: string[]) {
+    const onlineUserIds = gatewayUtils.getOnlineUserIds(Array.isArray(userIds) ? userIds : [])
+    client.emit('onlineUsersResponse', { onlineUserIds })
+  }
+
+  @SubscribeMessage('typing:start')
+  handleTypingStart(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      conversationId?: string
+      conversationType: 'private' | 'group'
+      senderId: string
+      recipientId?: string
+      username?: string
+    },
+  ) {
+    this.emitTypingEvent(client, 'typing:start', data)
+  }
+
+  @SubscribeMessage('typing:stop')
+  handleTypingStop(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      conversationId?: string
+      conversationType: 'private' | 'group'
+      senderId: string
+      recipientId?: string
+      username?: string
+    },
+  ) {
+    this.emitTypingEvent(client, 'typing:stop', data)
   }
 
   @SubscribeMessage('sendMessage')
@@ -399,5 +441,38 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     return { message: createdMessage, conversation }
+  }
+
+  private emitTypingEvent(
+    client: Socket,
+    event: 'typing:start' | 'typing:stop',
+    data: {
+      conversationId?: string
+      conversationType: 'private' | 'group'
+      senderId: string
+      recipientId?: string
+      username?: string
+    },
+  ) {
+    if (!data?.senderId || !data?.conversationType) return
+
+    const payload = {
+      conversationId: data.conversationId,
+      conversationType: data.conversationType,
+      userId: data.senderId,
+      username: data.username,
+    }
+
+    if (data.conversationType === 'group' && data.conversationId) {
+      client.to(data.conversationId).emit(event, payload)
+      return
+    }
+
+    if (data.conversationType === 'private' && data.recipientId) {
+      const recipientSocketIds = gatewayUtils.getUserSocketIds(data.recipientId)
+      recipientSocketIds.forEach((socketId) => {
+        this.server.to(socketId).emit(event, payload)
+      })
+    }
   }
 }
