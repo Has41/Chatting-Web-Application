@@ -9,6 +9,7 @@ import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
 import type { MediaViewerItem } from "@shared/components/MediaViewerModal"
 import TypingIndicator from "./TypingIndicator"
 import type { TypingUser } from "@chat/conversations/hooks/useChatSocket"
+import type { User } from "@shared/types"
 
 interface ChatMessagesProps {
   conversationId?: string
@@ -64,6 +65,13 @@ const ChatMessages = ({
 
   deduplicatedMessages.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
 
+  const typingUser = typingUsers[0]
+  const groupRecipients = conversationType === "group" ? getGroupRecipients(userData, user._id) : []
+  const typingProfile =
+    conversationType === "group"
+      ? groupRecipients.find((recipient: User) => recipient._id === typingUser?.userId)
+      : userData
+
   const mediaGallery: MediaViewerItem[] = []
   const mediaGalleryIndexByMessageId = new Map<string, number>()
 
@@ -109,7 +117,7 @@ const ChatMessages = ({
       {deduplicatedMessages.map((msg) => {
         const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id
         const isSender = senderId === user._id
-        const recipients = conversationType === "group" ? getGroupRecipients(userData, user._id) : userData
+        const recipients = conversationType === "group" ? groupRecipients : userData
 
         return (
           <div key={msg._id} className={`flex items-end ${isSender ? "mb-1 justify-end" : "mb-4 justify-start"}`}>
@@ -143,7 +151,7 @@ const ChatMessages = ({
             <Message
               isSender={isSender}
               message={msg}
-              recipientData={conversationType === "group" ? getGroupRecipients(userData, user._id) : []}
+              recipientData={conversationType === "group" ? groupRecipients : []}
               lastMessage={lastMessage}
               setMessages={setMessages}
               conversationId={conversationId}
@@ -156,7 +164,11 @@ const ChatMessages = ({
         )
       })}
 
-      <TypingIndicator typingUsers={typingUsers} />
+      <TypingIndicator
+        typingUsers={typingUsers}
+        avatarUrl={typingProfile?.profilePicture?.url}
+        avatarLabel={typingProfile?.username || typingUser?.username}
+      />
     </div>
   )
 }
