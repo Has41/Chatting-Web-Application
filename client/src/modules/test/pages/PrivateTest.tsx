@@ -84,22 +84,6 @@ const PrivateTest = () => {
     }
   }, [conversationData])
 
-  const checkCondition = () => {
-    const lastMessage = conversationData?.conversation?.lastMessage
-    const lastMessageData = conversationData?.messages.find((msg) => msg._id === lastMessage)
-
-    if (lastMessageData && lastMessageData.seenBy.length === 0) {
-      console.log("Last message found and not seen by anyone yet:", lastMessageData)
-      return true
-    }
-
-    if (messageSent) {
-      return true
-    }
-
-    return false
-  }
-
   useEffect(() => {
     if (conversationId || socket || userId) {
       const observer = new IntersectionObserver(
@@ -135,7 +119,7 @@ const PrivateTest = () => {
         }
       }
     }
-  }, [checkCondition])
+  }, [conversationData, conversationId, lastMessage, socket, userId])
 
   const sendMessage = () => {
     try {

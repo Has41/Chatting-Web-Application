@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
-import { useChannelFiles } from "../hooks/useChannels"
+import { useChannelFiles } from "../queries/useChannels"
 
 interface ChannelInfoFilesProps {
   channelId: string

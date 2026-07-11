@@ -1,4 +1,4 @@
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 
 export const getUserConversations = async () => {

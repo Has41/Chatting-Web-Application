@@ -15,7 +15,9 @@ export default defineConfig({
       "@app": path.resolve(__dirname, "./src/app"),
       "@auth": path.resolve(__dirname, "./src/modules/auth"),
       "@chat": path.resolve(__dirname, "./src/modules/chat"),
+      "@calls": path.resolve(__dirname, "./src/modules/calls"),
       "@profile": path.resolve(__dirname, "./src/modules/profile"),
+      "@stories": path.resolve(__dirname, "./src/modules/stories"),
       "@shared": path.resolve(__dirname, "./src/shared"),
       "@styles": path.resolve(__dirname, "./src/styles")
     }

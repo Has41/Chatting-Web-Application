@@ -1,14 +1,14 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import Message from "./Message"
 import useAuth from "@auth/hooks/useAuth"
 import getGroupRecipients from "@shared/utils/getGroupRecipients"
 import { useEffect, useRef, type UIEvent } from "react"
 import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
-import type { MediaViewerItem } from "@shared/components/MediaViewerModal"
+import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
 import TypingIndicator from "./TypingIndicator"
-import type { TypingUser } from "@chat/conversations/hooks/useChatSocket"
+import type { TypingUser } from "@chat/socket/useChatSocket"
 import type { User } from "@shared/types"
 
 interface ChatMessagesProps {
@@ -35,6 +35,7 @@ const ChatMessages = ({
 }: ChatMessagesProps) => {
   const { user } = useAuth()
   const scrollRef = useRef<HTMLDivElement | null>(null)
+  const currentUserId = user?._id
 
   const {
     data: infiniteData,
@@ -51,10 +52,8 @@ const ChatMessages = ({
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage: any, pages: any[]) => (lastPage.messages.length === 20 ? pages.length + 1 : undefined),
-    enabled: !!conversationId && !!user
+    enabled: !!conversationId && !!currentUserId
   })
-
-  if (!user) return null
 
   const fetchedMessages = infiniteData?.pages.flatMap((page: any) => page.messages) || []
   const combinedMessages = [...fetchedMessages, ...socketMessages]
@@ -66,7 +65,7 @@ const ChatMessages = ({
   deduplicatedMessages.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt))
 
   const typingUser = typingUsers[0]
-  const groupRecipients = conversationType === "group" ? getGroupRecipients(userData, user._id) : []
+  const groupRecipients = conversationType === "group" ? getGroupRecipients(userData, currentUserId ?? "") : []
   const typingProfile =
     conversationType === "group"
       ? groupRecipients.find((recipient: User) => recipient._id === typingUser?.userId)
@@ -110,13 +109,15 @@ const ChatMessages = ({
     }
   }, [deduplicatedMessages, typingUsers.length])
 
+  if (!user || !currentUserId) return null
+
   return (
     <div ref={scrollRef} onScroll={handleScroll} className="grow overflow-y-auto bg-gray-100 p-4">
       {isFetchingNextPage && <div className="text-center text-sm text-gray-500">Loading more messages...</div>}
 
       {deduplicatedMessages.map((msg) => {
         const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id
-        const isSender = senderId === user._id
+        const isSender = senderId === currentUserId
         const recipients = conversationType === "group" ? groupRecipients : userData
 
         return (

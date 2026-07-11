@@ -4,12 +4,14 @@ import useAuth from "@auth/hooks/useAuth"
 import getSeenText from "@shared/utils/getSeenText"
 import moment from "moment"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
-import EditMessageModal from "@shared/components/EditMessageModal"
-import FileMessagePreview from "@shared/components/FileMessagePreview"
+import EditMessageModal from "@chat/messages/components/EditMessageModal"
+import FileMessagePreview from "@chat/attachments/components/FileMessagePreview"
+import MessageReactions from "@chat/messages/components/MessageReactions"
 import { AlertCircle, Send } from "lucide-react"
-import type { MediaViewerItem } from "@shared/components/MediaViewerModal"
+import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
+import type { MessageReactionItem } from "@chat/messages/components/MessageReactions"
 import type { Dispatch, RefObject, SetStateAction } from "react"
 
 interface SeenUser {
@@ -36,6 +38,7 @@ interface ChatMessage {
   createdAt: string
   editedAt?: string
   seenBy?: SeenUser[]
+  reactions?: MessageReactionItem[]
 }
 
 interface MessageProps {
@@ -68,6 +71,7 @@ const Message = ({
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const isVisible = useIntersectionObserver(messageRef as RefObject<Element>)
+  const currentUserId = user?._id
   const [messageId, _] = useState(message._id)
   const [editContent, setEditContent] = useState<string>(message.content ?? "")
   const [showDropdown, setShowDropdown] = useState(false)
@@ -79,8 +83,7 @@ const Message = ({
   const canEditMessage = !isFileMessage || !!message.media?.caption?.trim()
   const isSending = message.localStatus === "sending"
   const hasFailed = message.localStatus === "failed"
-
-  if (!user) return null
+  const canReact = !isSending && !hasFailed
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -129,6 +132,45 @@ const Message = ({
 
     setMessages((prev) => updater(prev))
     updateCachedMessages(updater)
+  }
+
+  const applyReactionToMessage = (targetMessage: ChatMessage, emoji: string): ChatMessage => {
+    if (!user || !currentUserId) return targetMessage
+
+    const reactions = targetMessage.reactions ?? []
+    const existingReaction = reactions.find((reaction) => {
+      const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
+      return reactionUserId === currentUserId || reaction.users?.includes(currentUserId)
+    })
+    const reactionsWithoutMine = reactions
+      .map((reaction) => {
+        if (reaction.users?.includes(currentUserId)) {
+          return { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
+        }
+
+        return reaction
+      })
+      .filter((reaction) => {
+        const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
+        const hasGroupedUsers = !reaction.users || reaction.users.length > 0
+        return reactionUserId !== currentUserId && hasGroupedUsers
+      })
+
+    const nextReactions =
+      existingReaction?.emoji === emoji ? reactionsWithoutMine : [...reactionsWithoutMine, { user, emoji }]
+
+    return { ...targetMessage, reactions: nextReactions }
+  }
+
+  const handleReact = (emoji: string) => {
+    if (!canReact || !currentUserId) return
+
+    const updater = (messages: ChatMessage[]) =>
+      messages.map((msg) => (msg._id === message._id ? applyReactionToMessage(msg, emoji) : msg))
+
+    setMessages((prev) => updater(prev))
+    updateCachedMessages(updater)
+    socket.current?.emit("react-to-message", { messageId: message._id, userId: currentUserId, emoji })
   }
 
   const { mutate: editMessage } = useMutation({
@@ -194,21 +236,25 @@ const Message = ({
   })
 
   useEffect(() => {
+    if (!currentUserId) return
+
     const hasCurrentUserSeen = lastMessage?.seenBy?.some(
-      (seen: SeenUser) => seen.user._id === user._id || seen.user?._id === user._id
+      (seen: SeenUser) => seen.user._id === currentUserId || seen.user?._id === currentUserId
     )
     if (
       message?._id === lastMessage?._id &&
       isVisible &&
       !hasCurrentUserSeen &&
       !hasMarkedSeenRef.current &&
-      senderId !== user?._id
+      senderId !== currentUserId
     ) {
-      socket.current?.emit("markMessageAsSeen", conversationId, user._id, conversationType, lastMessage._id)
+      socket.current?.emit("markMessageAsSeen", conversationId, currentUserId, conversationType, lastMessage._id)
       hasMarkedSeenRef.current = true
       console.log("Marked message as seen:", lastMessage)
     }
-  }, [isVisible, message, lastMessage, conversationId, user._id, conversationType, socket])
+  }, [isVisible, message, lastMessage, conversationId, currentUserId, conversationType, socket, senderId])
+
+  if (!user || !currentUserId) return null
 
   return (
     <div className={`mb-3 ${isSender ? "flex justify-end" : "flex justify-start"}`}>
@@ -378,6 +424,13 @@ const Message = ({
             )}
           </div>
         </div>
+        <MessageReactions
+          reactions={message.reactions}
+          currentUserId={currentUserId}
+          disabled={!canReact}
+          align={isSender ? "right" : "left"}
+          onReact={handleReact}
+        />
         {message?._id === lastMessage?._id &&
           lastMessage?.sender === user?._id &&
           (lastMessage?.seenBy?.length ?? 0) > 0 && (

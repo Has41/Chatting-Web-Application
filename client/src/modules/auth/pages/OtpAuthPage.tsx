@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type ClipboardEvent } from "react"
 import ChatLogo from "@shared/components/ChatLogo"
 import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import type { AuthSwitchProps } from "@auth/types/forms"

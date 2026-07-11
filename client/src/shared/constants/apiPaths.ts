@@ -80,4 +80,9 @@ const CHANNEL_PATHS = {
   FILES: (channelId: string) => `/api/channels/${channelId}/files`
 }
 
-export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS, STORY_PATHS, CHANNEL_PATHS }
+const CALL_PATHS = {
+  BASE: "/api/calls",
+  DETAIL: (callLogId: string) => `/api/calls/${callLogId}`
+}
+
+export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS, STORY_PATHS, CHANNEL_PATHS, CALL_PATHS }

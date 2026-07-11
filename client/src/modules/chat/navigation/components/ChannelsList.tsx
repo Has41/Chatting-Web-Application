@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom"
 import useAuth from "@auth/hooks/useAuth"
 import { getChannelConversationRoute } from "@shared/constants/routePaths"
 import type { Channel, User } from "@shared/types"
-import { useCreateChannel, useJoinChannel, useMyChannels, usePublicChannels } from "@chat/channels/hooks/useChannels"
+import { useCreateChannel, useJoinChannel, useMyChannels, usePublicChannels } from "@chat/channels/queries/useChannels"
 
 const getUserId = (value: User | string) => (typeof value === "string" ? value : value._id)
 
@@ -176,7 +176,12 @@ const ChannelListItem = ({ channel, userId, joining, onJoin }: ChannelListItemPr
 
   return (
     <div className="flex items-center gap-3 rounded-[18px] bg-white p-3 shadow-sm ring-1 ring-black/5">
-      {content}
+      <Link
+        to={getChannelConversationRoute(channel._id)}
+        className="min-w-0 flex-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+      >
+        {content}
+      </Link>
       <button
         type="button"
         onClick={onJoin}

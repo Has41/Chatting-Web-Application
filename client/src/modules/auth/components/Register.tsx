@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form"
 import { firstStepRegister } from "@shared/utils/dynamicData"
 import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import InputField from "@shared/components/InputField"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { zodResolver } from "@hookform/resolvers/zod"

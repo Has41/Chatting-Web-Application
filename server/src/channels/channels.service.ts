@@ -357,6 +357,7 @@ export class ChannelsService {
       })
       .populate('sender', 'username displayName profilePicture')
       .populate('seenBy.user', 'username displayName profilePicture')
+      .populate('reactions.user', 'username displayName profilePicture')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

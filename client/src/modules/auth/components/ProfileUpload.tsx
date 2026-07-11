@@ -4,7 +4,7 @@ import "react-image-crop/dist/ReactCrop.css"
 import setCanvasPreview from "@shared/utils/setCanvasPreview"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
 import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { useNavigate } from "react-router-dom"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
@@ -62,10 +62,10 @@ const ProfileUpload = () => {
     setUpImg(null)
 
     const reader = new FileReader()
-    reader.addEventListener("load", () => {
+    reader.onload = () => {
       const imageUrl = reader.result?.toString() || ""
       setUpImg(imageUrl)
-    })
+    }
     reader.readAsDataURL(file)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""

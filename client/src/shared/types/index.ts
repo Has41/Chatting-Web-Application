@@ -25,6 +25,7 @@ export interface AuthUser extends User {
 export interface Message {
   _id: string
   conversationId: string
+  channel?: string
   sender: string | User
   content?: string
   messageType?: string
@@ -60,7 +61,8 @@ export interface FileAttachment {
 
 export interface MessageReaction {
   emoji: string
-  users: string[]
+  user?: string | User
+  users?: string[]
 }
 
 // Conversation Types

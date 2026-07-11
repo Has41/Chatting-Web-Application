@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateInterestsProps {

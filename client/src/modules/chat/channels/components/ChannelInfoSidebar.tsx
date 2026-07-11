@@ -21,7 +21,7 @@ import {
 import { useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import { CHAT_PAGE } from "@shared/constants/routePaths"
 import type { Channel, User } from "@shared/types"
@@ -34,7 +34,7 @@ import {
   useRemoveChannelMembers,
   useTransferChannelOwnership,
   useUpdateChannel
-} from "../hooks/useChannels"
+} from "../queries/useChannels"
 import ChannelInfoFiles from "./ChannelInfoFiles"
 
 const getUserId = (value?: User | string | null) => (typeof value === "string" ? value : value?._id)
@@ -72,6 +72,9 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
   const adminIds = useMemo(() => new Set(channel.admins.map(getUserId).filter(Boolean)), [channel.admins])
   const currentUserIsOwner = Boolean(currentUserId && currentUserId === ownerId)
   const currentUserIsAdmin = Boolean(currentUserId && (currentUserIsOwner || adminIds.has(currentUserId)))
+  const currentUserIsMember = Boolean(
+    currentUserId && channel.members.some((member) => getUserId(member) === currentUserId)
+  )
   const members = useMemo(
     () =>
       channel.members
@@ -355,7 +358,7 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
             <button
               type="button"
               onClick={handleLeave}
-              disabled={currentUserIsOwner || leaveChannel.isPending}
+              disabled={!currentUserIsMember || currentUserIsOwner || leaveChannel.isPending}
               className="flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {leaveChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}

@@ -2,13 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { io, Socket } from "socket.io-client"
 import { useQueryClient } from "@tanstack/react-query"
 import type { Message } from "@shared/types"
-import { channelKeys } from "./useChannels"
+import { channelKeys } from "../queries/useChannels"
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
 
 interface UseChannelSocketConfig {
   channelId?: string
   userId?: string
+  enabled?: boolean
   setMessages: (value: Message[] | ((prev: Message[]) => Message[])) => void
 }
 
@@ -17,7 +18,7 @@ export interface ChannelTypingUser {
   username?: string
 }
 
-export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelSocketConfig) => {
+export const useChannelSocket = ({ channelId, userId, enabled = true, setMessages }: UseChannelSocketConfig) => {
   const socketRef = useRef<Socket | null>(null)
   const [typingUsers, setTypingUsers] = useState<ChannelTypingUser[]>([])
   const channelIdRef = useRef(channelId)
@@ -29,10 +30,10 @@ export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelS
     channelIdRef.current = channelId
     setMessagesRef.current = setMessages
 
-    if (socketRef.current?.connected && channelId && userId) {
+    if (socketRef.current?.connected && channelId && userId && enabled) {
       socketRef.current.emit("join-channel", { channelId, userId })
     }
-  }, [channelId, setMessages, userId])
+  }, [channelId, enabled, setMessages, userId])
 
   const mergeIncomingMessage = useCallback((incomingMessage: Message & { clientTempId?: string }) => {
     setMessagesRef.current((prev) => {
@@ -50,8 +51,45 @@ export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelS
     })
   }, [])
 
+  const mergeReactionUpdate = useCallback(
+    (updatedMessage: Message) => {
+      if (!updatedMessage?._id) return
+
+      const mergeMessage = (message: Message) => {
+        const nextSender = typeof updatedMessage.sender === "string" ? message.sender : updatedMessage.sender
+
+        return {
+          ...message,
+          ...updatedMessage,
+          sender: nextSender
+        }
+      }
+
+      setMessagesRef.current((prev) =>
+        prev.map((message: any) =>
+          message._id === updatedMessage._id ? mergeMessage(message) : message
+        )
+      )
+
+      queryClient.setQueryData(channelKeys.messages(channelIdRef.current), (oldData: any) => {
+        if (!oldData?.pages) return oldData
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            messages: page.messages.map((message: Message) =>
+              message._id === updatedMessage._id ? mergeMessage(message) : message
+            )
+          }))
+        }
+      })
+    },
+    [queryClient]
+  )
+
   useEffect(() => {
-    if (!userId) return
+    if (!userId || !enabled) return
 
     socketRef.current = io(SOCKET_URL, {
       query: { userId },
@@ -112,6 +150,11 @@ export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelS
       )
     })
 
+    socketRef.current.on("message-reaction-updated", (data: { message?: Message }) => {
+      if (data?.message?.channel?.toString() !== channelIdRef.current?.toString()) return
+      mergeReactionUpdate(data.message)
+    })
+
     return () => {
       Object.values(typingTimeoutsRef.current).forEach((timeoutId) => window.clearTimeout(timeoutId))
       typingTimeoutsRef.current = {}
@@ -121,7 +164,7 @@ export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelS
       socketRef.current?.disconnect()
       socketRef.current = null
     }
-  }, [mergeIncomingMessage, queryClient, userId])
+  }, [enabled, mergeIncomingMessage, mergeReactionUpdate, queryClient, userId])
 
   const sendChannelMessage = useCallback(
     (payload: {
@@ -135,6 +178,17 @@ export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelS
       socketRef.current?.emit("send-channel-message", payload)
     },
     []
+  )
+
+  const reactToMessage = useCallback(
+    (payload: { messageId: string; emoji: string }) => {
+      if (!userId) return
+      socketRef.current?.emit("react-to-message", {
+        ...payload,
+        userId
+      })
+    },
+    [userId]
   )
 
   const emitTypingStart = useCallback(
@@ -166,6 +220,7 @@ export const useChannelSocket = ({ channelId, userId, setMessages }: UseChannelS
   return {
     socketRef,
     sendChannelMessage,
+    reactToMessage,
     typingUsers,
     emitTypingStart,
     emitTypingStop

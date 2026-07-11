@@ -14,25 +14,52 @@ export class MessagesService {
   ) {}
 
   async addReaction(messageId: string, userId: string, emoji: string) {
-    const message = await this.messageModel.findById(messageId).select('reactions')
+    const normalizedEmoji = emoji?.trim()
+
+    if (!normalizedEmoji || Array.from(normalizedEmoji).length > 16) {
+      throw new HttpException('A valid emoji reaction is required.', HttpStatus.BAD_REQUEST)
+    }
+
+    const message = await this.messageModel.findById(messageId).select('sender recipient channel reactions')
 
     if (!message) {
       throw new HttpException('Message not found!', HttpStatus.NOT_FOUND)
     }
 
-    const existingReaction = message.reactions.find(
-      (reaction) => reaction.user.toString() === userId.toString(),
-    )
+    if (message.channel) {
+      const channel = await this.channelModel.findById(message.channel).select('members')
+      const isMember = channel?.members.some((member) => member.toString() === userId)
 
-    if (existingReaction) {
-      existingReaction.emoji = emoji
+      if (!isMember) {
+        throw new HttpException('Not authorized to react to this message.', HttpStatus.FORBIDDEN)
+      }
     } else {
-      message.reactions.push({ user: new Types.ObjectId(userId), emoji })
+      const conversation = await this.conversationModel.findOne({ messages: message._id }).select('participants')
+      const isParticipant = conversation?.participants.some((participant) => participant.toString() === userId)
+      const isDirectParticipant = [message.sender?.toString(), message.recipient?.toString()].includes(userId)
+
+      if (!isParticipant && !isDirectParticipant) {
+        throw new HttpException('Not authorized to react to this message.', HttpStatus.FORBIDDEN)
+      }
+    }
+
+    const existingReaction = message.reactions.find((reaction) => reaction.user.toString() === userId.toString())
+    const shouldRemoveReaction = existingReaction?.emoji === normalizedEmoji
+
+    message.reactions = message.reactions.filter((reaction) => reaction.user.toString() !== userId.toString())
+
+    if (!shouldRemoveReaction) {
+      message.reactions.push({ user: new Types.ObjectId(userId), emoji: normalizedEmoji })
     }
 
     await message.save()
 
-    return { message: 'Reaction added successfully!' }
+    const updatedMessage = await this.messageModel
+      .findById(messageId)
+      .populate('reactions.user', 'username displayName profilePicture')
+      .lean()
+
+    return { message: updatedMessage }
   }
 
   async editMessage(messageId: string, userId: string, data: { content?: string; caption?: string }) {

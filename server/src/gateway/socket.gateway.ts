@@ -191,6 +191,94 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('react-to-message')
+  async handleReactToMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { messageId?: string; userId?: string; emoji?: string },
+  ) {
+    const { messageId, userId, emoji } = data ?? {}
+    const socketUserId = client.handshake.query.userId as string
+    const normalizedEmoji = emoji?.trim()
+
+    if (!messageId || !userId || userId !== socketUserId || !normalizedEmoji || Array.from(normalizedEmoji).length > 16) {
+      client.emit('message-reaction-error', { messageId, message: 'Unable to update reaction.' })
+      return
+    }
+
+    try {
+      const message = await this.messageModel.findById(messageId).select('sender recipient channel reactions')
+
+      if (!message) {
+        client.emit('message-reaction-error', { messageId, message: 'Message not found.' })
+        return
+      }
+
+      let conversation: ConversationDocument | null = null
+
+      if (message.channel) {
+        const channel = await this.channelModel.findById(message.channel).select('members')
+        const isMember = channel?.members.some((member) => member.toString() === userId)
+
+        if (!isMember) {
+          client.emit('message-reaction-error', { messageId, message: 'You cannot react until you join this channel.' })
+          return
+        }
+      } else {
+        conversation = await this.conversationModel.findOne({ messages: message._id }).select('conversationType participants')
+        const isParticipant = conversation?.participants.some((participant) => participant.toString() === userId)
+        const isDirectParticipant = [message.sender?.toString(), message.recipient?.toString()].includes(userId)
+
+        if (!isParticipant && !isDirectParticipant) {
+          client.emit('message-reaction-error', { messageId, message: 'Unable to update reaction.' })
+          return
+        }
+      }
+
+      const existingReaction = message.reactions.find((reaction) => reaction.user.toString() === userId)
+      const shouldRemoveReaction = existingReaction?.emoji === normalizedEmoji
+
+      message.reactions = message.reactions.filter((reaction) => reaction.user.toString() !== userId)
+
+      if (!shouldRemoveReaction) {
+        message.reactions.push({ user: new Types.ObjectId(userId), emoji: normalizedEmoji })
+      }
+
+      await message.save()
+
+      const updatedMessage = await this.messageModel
+        .findById(messageId)
+        .populate('sender', 'username displayName profilePicture')
+        .populate('reactions.user', 'username displayName profilePicture')
+        .lean()
+
+      const payload = {
+        messageId,
+        message: updatedMessage,
+      }
+
+      if (message.channel) {
+        this.server.to(`channel:${message.channel.toString()}`).emit('message-reaction-updated', payload)
+        return
+      }
+
+      if (conversation?.conversationType === 'group') {
+        this.server.to(conversation._id.toString()).emit('message-reaction-updated', payload)
+        return
+      }
+
+      const socketIds = new Set<string>()
+      gatewayUtils.getUserSocketIds(message.sender.toString()).forEach((socketId) => socketIds.add(socketId))
+      if (message.recipient) {
+        gatewayUtils.getUserSocketIds(message.recipient.toString()).forEach((socketId) => socketIds.add(socketId))
+      }
+
+      socketIds.forEach((socketId) => this.server.to(socketId).emit('message-reaction-updated', payload))
+    } catch (err) {
+      console.error('Error updating message reaction:', err)
+      client.emit('message-reaction-error', { messageId, message: 'Unable to update reaction.' })
+    }
+  }
+
   @SubscribeMessage('join-group')
   async handleJoinGroup(
     @ConnectedSocket() client: Socket,

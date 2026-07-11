@@ -63,15 +63,18 @@ For UI work:
 
 ## Frontend Structure Goal
 
-Move toward this module structure gradually:
+Move toward this feature-sliced frontend structure gradually:
 
 ```txt
 client/src/
   app/
     providers/
+    router/
+      routes.tsx
+      guards/
+    store/
     App.tsx
-    routes.tsx
-    store.tsx
+    main.tsx
 
   modules/
     auth/
@@ -79,64 +82,132 @@ client/src/
       components/
       hooks/
       pages/
-      services/
-      states/
+      state/
       types/
+      index.ts
 
     chat/
+      layout/
+        components/
+        ChatLayout.tsx
+
+      conversations/
+        api/
+        components/
+        hooks/
+        queries/
+        state/
+        types/
+        index.ts
+
+      messages/
+        api/
+        components/
+        hooks/
+        queries/
+        state/
+        types/
+        utils/
+        index.ts
+
+      composer/
+        components/
+        hooks/
+        state/
+        utils/
+        index.ts
+
+      attachments/
+        api/
+        components/
+        hooks/
+        queries/
+        types/
+        utils/
+
+      chat-info/
+        components/
+        hooks/
+        index.ts
+
+      navigation/
+        components/
+        hooks/
+
+      socket/
+        chat-socket.ts
+        chat-events.ts
+        chat-socket.types.ts
+
+      pages/
+      types/
+      index.ts
+
+    calls/
       api/
       components/
-        layout/
-        messages/
-        composer/
-        chat-info/
-        media/
-        calls/
-        stories/
-        navigation/
+      hooks/
+      livekit/
+      queries/
+      socket/
+      state/
+      types/
+      index.ts
+
+    stories/
+      api/
+      components/
       hooks/
       pages/
-      services/
-      socket/
-      states/
+      queries/
+      state/
       types/
-      utils/
+      index.ts
 
     profile/
       api/
       components/
       hooks/
       pages/
+      state/
       types/
+      index.ts
 
   shared/
+    api/
+      api-client.ts
+      query-client.ts
     components/
       ui/
       feedback/
+      layout/
       media/
-    constants/
     hooks/
+    lib/
+      socket/
+      storage/
+      cloudinary/
+    constants/
     types/
     utils/
 
   styles/
 ```
 
-`shared/` should only contain code that is genuinely reusable across modules. Chat-specific components should live under `modules/chat/`.
+Frontend placement rules:
 
-Likely chat-specific components currently worth moving out of `shared/components` over time:
-
-- `AudioRecorder`
-- `AudioPlayer`
-- `AttachmentMenu`
-- `EditMessageModal`
-- `FileMessagePreview`
-- `MediaViewerModal`
-- `PDFMeta`
-- `PDFPreview`
-- `GroupModal`
-
-Move files in small batches and update imports immediately. Do not do a giant structure rewrite in one pass.
+- `shared/` is only for code that is genuinely reusable across multiple top-level modules such as `auth`, `chat`, `calls`, `stories`, and `profile`.
+- `modules/chat/` owns the text chat workspace: layout, conversations, messages, composer, attachments, chat info, navigation, and chat socket plumbing.
+- `modules/calls/` owns calling as a top-level feature: call logs, call panels, signaling adapters, LiveKit/WebRTC-specific helpers, call socket hooks, and call state.
+- `modules/stories/` owns stories as a top-level feature: story upload, viewing, state, and story APIs.
+- Keep feature-local components, hooks, types, state, utils, and APIs inside the feature folder that owns the behavior.
+- Use `api/` for raw HTTP/client functions only. Put TanStack Query wrappers, query keys, cache invalidation helpers, and query-specific mutation hooks in feature-local `queries/`.
+- Use `hooks/` for UI/domain hooks that are not primarily TanStack Query wrappers.
+- Put exported request/response contracts and reusable domain shapes in feature-local `types/`; keep component-only prop types colocated with the component.
+- Put reusable pure helpers in feature-local `utils/` once they are used by more than one file in that feature.
+- Use `state/`, not `states/`, for new frontend folders.
+- Add `index.ts` barrels only when they make imports clearer and do not hide ownership boundaries.
+- Move files in small batches and update imports immediately. Do not do a giant structure rewrite in one pass.
 
 ## Backend Structure Goal
 
@@ -203,9 +274,12 @@ queryClient.invalidateQueries({ queryKey: ["key"] })
 ## Recommended Refactor Order
 
 1. Keep `PRODUCT.md`, `DESIGN.md`, and this `AGENTS.md` updated.
-2. Move chat-only shared components into `modules/chat/components/...`.
-3. Split chat UI by concern: `messages`, `composer`, `chat-info`, `media`, `calls`, `stories`, `navigation`.
-4. Move chat socket hooks into `modules/chat/socket` or a clear `hooks/socket` convention.
-5. Clean aliases and imports after each batch.
-6. Run `cd client; npm run build` after frontend move batches.
-7. Refactor backend modules only after the frontend chat structure is stable.
+2. Move top-level app wiring toward `app/providers`, `app/router`, and `app/store`.
+3. Move chat-owned shared code into the correct `modules/chat/*` feature folder: `messages`, `composer`, `attachments`, `chat-info`, `navigation`, `conversations`, or `layout`.
+4. Split feature query wrappers into `queries/` while keeping raw transport functions in `api/`.
+5. Move call-specific code out of `modules/chat` into top-level `modules/calls`.
+6. Move story-specific code out of `modules/chat` into top-level `modules/stories`.
+7. Move chat socket hooks and event contracts into `modules/chat/socket` once message/conversation structure is stable.
+8. Clean aliases and imports after each batch.
+9. Run `cd client; npm run build` after frontend move batches.
+10. Refactor backend modules only after the frontend feature structure is stable.

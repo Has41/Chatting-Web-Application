@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useEffect, useReducer, type Dispatch, type SetStateAction } from "react"
 import type { Conversation } from "@shared/types"
-import { useChatListQuery } from "@chat/queries/chatQueries"
+import { useChatListQuery } from "@chat/conversations/queries/chatQueries"
+import useAuth from "@auth/hooks/useAuth"
 
 interface ChatContextType {
   chatList: Conversation[]
@@ -37,9 +38,16 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
 
 const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(chatReducer, initialState)
-  const { data, isLoading, isError } = useChatListQuery()
+  const { isAuthenticated, user } = useAuth()
+  const canLoadChats = Boolean(isAuthenticated && user?._id)
+  const { data, isLoading, isError } = useChatListQuery(canLoadChats)
 
   useEffect(() => {
+    if (!canLoadChats) {
+      dispatch({ type: "RESET" })
+      return
+    }
+
     if (data?.conversations) {
       dispatch({ type: "SET_CHAT_LIST", payload: data.conversations })
       return
@@ -48,7 +56,7 @@ const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     if (isError) {
       dispatch({ type: "RESET" })
     }
-  }, [data, isError])
+  }, [canLoadChats, data, isError])
 
   return (
     <ChatContext.Provider

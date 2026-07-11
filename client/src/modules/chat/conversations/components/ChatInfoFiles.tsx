@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
 

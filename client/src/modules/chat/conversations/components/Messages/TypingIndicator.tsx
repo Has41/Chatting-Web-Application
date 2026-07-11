@@ -1,4 +1,4 @@
-import type { TypingUser } from "@chat/conversations/hooks/useChatSocket"
+import type { TypingUser } from "@chat/socket/useChatSocket"
 
 interface TypingIndicatorProps {
   typingUsers: TypingUser[]

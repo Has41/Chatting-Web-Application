@@ -2,9 +2,9 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginFields } from "@shared/utils/dynamicData"
 import InputField from "@shared/components/InputField"
-import axiosInstance from "@shared/utils/axiosInstance"
-import { useMutation } from "@tanstack/react-query"
-import { AUTH_PATHS } from "@shared/constants/apiPaths"
+import axiosInstance from "@shared/api/api-client"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { AUTH_PATHS, CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import { loginSchema } from "@shared/utils/zodSchema"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import { useState } from "react"
@@ -17,6 +17,7 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { setIsAuthenticated, setUser, refetch } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const {
     register: login,
     clearErrors,
@@ -31,10 +32,17 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
     mutationFn: async (credentials: LoginFormData) => {
       return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setErrorMessage(null)
+      const currentUser = await refetch()
+      if (currentUser.data) {
+        setUser(currentUser.data)
+      }
       setIsAuthenticated(true)
-      refetch()
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER] }),
+        queryClient.invalidateQueries({ queryKey: ["friendConversations"] })
+      ])
       navigate("/chat")
     },
     onError: (error: AxiosError<{ message?: string }>) => {

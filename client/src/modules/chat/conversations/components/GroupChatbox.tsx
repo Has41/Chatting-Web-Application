@@ -3,12 +3,12 @@ import { chatOptions } from "@shared/utils/dynamicData"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
 import ProfileSidebar from "./ProfileSidebar"
-import useChatSocket from "@chat/conversations/hooks/useChatSocket"
+import useChatSocket from "@chat/socket/useChatSocket"
 import type { Conversation } from "@shared/types"
 
 const GroupChatbox = () => {
@@ -21,10 +21,8 @@ const GroupChatbox = () => {
   const [groupData, setGroupData] = useState<Conversation | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  if (!user) return null
-
   const { socketRef, sendMessage, typingUsers, emitTypingStart, emitTypingStop } = useChatSocket({
-    userId: user._id,
+    userId: user?._id,
     conversationId,
     setMessages,
     type: "group"
@@ -36,7 +34,7 @@ const GroupChatbox = () => {
       const response = await axiosInstance.get(`${CONVERSATION_PATHS.GET_CURRENT_CONVO}/${conversationId}`)
       return response.data
     },
-    enabled: !!conversationId
+    enabled: Boolean(user && conversationId)
   })
 
   useEffect(() => {
@@ -49,6 +47,8 @@ const GroupChatbox = () => {
     if (!groupError) return
     console.error("Failed to load group:", groupError)
   }, [groupError])
+
+  if (!user) return null
 
   // const handleSendMessage = () => {
   //   if (!messageContent.trim()) return

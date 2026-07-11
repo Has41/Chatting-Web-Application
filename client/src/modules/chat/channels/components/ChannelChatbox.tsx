@@ -4,20 +4,21 @@ import moment from "moment"
 import { useParams } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
-import { channelKeys, useChannel } from "../hooks/useChannels"
-import { useChannelMessages } from "../hooks/useChannelMessages"
+import { channelKeys, useChannel, useJoinChannel } from "../queries/useChannels"
+import { useChannelMessages } from "../queries/useChannelMessages"
 import { useChannelSocket } from "../hooks/useChannelSocket"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
 import type { Message, User } from "@shared/types"
-import type { FileType, MessageFileMeta, SendMessagePayload } from "@shared/types/components"
-import AttachmentMenu from "@shared/components/AttachmentMenu"
-import FilePreviewModal from "@chat/conversations/components/FilePreviewModal"
-import FileMessagePreview from "@shared/components/FileMessagePreview"
-import type { MediaViewerItem } from "@shared/components/MediaViewerModal"
+import type { FileType, SendMessagePayload } from "@chat/attachments/types/attachments"
+import AttachmentMenu from "@chat/composer/components/AttachmentMenu"
+import FilePreviewModal from "@chat/attachments/components/FilePreviewModal"
+import FileMessagePreview from "@chat/attachments/components/FileMessagePreview"
+import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
 import ChannelInfoSidebar from "./ChannelInfoSidebar"
-import EditMessageModal from "@shared/components/EditMessageModal"
+import EditMessageModal from "@chat/messages/components/EditMessageModal"
 import TypingIndicator from "@chat/conversations/components/Messages/TypingIndicator"
+import MessageReactions from "@chat/messages/components/MessageReactions"
 
 type ChannelMessage = Message & {
   channel?: string
@@ -68,17 +69,23 @@ const ChannelChatbox = () => {
 
   const channelQuery = useChannel(channelId)
   const messagesQuery = useChannelMessages(channelId)
+  const joinChannel = useJoinChannel()
   const channel = channelQuery.data
+  const isChannelMember = Boolean(
+    channel && user?._id && channel.members.some((member) => getChannelUserId(member) === user._id)
+  )
   const currentUserIsChannelAdmin = Boolean(
     channel &&
-      user?._id &&
-      (getChannelUserId(channel.owner) === user._id ||
-        channel.admins.some((admin) => getChannelUserId(admin) === user._id))
+    user?._id &&
+    (getChannelUserId(channel.owner) === user._id || channel.admins.some((admin) => getChannelUserId(admin) === user._id))
   )
-  const canSendInChannel = (channel?.sendPermissions || "admins") === "members" || currentUserIsChannelAdmin
-  const { sendChannelMessage, typingUsers, emitTypingStart, emitTypingStop } = useChannelSocket({
+  const canSendInChannel =
+    isChannelMember && ((channel?.sendPermissions || "admins") === "members" || currentUserIsChannelAdmin)
+  const isPublicPreview = Boolean(channel && channel.visibility === "public" && !isChannelMember)
+  const { sendChannelMessage, reactToMessage, typingUsers, emitTypingStart, emitTypingStop } = useChannelSocket({
     channelId,
     userId: user?._id,
+    enabled: isChannelMember,
     setMessages: setLiveMessages
   })
 
@@ -92,9 +99,7 @@ const ChannelChatbox = () => {
     const addMessage = (message: ChannelMessage) => {
       const stableKey = message.clientTempId || message._id
       const existingKey = Array.from(byId.entries()).find(
-        ([, value]) =>
-          value._id === message._id ||
-          (message.clientTempId && value.clientTempId === message.clientTempId)
+        ([, value]) => value._id === message._id || (message.clientTempId && value.clientTempId === message.clientTempId)
       )?.[0]
 
       if (existingKey) {
@@ -145,9 +150,7 @@ const ChannelChatbox = () => {
         ...oldData,
         pages: oldData.pages.map((page: any) => ({
           ...page,
-          messages: page.messages.map((message: ChannelMessage) =>
-            message._id === messageId ? updater(message) : message
-          )
+          messages: page.messages.map((message: ChannelMessage) => (message._id === messageId ? updater(message) : message))
         }))
       }
     })
@@ -354,6 +357,11 @@ const ChannelChatbox = () => {
     })
   }
 
+  const handleJoinChannel = async () => {
+    if (!channelId || joinChannel.isPending) return
+    await joinChannel.mutateAsync(channelId)
+  }
+
   if (!channelId) {
     return (
       <section className="flex h-screen flex-1 items-center justify-center bg-[#f8fbf8]">
@@ -394,7 +402,7 @@ const ChannelChatbox = () => {
         <button
           type="button"
           onClick={() => setIsInfoOpen(true)}
-          className="flex min-w-0 items-center gap-3 rounded-lg text-left transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+          className="flex min-w-0 items-center gap-3 rounded-lg text-left transition hover:bg-slate-50 focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
           aria-label="Open channel info"
         >
           <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#e5f8e8] text-[#2f733c]">
@@ -421,6 +429,17 @@ const ChannelChatbox = () => {
             </div>
           </div>
         </button>
+        {isPublicPreview && (
+          <button
+            type="button"
+            onClick={handleJoinChannel}
+            disabled={joinChannel.isPending}
+            className="ml-4 flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#96e6a1] px-4 text-sm font-semibold text-[#102315] transition hover:bg-[#84dc91] focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {joinChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
+            Join
+          </button>
+        )}
       </header>
 
       <ChannelInfoSidebar isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} channel={channel} />
@@ -445,6 +464,8 @@ const ChannelChatbox = () => {
                   channelId={channelId}
                   onUpdateMessage={updateMessageInCache}
                   onRemoveMessage={removeMessageFromCache}
+                  onReactToMessage={reactToMessage}
+                  canReactInChannel={isChannelMember}
                 />
               )
             })}
@@ -463,7 +484,9 @@ const ChannelChatbox = () => {
               </div>
               <h2 className="mt-4 text-lg font-semibold text-[#18251b]">Start the channel</h2>
               <p className="mt-2 max-w-sm text-sm leading-6 text-[#6c7d70]">
-                Send the first message and this space will come alive for everyone inside it.
+                {isPublicPreview
+                  ? "This public channel is open to preview. Join when you want to take part."
+                  : "Send the first message and this space will come alive for everyone inside it."}
               </p>
             </div>
           </div>
@@ -472,74 +495,96 @@ const ChannelChatbox = () => {
 
       <footer className="border-t border-black/5 bg-white px-5 py-4">
         <div className="relative mx-auto max-w-3xl">
-          {!canSendInChannel && (
-            <div className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
-              <Lock size={14} />
-              Only channel admins can send messages here.
+          {isPublicPreview ? (
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-[#f1f6f2] px-4 py-3 ring-1 ring-black/5">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#18251b]">Previewing public channel</p>
+                <p className="mt-1 text-xs font-medium text-[#65786a]">Join to send messages, files, and typing updates.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleJoinChannel}
+                disabled={joinChannel.isPending}
+                className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-[#96e6a1] px-4 text-sm font-semibold text-[#102315] transition hover:bg-[#84dc91] focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {joinChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
+                Join channel
+              </button>
             </div>
+          ) : (
+            !canSendInChannel && (
+              <div className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500 ring-1 ring-slate-200">
+                <Lock size={14} />
+                Only channel admins can send messages here.
+              </div>
+            )
           )}
-          {previewFile && (
-            <FilePreviewModal
-              file={previewFile}
-              type={attachmentType ?? "document"}
-              conversationId={channelId}
-              conversationType="channel"
-              onSend={handleSendFile}
-              onCancel={() => setPreviewFile(null)}
-            />
+          {!isPublicPreview && (
+            <>
+              {previewFile && (
+                <FilePreviewModal
+                  file={previewFile}
+                  type={attachmentType ?? "document"}
+                  conversationId={channelId}
+                  conversationType="channel"
+                  onSend={handleSendFile}
+                  onCancel={() => setPreviewFile(null)}
+                />
+              )}
+              <form onSubmit={handleSubmit} className="flex items-end gap-3">
+                {showAttachmentOptions && (
+                  <AttachmentMenu
+                    onSelect={(type) => {
+                      handleAttachmentSelect(type)
+                      setShowAttachmentOptions(false)
+                    }}
+                    onClose={() => setShowAttachmentOptions(false)}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowAttachmentOptions((prev) => !prev)}
+                  disabled={!canSendInChannel}
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-[#506856] transition hover:bg-[#f1f6f2] focus:ring-2 focus:ring-[#96e6a1] focus:outline-none disabled:cursor-not-allowed disabled:opacity-45"
+                  aria-label="Attach file"
+                >
+                  <Paperclip size={20} />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept={getAcceptedTypes(attachmentType)}
+                  onChange={handleFileChange}
+                />
+                <label className="flex min-h-12 flex-1 items-center rounded-[24px] bg-[#f1f6f2] px-4 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-[#96e6a1]">
+                  <textarea
+                    value={messageText}
+                    onChange={(event) => handleMessageInputChange(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (!canSendInChannel) return
+                      if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault()
+                        event.currentTarget.form?.requestSubmit()
+                      }
+                    }}
+                    disabled={!canSendInChannel}
+                    rows={1}
+                    placeholder={canSendInChannel ? `Message ${channel.name}` : "Admins only"}
+                    className="max-h-32 min-h-6 w-full resize-none bg-transparent py-3 text-sm text-[#18251b] outline-none placeholder:text-[#9aa99d] disabled:cursor-not-allowed"
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={!messageText.trim() || !canSendInChannel}
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#96e6a1] text-[#102315] shadow-sm transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Send channel message"
+                >
+                  <Send size={20} />
+                </button>
+              </form>
+            </>
           )}
-          <form onSubmit={handleSubmit} className="flex items-end gap-3">
-            {showAttachmentOptions && (
-              <AttachmentMenu
-                onSelect={(type) => {
-                  handleAttachmentSelect(type)
-                  setShowAttachmentOptions(false)
-                }}
-                onClose={() => setShowAttachmentOptions(false)}
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => setShowAttachmentOptions((prev) => !prev)}
-              disabled={!canSendInChannel}
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-[#506856] transition hover:bg-[#f1f6f2] focus:outline-none focus:ring-2 focus:ring-[#96e6a1] disabled:cursor-not-allowed disabled:opacity-45"
-              aria-label="Attach file"
-            >
-              <Paperclip size={20} />
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              accept={getAcceptedTypes(attachmentType)}
-              onChange={handleFileChange}
-            />
-            <label className="flex min-h-12 flex-1 items-center rounded-[24px] bg-[#f1f6f2] px-4 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-[#96e6a1]">
-              <textarea
-                value={messageText}
-                onChange={(event) => handleMessageInputChange(event.target.value)}
-                onKeyDown={(event) => {
-                  if (!canSendInChannel) return
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault()
-                    event.currentTarget.form?.requestSubmit()
-                  }
-                }}
-                disabled={!canSendInChannel}
-                rows={1}
-                placeholder={canSendInChannel ? `Message ${channel.name}` : "Admins only"}
-                className="max-h-32 min-h-6 w-full resize-none bg-transparent py-3 text-sm text-[#18251b] outline-none placeholder:text-[#9aa99d] disabled:cursor-not-allowed"
-              />
-            </label>
-            <button
-              type="submit"
-              disabled={!messageText.trim() || !canSendInChannel}
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#96e6a1] text-[#102315] shadow-sm transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Send channel message"
-            >
-              <Send size={20} />
-            </button>
-          </form>
         </div>
       </footer>
     </section>
@@ -553,7 +598,9 @@ const ChannelMessageBubble = ({
   mediaGalleryIndex,
   channelId,
   onUpdateMessage,
-  onRemoveMessage
+  onRemoveMessage,
+  onReactToMessage,
+  canReactInChannel
 }: {
   message: ChannelMessage
   currentUserId?: string
@@ -562,6 +609,8 @@ const ChannelMessageBubble = ({
   channelId: string
   onUpdateMessage: (messageId: string, updater: (message: ChannelMessage) => ChannelMessage) => void
   onRemoveMessage: (messageId: string) => void
+  onReactToMessage: (payload: { messageId: string; emoji: string }) => void
+  canReactInChannel: boolean
 }) => {
   const sender = getSender(message.sender)
   const isMine = currentUserId ? getSenderId(message.sender) === currentUserId : false
@@ -570,6 +619,7 @@ const ChannelMessageBubble = ({
   const isFileMessage = message.messageType === "file"
   const canEditMessage = isMine && (!isFileMessage || !!message.media?.caption?.trim())
   const canUseActions = isMine && message.localStatus !== "sending" && message.localStatus !== "failed"
+  const canReact = canReactInChannel && message.localStatus !== "sending" && message.localStatus !== "failed"
   const [showActions, setShowActions] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editContent, setEditContent] = useState(isFileMessage ? (message.media?.caption ?? "") : (message.content ?? ""))
@@ -624,6 +674,38 @@ const ChannelMessageBubble = ({
     }
   })
 
+  const handleReact = (emoji: string) => {
+    if (!canReact || !currentUserId) return
+
+    onUpdateMessage(message._id, (currentMessage) => {
+      const reactions = currentMessage.reactions ?? []
+      const existingReaction = reactions.find((reaction) => {
+        const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
+        return reactionUserId === currentUserId || reaction.users?.includes(currentUserId)
+      })
+      const reactionsWithoutMine = reactions
+        .map((reaction) => {
+          if (reaction.users?.includes(currentUserId)) {
+            return { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
+          }
+
+          return reaction
+        })
+        .filter((reaction) => {
+          const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
+          const hasGroupedUsers = !reaction.users || reaction.users.length > 0
+          return reactionUserId !== currentUserId && hasGroupedUsers
+        })
+
+      const nextReactions =
+        existingReaction?.emoji === emoji ? reactionsWithoutMine : [...reactionsWithoutMine, { user: currentUserId, emoji }]
+
+      return { ...currentMessage, reactions: nextReactions }
+    })
+
+    onReactToMessage({ messageId: message._id, emoji })
+  }
+
   return (
     <div className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}>
       {!isMine && (
@@ -653,7 +735,7 @@ const ChannelMessageBubble = ({
                 mediaGalleryIndex={mediaGalleryIndex}
               />
             ) : (
-              <p className="whitespace-pre-wrap break-words text-sm leading-6">{message.content || message.text}</p>
+              <p className="text-sm leading-6 break-words whitespace-pre-wrap">{message.content || message.text}</p>
             )}
             <div
               className={`flex items-center gap-2 text-[11px] ${isFileMessage ? "mt-4 px-2 pb-1" : "mt-2"} ${
@@ -682,14 +764,14 @@ const ChannelMessageBubble = ({
               <button
                 type="button"
                 onClick={() => setShowActions((prev) => !prev)}
-                className="grid size-7 place-items-center rounded-full text-slate-400 opacity-0 transition hover:bg-white hover:text-slate-700 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+                className="grid size-7 place-items-center rounded-full text-slate-400 opacity-0 transition group-hover:opacity-100 hover:bg-white hover:text-slate-700 focus:opacity-100 focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
                 aria-label="Message actions"
               >
                 <MoreVertical size={16} />
               </button>
 
               {showActions && (
-                <div className="absolute right-0 top-8 z-20 min-w-32 overflow-hidden rounded-lg border border-slate-100 bg-white py-1 shadow-lg">
+                <div className="absolute top-8 right-0 z-20 min-w-32 overflow-hidden rounded-lg border border-slate-100 bg-white py-1 shadow-lg">
                   {canEditMessage && (
                     <button
                       type="button"
@@ -728,6 +810,13 @@ const ChannelMessageBubble = ({
             />
           )}
         </div>
+        <MessageReactions
+          reactions={message.reactions}
+          currentUserId={currentUserId}
+          disabled={!canReact}
+          align={isMine ? "right" : "left"}
+          onReact={handleReact}
+        />
         {(editMessage.isPending || deleteMessage.isPending) && (
           <div className="mt-1 flex items-center gap-1 px-1 text-[11px] text-slate-500">
             <Loader2 size={11} className="animate-spin" />

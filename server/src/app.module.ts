@@ -8,6 +8,7 @@ import { FilesModule } from './files/files.module'
 import { GatewayModule } from './gateway/gateway.module'
 import { StoriesModule } from './stories/stories.module'
 import { ChannelsModule } from './channels/channels.module'
+import { CallsModule } from './calls/calls.module'
 
 try {
   process.loadEnvFile?.()
@@ -28,6 +29,7 @@ try {
     GatewayModule,
     StoriesModule,
     ChannelsModule,
+    CallsModule,
   ],
   controllers: [],
   providers: [],

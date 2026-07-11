@@ -1,4 +1,4 @@
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { CHANNEL_PATHS } from "@shared/constants/apiPaths"
 import type { Channel, Message } from "@shared/types"
 

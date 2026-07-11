@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import { getNewChatRoute } from "@shared/constants/routePaths"
 import { Link } from "react-router-dom"

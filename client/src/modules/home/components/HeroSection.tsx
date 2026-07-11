@@ -46,7 +46,7 @@ const HeroComponent = () => {
         </div>
       </div>
       <div>
-        <img width={800} height={1500} src={mainImage} className="shadow-md" />
+        <img width={800} height={1500} src={mainImage} alt="Friends listening to music together" className="shadow-md" />
       </div>
     </main>
   )

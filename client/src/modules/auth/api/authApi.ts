@@ -1,4 +1,4 @@
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { AUTH_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 
 export const getCurrentUser = async () => {

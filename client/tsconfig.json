@@ -21,8 +21,10 @@
       "@/*": ["./src/*"],
       "@app/*": ["./src/app/*"],
       "@auth/*": ["./src/modules/auth/*"],
+      "@calls/*": ["./src/modules/calls/*"],
       "@chat/*": ["./src/modules/chat/*"],
       "@profile/*": ["./src/modules/profile/*"],
+      "@stories/*": ["./src/modules/stories/*"],
       "@shared/*": ["./src/shared/*"],
       "@styles/*": ["./src/styles/*"]
     }

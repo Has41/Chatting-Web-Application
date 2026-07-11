@@ -1,5 +1,5 @@
 import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import type { Conversation } from "@shared/types"
 
 export const groupManagementApi = {

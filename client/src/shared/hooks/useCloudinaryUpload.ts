@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import axios from "axios"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { FILE_PATHS } from "@shared/constants/apiPaths"
 import validateFile from "@shared/utils/validateFile"
 

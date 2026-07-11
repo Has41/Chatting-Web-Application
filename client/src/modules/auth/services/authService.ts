@@ -1,4 +1,4 @@
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 
 export const verifyOtp = async (payload: { otp: string; email: string }) => {

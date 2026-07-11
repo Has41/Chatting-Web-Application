@@ -87,6 +87,10 @@ export class ConversationsService {
         path: 'seenBy.user',
         select: 'username displayName profilePicture',
       })
+      .populate({
+        path: 'reactions.user',
+        select: 'username displayName profilePicture',
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

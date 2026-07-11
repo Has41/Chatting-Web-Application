@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import UserSearch from "./Messages/UserSearch"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import { getChatConversationRoute, getNewChatRoute } from "@shared/constants/routePaths"
 import { Link } from "react-router-dom"

@@ -23,12 +23,13 @@ export class MessagesController {
   @UseGuards(JwtAuthGuard)
   async addReaction(
     @Param('messageId') messageId: string,
-    @Body() body: { userId: string; emoji: string },
+    @Body() body: { emoji: string },
+    @Req() request: Request & { user: { id: string } },
     @Res() response: Response,
   ) {
     const result = await this.messagesService.addReaction(
       messageId,
-      body.userId,
+      request.user.id,
       body.emoji,
     )
     return response.status(HttpStatus.OK).json(result)

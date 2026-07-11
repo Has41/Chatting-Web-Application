@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { bioSchema } from "@shared/utils/zodSchema"
 import { USER_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/utils/axiosInstance"
+import axiosInstance from "@shared/api/api-client"
 import useAuth from "@auth/hooks/useAuth"
 
 interface UpdateBioProps {

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { Send } from "lucide-react"
-import AttachmentMenu from "@shared/components/AttachmentMenu"
-import FilePreviewModal from "../FilePreviewModal"
+import AttachmentMenu from "@chat/composer/components/AttachmentMenu"
+import FilePreviewModal from "@chat/attachments/components/FilePreviewModal"
 import useAuth from "@auth/hooks/useAuth"
-import AudioRecorder from "@shared/components/AudioRecorder"
-import type { ConversationType, FileType, MessageFileMeta } from "@shared/types/components"
+import AudioRecorder from "@chat/composer/components/AudioRecorder"
+import type { ConversationType, FileType, MessageFileMeta } from "@chat/attachments/types/attachments"
 
 const createTempMessageId = () => `temp-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`
 
