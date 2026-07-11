@@ -79,6 +79,9 @@ export class User {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Conversation' }], default: [] })
   conversations: Types.ObjectId[]
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Channel' }], default: [] })
+  channels: Types.ObjectId[]
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

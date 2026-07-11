@@ -1,10 +1,12 @@
 import { useEffect, useReducer } from "react"
-import { chatOptions } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"
 import { useQuery } from "@tanstack/react-query"
 import axiosInstance from "@shared/utils/axiosInstance"
 import { USER_PATHS, CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import { useParams } from "react-router-dom"
+import { MoreVertical, Phone, Video } from "lucide-react"
+import AudioCallPanel from "@chat/calls/components/AudioCallPanel"
+import useCallSocket from "@chat/calls/hooks/useCallSocket"
 import ChatMessages from "./Messages/ChatMessages"
 import SendMessage from "./Messages/SendMessage"
 import ProfileSidebar from "./ProfileSidebar"
@@ -26,6 +28,7 @@ const Chatbox = () => {
     conversationId,
     setMessages
   })
+  const audioCall = useCallSocket(user._id)
 
   const { data: chatData, error: chatError } = useQuery({
     queryKey: ["chatData", userId, conversationId],
@@ -77,22 +80,58 @@ const Chatbox = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          {chatOptions.map((option, index) => (
-            <div key={index} className="cursor-pointer">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d={option.path} />
-              </svg>
-            </div>
-          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const recipientId = userId || state.userData?._id
+              if (recipientId) audioCall.startAudioCall(recipientId)
+            }}
+            disabled={audioCall.status !== "idle" || !(userId || state.userData?._id)}
+            className="inline-flex size-9 items-center justify-center rounded-full transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Start audio call"
+            title="Audio call"
+          >
+            <Phone className="size-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const recipientId = userId || state.userData?._id
+              if (recipientId) audioCall.startVideoCall(recipientId)
+            }}
+            disabled={audioCall.status !== "idle" || !(userId || state.userData?._id)}
+            className="inline-flex size-9 items-center justify-center rounded-full transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Start video call"
+            title="Video call"
+          >
+            <Video className="size-5" />
+          </button>
+          <button
+            type="button"
+            className="inline-flex size-9 items-center justify-center rounded-full transition hover:bg-gray-100"
+            aria-label="More chat options"
+            title="More"
+          >
+            <MoreVertical className="size-5" />
+          </button>
         </div>
       </nav>
+
+      <AudioCallPanel
+        status={audioCall.status}
+        callType={audioCall.callType}
+        remoteStream={audioCall.remoteStream}
+        localStream={audioCall.localStream}
+        peer={state.userData}
+        error={audioCall.error}
+        isMuted={audioCall.isMuted}
+        isCameraOff={audioCall.isCameraOff}
+        onAccept={audioCall.acceptCall}
+        onReject={audioCall.rejectCall}
+        onEnd={audioCall.endCall}
+        onToggleMute={audioCall.toggleMute}
+        onToggleCamera={audioCall.toggleCamera}
+      />
 
       <ProfileSidebar
         isOpen={state.isSidebarOpen}

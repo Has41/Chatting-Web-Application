@@ -35,6 +35,9 @@ export class Conversation {
   @Prop({ type: Types.ObjectId, ref: 'User' })
   groupOwner: Types.ObjectId
 
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  admins: Types.ObjectId[]
+
   @Prop({ default: "Hey, we using Chitchat!" })
   groupInfo: string
 

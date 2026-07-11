@@ -14,6 +14,7 @@ import { Model, Types } from 'mongoose'
 import { Message, MessageDocument } from '../users/schemas/message.schema.js'
 import { Conversation, ConversationDocument } from '../users/schemas/conversation.schema.js'
 import { User, UserDocument } from '../users/schemas/users.schema.js'
+import { Channel, ChannelDocument } from '../channels/channel.schema.js'
 import * as gatewayUtils from './gateway.utils.js'
 
 @WebSocketGateway({
@@ -32,6 +33,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
     @InjectModel(Conversation.name) private conversationModel: Model<ConversationDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Channel.name) private channelModel: Model<ChannelDocument>,
   ) {}
 
   // ============== CONNECTION HANDLERS ==============
@@ -81,7 +83,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     data: {
       conversationId?: string
-      conversationType: 'private' | 'group'
+      conversationType: 'private' | 'group' | 'channel'
       senderId: string
       recipientId?: string
       username?: string
@@ -96,7 +98,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     data: {
       conversationId?: string
-      conversationType: 'private' | 'group'
+      conversationType: 'private' | 'group' | 'channel'
       senderId: string
       recipientId?: string
       username?: string
@@ -227,9 +229,159 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { from, to, type, offer } = data
     console.log(`📞 ${from} is calling ${to} (${type})`)
-    const recipientSocketId = gatewayUtils.getUserSocketId(to)
-    if (recipientSocketId) {
-      this.server.to(recipientSocketId).emit('incoming-call', { from, type, offer })
+    if (!['audio', 'video'].includes(type)) {
+      client.emit('call-rejected', { from: to, reason: 'Only audio and video calls are supported.' })
+      return
+    }
+
+    const recipientSocketIds = gatewayUtils.getUserSocketIds(to)
+    if (recipientSocketIds.length > 0) {
+      recipientSocketIds.forEach((socketId) => {
+        this.server.to(socketId).emit('incoming-call', { from, type, offer })
+      })
+      return
+    }
+
+    client.emit('call-unavailable', { to })
+  }
+
+  @SubscribeMessage('join-channel')
+  async handleJoinChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelId: string; userId: string },
+  ) {
+    const { channelId, userId } = data
+
+    try {
+      const channel = await this.channelModel.findById(channelId).select('members visibility')
+
+      if (!channel) {
+        console.error(`Channel with ID ${channelId} not found!`)
+        return
+      }
+
+      const isMember = channel.members.some((member) => member.toString() === userId)
+      if (!isMember) {
+        console.error(`User ${userId} is not authorized to join channel room: ${channelId}`)
+        return
+      }
+
+      client.join(`channel:${channelId}`)
+      console.log(`User ${userId} joined channel room: ${channelId}`)
+    } catch (err) {
+      console.error(`Error in joinChannel for channel ${channelId} and user ${userId}:`, err)
+    }
+  }
+
+  @SubscribeMessage('leave-channel')
+  handleLeaveChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelId: string },
+  ) {
+    if (!data?.channelId) return
+    client.leave(`channel:${data.channelId}`)
+  }
+
+  @SubscribeMessage('send-channel-message')
+  async handleSendChannelMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      channelId: string
+      sender: string
+      content?: string
+      messageType: 'text' | 'file'
+      fileData?: any
+      clientTempId?: string
+    },
+  ) {
+    const { channelId, sender, content, messageType, fileData, clientTempId } = data ?? {}
+
+    try {
+      if (!channelId || !sender || !messageType) {
+        console.error('Invalid send-channel-message payload:', data)
+        return
+      }
+
+      const channel = await this.channelModel.findById(channelId)
+
+      if (!channel) {
+        client.emit('channel-message-error', { message: 'Channel not found.' })
+        return
+      }
+
+      const isMember = channel.members.some((member) => member.toString() === sender)
+      if (!isMember) {
+        client.emit('channel-message-error', { message: 'You are not a member of this channel.' })
+        return
+      }
+
+      const isOwner = channel.owner.toString() === sender
+      const isAdmin = (channel.admins ?? []).some((admin) => admin.toString() === sender)
+      if ((channel.sendPermissions || 'admins') === 'admins' && !isOwner && !isAdmin) {
+        client.emit('channel-message-error', { message: 'Only channel admins can send messages in this channel.' })
+        return
+      }
+
+      if (messageType === 'text' && !content?.trim()) {
+        client.emit('channel-message-error', { message: 'Message content is required.' })
+        return
+      }
+
+      if (messageType === 'file' && !fileData?.url) {
+        client.emit('channel-message-error', { message: 'File data is required.' })
+        return
+      }
+
+      const messageDataToCreate: any = {
+        sender: new Types.ObjectId(sender),
+        channel: new Types.ObjectId(channelId),
+        conversationType: 'channel',
+        messageType,
+      }
+
+      if (messageType === 'text') {
+        messageDataToCreate.content = content.trim()
+      }
+
+      if (messageType === 'file') {
+        messageDataToCreate.media = {
+          publicId: fileData.publicId,
+          mediaUrl: fileData.url,
+          caption: fileData.caption || '',
+          thumbnailUrl: fileData.thumbnailUrl || '',
+          mediaType: fileData.mediaType || '',
+          mimeType: fileData.mimeType || '',
+          fileName: fileData.fileName || '',
+        }
+      }
+
+      const createdMessage = await this.messageModel.create(messageDataToCreate)
+
+      const update: any = {
+        $set: { lastMessage: createdMessage._id },
+        $addToSet: { messages: createdMessage._id },
+      }
+
+      if (createdMessage.media?.mediaUrl && createdMessage.media.mediaType !== 'audio') {
+        update.$addToSet.mediaUrls = createdMessage.media.mediaUrl
+      }
+
+      await this.channelModel.updateOne({ _id: channelId }, update)
+
+      const emittedMessage = await this.messageModel
+        .findById(createdMessage._id)
+        .populate('sender', 'username displayName profilePicture')
+        .lean()
+
+      this.server.to(`channel:${channelId}`).emit('receive-channel-message', {
+        ...emittedMessage,
+        channel: channelId,
+        clientTempId,
+      })
+    } catch (err) {
+      console.error('Error sending channel message:', err)
+      client.emit('channel-message-error', { message: 'Unable to send channel message.' })
     }
   }
 
@@ -237,20 +389,18 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleAnswerCall(@ConnectedSocket() client: Socket, @MessageBody() data: { from: string; to: string; answer: any }) {
     const { from, to, answer } = data
     console.log(`✅ ${from} accepted call from ${to}`)
-    const recipientSocketId = gatewayUtils.getUserSocketId(to)
-    if (recipientSocketId) {
-      this.server.to(recipientSocketId).emit('call-accepted', { from, answer })
-    }
+    gatewayUtils.getUserSocketIds(to).forEach((socketId) => {
+      this.server.to(socketId).emit('call-accepted', { from, answer })
+    })
   }
 
   @SubscribeMessage('reject-call')
   handleRejectCall(@ConnectedSocket() client: Socket, @MessageBody() data: { from: string; to: string }) {
     const { from, to } = data
     console.log(`❌ ${from} rejected call from ${to}`)
-    const recipientSocketId = gatewayUtils.getUserSocketId(to)
-    if (recipientSocketId) {
-      this.server.to(recipientSocketId).emit('call-rejected', { from })
-    }
+    gatewayUtils.getUserSocketIds(to).forEach((socketId) => {
+      this.server.to(socketId).emit('call-rejected', { from })
+    })
   }
 
   @SubscribeMessage('ice-candidate')
@@ -259,17 +409,20 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { from: string; to: string; candidate: any },
   ) {
     const { from, to, candidate } = data
-    const recipientSocketId = gatewayUtils.getUserSocketId(to)
-    if (recipientSocketId) {
-      this.server.to(recipientSocketId).emit('ice-candidate', { from, candidate })
-    }
+    gatewayUtils.getUserSocketIds(to).forEach((socketId) => {
+      this.server.to(socketId).emit('ice-candidate', { from, candidate })
+    })
   }
 
   @SubscribeMessage('end-call')
-  handleEndCall(@ConnectedSocket() client: Socket, @MessageBody() data: { from: string }) {
-    const { from } = data
+  handleEndCall(@ConnectedSocket() client: Socket, @MessageBody() data: { from: string; to?: string }) {
+    const { from, to } = data
     console.log(`🔚 Call ended by ${from}`)
-    client.broadcast.emit('end-call', { from })
+    if (!to) return
+
+    gatewayUtils.getUserSocketIds(to).forEach((socketId) => {
+      this.server.to(socketId).emit('end-call', { from })
+    })
   }
 
   // ============== QUEUE PROCESSOR ==============
@@ -448,7 +601,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     event: 'typing:start' | 'typing:stop',
     data: {
       conversationId?: string
-      conversationType: 'private' | 'group'
+      conversationType: 'private' | 'group' | 'channel'
       senderId: string
       recipientId?: string
       username?: string
@@ -465,6 +618,11 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (data.conversationType === 'group' && data.conversationId) {
       client.to(data.conversationId).emit(event, payload)
+      return
+    }
+
+    if (data.conversationType === 'channel' && data.conversationId) {
+      client.to(`channel:${data.conversationId}`).emit(event, payload)
       return
     }
 

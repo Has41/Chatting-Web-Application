@@ -43,7 +43,15 @@ const CONVERSATION_PATHS = {
   LEAVE_GROUP: "/api/conversations/leave-group/:convoId",
   ADD_PARTICIPANTS: "/api/conversations/add-participants",
   REMOVE_PARTICIPANTS: "/api/conversations/remove-participants/:convoId",
-  CHANGE_OWNERSHIP: "/api/conversations/change-ownership/:convoId/:newOwnerId"
+  CHANGE_OWNERSHIP: "/api/conversations/change-ownership/:convoId/:newOwnerId",
+  ADD_GROUP_PARTICIPANTS: (convoId: string) => `/api/conversations/add-participants/${convoId}`,
+  REMOVE_GROUP_PARTICIPANTS: (convoId: string) => `/api/conversations/remove-participants/${convoId}`,
+  TRANSFER_GROUP_OWNERSHIP: (convoId: string, newOwnerId: string) =>
+    `/api/conversations/change-ownership/${convoId}/${newOwnerId}`,
+  PROMOTE_GROUP_ADMIN: (convoId: string, targetUserId: string) =>
+    `/api/conversations/promote-admin/${convoId}/${targetUserId}`,
+  DEMOTE_GROUP_ADMIN: (convoId: string, targetUserId: string) =>
+    `/api/conversations/demote-admin/${convoId}/${targetUserId}`
 }
 
 const FILE_PATHS = {
@@ -56,4 +64,20 @@ const STORY_PATHS = {
   DELETE: "/api/stories"
 }
 
-export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS, STORY_PATHS }
+const CHANNEL_PATHS = {
+  BASE: "/api/channels",
+  MY: "/api/channels/my",
+  PUBLIC: "/api/channels/public",
+  JOIN: (channelId: string) => `/api/channels/${channelId}/join`,
+  LEAVE: (channelId: string) => `/api/channels/${channelId}/leave`,
+  MEMBERS: (channelId: string) => `/api/channels/${channelId}/members`,
+  TRANSFER_OWNERSHIP: (channelId: string, newOwnerId: string) =>
+    `/api/channels/${channelId}/transfer-ownership/${newOwnerId}`,
+  PROMOTE_ADMIN: (channelId: string, targetUserId: string) => `/api/channels/${channelId}/promote-admin/${targetUserId}`,
+  DEMOTE_ADMIN: (channelId: string, targetUserId: string) => `/api/channels/${channelId}/demote-admin/${targetUserId}`,
+  DETAIL: (channelId: string) => `/api/channels/${channelId}`,
+  MESSAGES: (channelId: string) => `/api/channels/${channelId}/messages`,
+  FILES: (channelId: string) => `/api/channels/${channelId}/files`
+}
+
+export { AUTH_PATHS, USER_PATHS, MESSAGE_PATHS, CONVERSATION_PATHS, FILE_PATHS, STORY_PATHS, CHANNEL_PATHS }

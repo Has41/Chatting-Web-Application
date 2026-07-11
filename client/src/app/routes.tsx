@@ -9,10 +9,12 @@ import ChatArea from "@chat/pages/ChatArea"
 import StartChat from "@chat/navigation/components/StartChat"
 import Chatbox from "@chat/conversations/components/Chatbox"
 import GroupChatbox from "@chat/conversations/components/GroupChatbox"
+import ChannelChatbox from "@chat/channels/components/ChannelChatbox"
 import {
   AUTH_PAGE,
   CHAT_PAGE,
   CHAT_CONVERSATION,
+  CHANNEL_CONVERSATION,
   NEW_CHAT_PAGE,
   OTP_PAGE,
   GROUP_CONVERSATION
@@ -48,6 +50,7 @@ export const AppRoutes: React.FC = () => {
           <Route path={NEW_CHAT_PAGE} element={<Chatbox />} />
           <Route path={CHAT_CONVERSATION} element={<Chatbox />} />
           <Route path={GROUP_CONVERSATION} element={<GroupChatbox />} />
+          <Route path={CHANNEL_CONVERSATION} element={<ChannelChatbox />} />
         </Route>
       </Route>
     </Routes>

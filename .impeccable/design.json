@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-10T14:45:00+05:00",
+  "title": "Design System: Chatting Web Application",
+  "extensions": {
+    "colorMeta": {
+      "mint-primary": {
+        "role": "primary",
+        "displayName": "Fresh Mint",
+        "canonical": "#96e6a1",
+        "tonalRamp": ["#064e3b", "#047857", "#10b981", "#34d399", "#6ee7b7", "#96e6a1", "#bbf7d0", "#ecfdf5"]
+      },
+      "lime-highlight": {
+        "role": "primary",
+        "displayName": "Lime Highlight",
+        "canonical": "#d4fc79",
+        "tonalRamp": ["#365314", "#4d7c0f", "#65a30d", "#84cc16", "#a3e635", "#d4fc79", "#ecfccb", "#f7fee7"]
+      },
+      "shell-bg": {
+        "role": "neutral",
+        "displayName": "Shell Mist",
+        "canonical": "#f7f8fb",
+        "tonalRamp": ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9", "#f7f8fb"]
+      },
+      "warm-white": {
+        "role": "neutral",
+        "displayName": "Warm White",
+        "canonical": "#faf9f6",
+        "tonalRamp": ["#1c1917", "#44403c", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f5f4", "#faf9f6"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#111827", "#374151", "#6b7280", "#9ca3af", "#d1d5db", "#e5e7eb", "#f9fafb", "#ffffff"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink Black",
+        "canonical": "#121212",
+        "tonalRamp": ["#000000", "#121212", "#262626", "#404040", "#737373", "#a3a3a3", "#d4d4d4", "#f5f5f5"]
+      },
+      "story-blue": {
+        "role": "secondary",
+        "displayName": "Story Blue",
+        "canonical": "#2563eb",
+        "tonalRamp": ["#172554", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#bfdbfe", "#eff6ff"]
+      },
+      "story-fuchsia": {
+        "role": "secondary",
+        "displayName": "Story Fuchsia",
+        "canonical": "#d946ef",
+        "tonalRamp": ["#4a044e", "#86198f", "#a21caf", "#c026d3", "#d946ef", "#e879f9", "#f5d0fe", "#fdf4ff"]
+      },
+      "story-amber": {
+        "role": "secondary",
+        "displayName": "Story Amber",
+        "canonical": "#f59e0b",
+        "tonalRamp": ["#451a03", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fde68a", "#fffbeb"]
+      },
+      "media-black": {
+        "role": "neutral",
+        "displayName": "Media Black",
+        "canonical": "#09090b",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#3f3f46", "#71717a", "#d4d4d8", "#fafafa"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Danger Red",
+        "canonical": "#ef4444",
+        "tonalRamp": ["#450a0a", "#7f1d1d", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fecaca", "#fef2f2"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Empty states, auth headings, and major starts." },
+      "headline": { "displayName": "Headline", "purpose": "Modals, sidebars, chat info, and card titles." },
+      "title": { "displayName": "Title", "purpose": "Conversation names, story owners, and row titles." },
+      "body": { "displayName": "Body", "purpose": "Messages, controls, forms, and app copy." },
+      "supporting": { "displayName": "Supporting", "purpose": "Longer marketing/card copy." },
+      "label": { "displayName": "Label", "purpose": "Timestamps, badges, counts, and metadata." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 4px 6px rgba(0, 0, 0, 0.1)", "purpose": "Static product cards and auth cards." },
+      { "name": "dropdown", "value": "0 10px 15px rgba(0, 0, 0, 0.1)", "purpose": "Menus, search results, and popovers." },
+      { "name": "overlay", "value": "0 25px 50px rgba(0, 0, 0, 0.25)", "purpose": "Modals, viewers, and call panels." },
+      { "name": "sidebar-right", "value": "10px 0 15px -3px rgba(0, 0, 0, 0.3)", "purpose": "Large side panels sliding over app content." }
+    ],
+    "motion": [
+      { "name": "state-fast", "value": "150ms ease-out", "purpose": "Hover, active, and icon feedback." },
+      { "name": "panel-slide", "value": "300ms ease-out", "purpose": "Sidebars and transient panels." },
+      { "name": "fade-in", "value": "300ms ease-in-out", "purpose": "Small reveals like seen-by details." },
+      { "name": "story-call-pulse", "value": "2s cubic-bezier(0.4, 0, 0.6, 1)", "purpose": "Calling, typing, and recording activity with reduced-motion alternatives." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Chat Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Mint primary action for sending, saving, and chat-specific confirmation.",
+      "html": "<button class=\"ds-btn-primary\">Send message</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:6px;background:#96e6a1;color:#fff;padding:10px 20px;font-family:Poppins,sans-serif;font-size:14px;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,.1);transition:background .15s ease-out,transform .15s ease-out}.ds-btn-primary:hover{background:#4ade80}.ds-btn-primary:active{transform:scale(.98)}.ds-btn-primary:focus-visible{outline:2px solid #96e6a1;outline-offset:2px}"
+    },
+    {
+      "name": "Story Action Button",
+      "kind": "button",
+      "refersTo": "button-social",
+      "description": "Blue social action for story creation and discovery flows.",
+      "html": "<button class=\"ds-btn-story\">Add story</button>",
+      "css": ".ds-btn-story{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:6px;background:#2563eb;color:#fff;padding:10px 16px;font-family:Poppins,sans-serif;font-size:14px;font-weight:600;transition:background .15s ease-out,transform .15s ease-out}.ds-btn-story:hover{background:#3b82f6}.ds-btn-story:active{transform:scale(.98)}.ds-btn-story:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}"
+    },
+    {
+      "name": "Chat Composer Input",
+      "kind": "input",
+      "refersTo": "input-chat",
+      "description": "Bottom composer text field for message entry.",
+      "html": "<input class=\"ds-chat-input\" placeholder=\"Type a message...\" />",
+      "css": ".ds-chat-input{width:100%;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#121212;padding:12px;font-family:Poppins,sans-serif;font-size:14px;line-height:1.5}.ds-chat-input::placeholder{color:#64748b}.ds-chat-input:focus{border-color:#96e6a1;outline:2px solid rgba(150,230,161,.35);outline-offset:0}"
+    },
+    {
+      "name": "Sent Message Bubble",
+      "kind": "custom",
+      "refersTo": "message-sent",
+      "description": "Outgoing message bubble with sending metadata.",
+      "html": "<div class=\"ds-message-sent\"><span>Meet me there in 10?</span><small>Sending</small></div>",
+      "css": ".ds-message-sent{display:inline-flex;max-width:384px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px;border-radius:18px 18px 0 18px;background:#96e6a1;color:#fff;padding:12px 16px;font-family:Poppins,sans-serif;font-size:14px;box-shadow:0 4px 6px rgba(0,0,0,.1)}.ds-message-sent small{margin-left:auto;font-size:12px;color:#fff;opacity:.9}"
+    },
+    {
+      "name": "Received Message Bubble",
+      "kind": "custom",
+      "refersTo": "message-received",
+      "description": "Incoming message bubble for private or group conversations.",
+      "html": "<div class=\"ds-message-received\"><span>Yeah, send the file too.</span><small>2:14 pm</small></div>",
+      "css": ".ds-message-received{display:inline-flex;max-width:384px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px;border-radius:18px 18px 18px 0;background:#faf9f6;color:#121212;padding:12px 16px;font-family:Poppins,sans-serif;font-size:14px;box-shadow:0 4px 6px rgba(0,0,0,.08)}.ds-message-received small{margin-left:auto;font-size:12px;color:rgba(18,18,18,.6)}"
+    },
+    {
+      "name": "Story Avatar",
+      "kind": "custom",
+      "refersTo": "story-avatar",
+      "description": "Circular story entry with active ring, online dot, and count badge.",
+      "html": "<button class=\"ds-story-avatar\" aria-label=\"Open story\"><span class=\"ds-story-ring\"><span class=\"ds-story-face\">H</span><span class=\"ds-story-online\"></span><span class=\"ds-story-count\">2</span></span><span class=\"ds-story-name\">Hassaan</span></button>",
+      "css": ".ds-story-avatar{display:flex;width:80px;flex-direction:column;align-items:center;border:0;border-radius:8px;background:transparent;padding:8px 4px;text-align:center;font-family:Poppins,sans-serif;transition:background .15s ease-out}.ds-story-avatar:hover{background:#f3f4f6}.ds-story-avatar:focus-visible{outline:2px solid #2563eb;outline-offset:2px}.ds-story-ring{position:relative;display:flex;border-radius:9999px;background:linear-gradient(135deg,#2563eb,#d946ef,#f59e0b);padding:2px}.ds-story-face{display:flex;width:56px;height:56px;align-items:center;justify-content:center;border:2px solid #f9fafb;border-radius:9999px;background:#f1f5f9;color:#64748b;font-weight:700}.ds-story-online{position:absolute;right:0;bottom:4px;width:12px;height:12px;border:2px solid #f9fafb;border-radius:9999px;background:#10b981}.ds-story-count{position:absolute;right:-4px;top:-4px;display:flex;width:20px;height:20px;align-items:center;justify-content:center;border:1px solid #f9fafb;border-radius:9999px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-weight:700}.ds-story-name{margin-top:8px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(18,18,18,.8);font-size:12px;font-weight:600}"
+    },
+    {
+      "name": "Attachment Menu",
+      "kind": "custom",
+      "refersTo": "attachment-menu",
+      "description": "Floating two-column menu for file, image, audio, and document options.",
+      "html": "<div class=\"ds-attachment-menu\"><button><span>📷</span><em>Image</em></button><button><span>📄</span><em>Document</em></button></div>",
+      "css": ".ds-attachment-menu{display:grid;width:192px;grid-template-columns:1fr 1fr;gap:16px;border-radius:8px;background:#fff;padding:16px;box-shadow:0 10px 15px rgba(0,0,0,.1);font-family:Poppins,sans-serif}.ds-attachment-menu button{display:flex;flex-direction:column;align-items:center;gap:8px;border:0;border-radius:4px;background:transparent;padding:12px;color:#1f2937;transition:background .15s ease-out}.ds-attachment-menu button:hover{background:#f0fdf4}.ds-attachment-menu button:focus-visible{outline:2px solid #96e6a1;outline-offset:2px}.ds-attachment-menu span{display:flex;width:48px;height:48px;align-items:center;justify-content:center;border-radius:9999px;background:rgba(150,230,161,.4);font-style:normal}.ds-attachment-menu em{font-size:14px;font-style:normal}"
+    },
+    {
+      "name": "Media Viewer Shell",
+      "kind": "custom",
+      "refersTo": "media-viewer",
+      "description": "Dark framed viewer surface for images and videos with gallery controls.",
+      "html": "<div class=\"ds-media-viewer\"><header><span>Media</span><button>×</button></header><main>Image or video</main></div>",
+      "css": ".ds-media-viewer{display:flex;width:min(960px,100%);height:520px;flex-direction:column;overflow:hidden;border-radius:8px;background:#09090b;color:#fff;box-shadow:0 25px 50px rgba(0,0,0,.25);font-family:Poppins,sans-serif}.ds-media-viewer header{display:flex;height:56px;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.1);padding:0 16px}.ds-media-viewer button{display:inline-flex;width:36px;height:36px;align-items:center;justify-content:center;border:0;border-radius:9999px;background:transparent;color:rgba(255,255,255,.8);font-size:24px;transition:background .15s ease-out,color .15s ease-out}.ds-media-viewer button:hover{background:rgba(255,255,255,.1);color:#fff}.ds-media-viewer button:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}.ds-media-viewer main{display:flex;min-height:0;flex:1;align-items:center;justify-content:center;background:#000;color:rgba(255,255,255,.65)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Social Mint Studio",
+    "overview": "This system is a friendly messenger workspace built around soft white product surfaces, mint-green chat actions, and compact social moments. It should feel playful where people and media are involved - stories, avatars, upload states, call status, typing, and empty starts - while the core chat flow stays familiar and quick.\n\nThe authenticated app is the source of truth. Marketing sections can be more open and expressive, but app surfaces should stay dense, readable, and recognizable as chat UI. PRODUCT.md says the product must not feel like \"a generic SaaS dashboard, a cold enterprise inbox, or an over-decorated social feed\"; this visual system enforces that line.",
+    "keyCharacteristics": [
+      "Soft white and slate shell with mint as the core action and message accent.",
+      "Rounded chat-specific shapes: asymmetric bubbles, circular avatars, compact icon buttons, and 8px cards.",
+      "Dark immersive surfaces reserved for media viewers, story viewers, and active call overlays.",
+      "Strong social colors - blue, fuchsia, and amber - reserved for stories, progress, and online presence.",
+      "Familiar controls first: icon buttons, bottom composer, side chat info, modal viewers, and inline sending states."
+    ],
+    "rules": [
+      { "name": "The Mint Means Chat Rule", "body": "Fresh Mint is the chat system's core accent. Do not spend it on decorative backgrounds when it is needed for sent messages, primary actions, online state, and focus feedback.", "section": "colors" },
+      { "name": "The Social Color Reserve Rule", "body": "Blue, fuchsia, and amber are reserved for story rings, upload progress, and explicitly social discovery. If they appear everywhere, stories stop feeling special.", "section": "colors" },
+      { "name": "The Product Scale Rule", "body": "Use fixed rem sizes for the app. Do not use fluid hero-style type inside chat panels, sidebars, modals, or message surfaces.", "section": "typography" },
+      { "name": "The Label Quietness Rule", "body": "Labels and timestamps are small and steady. Do not uppercase-track every section; it turns the product into a marketing template.", "section": "typography" },
+      { "name": "The Layer Only Rule", "body": "A surface earns a shadow only when it overlaps another surface, opens as a transient layer, or needs to separate from a media backdrop.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the authenticated chat app as the design source of truth; the marketing home page is secondary.",
+      "Do use Fresh Mint for sent messages, primary chat actions, online/focus feedback, and the logo.",
+      "Do reserve stronger blue/fuchsia/amber color for stories and social discovery moments.",
+      "Do keep media type layouts honest: image, video, audio, and document messages need different frames and timestamp spacing.",
+      "Do show state inline for sending, failed, edited, typing, recording, uploading, calling, and empty conversations.",
+      "Do use lucide icons or the existing outline SVG vocabulary for chat controls.",
+      "Do provide avatar initials or icon fallbacks instead of empty src values."
+    ],
+    "donts": [
+      "Don't make the product feel like \"a generic SaaS dashboard, a cold enterprise inbox, or an over-decorated social feed.\"",
+      "Don't use heavy gradients as broad app backgrounds; gradients belong to story rings, auth buttons, and small social moments.",
+      "Don't use decorative glass panels, giant hero sections, or marketing card grids inside the chat app.",
+      "Don't reinvent standard chat controls for flavor. Composer, attachments, calls, media navigation, and message menus should stay familiar.",
+      "Don't show empty states that only say nothing exists; they must help users start a chat, find friends, or add a story.",
+      "Don't pair a 1px border with a large soft shadow as decoration. Pick border for resting surfaces or shadow for layers.",
+      "Don't hide focus visibility. Any future polish should undo global outline suppression where it harms keyboard use."
+    ]
+  }
+}

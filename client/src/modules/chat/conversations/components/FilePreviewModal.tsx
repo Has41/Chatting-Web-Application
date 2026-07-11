@@ -76,7 +76,9 @@ const FilePreviewModal = ({
         file,
         conversationType === "private"
           ? `${ROOT_FOLDER}/${user?._id}/chat-uploads/chat-with-${recipientId}`
-          : `${ROOT_FOLDER}/${user?._id}/chat-uploads/group-${conversationId}`,
+          : conversationType === "channel"
+            ? `${ROOT_FOLDER}/${user?._id}/chat-uploads/channel-${conversationId}`
+            : `${ROOT_FOLDER}/${user?._id}/chat-uploads/group-${conversationId}`,
         file.type,
         actualAttachmentType
       )

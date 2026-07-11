@@ -43,6 +43,7 @@ export interface Message {
   replyTo?: string
   reactions?: MessageReaction[]
   isDeleted?: boolean
+  editedAt?: string
   createdAt: string
   updatedAt: string
 }
@@ -73,7 +74,7 @@ export interface Conversation {
   groupPicture?: { url?: string }
   groupOwner?: any
   participants: (User | string)[]
-  admins?: string[]
+  admins?: (User | string)[]
   lastMessage?: Message
   unreadCount?: number
   groupAvatar?: string
@@ -95,6 +96,23 @@ export interface Story {
   }
   createdAt: string
   expiresAt: string
+}
+
+export interface Channel {
+  _id: string
+  name: string
+  description?: string
+  avatar?: { url?: string; publicId?: string }
+  visibility: "public" | "private"
+  sendPermissions?: "admins" | "members"
+  owner: User | string
+  admins: (User | string)[]
+  members: (User | string)[]
+  messages?: string[]
+  lastMessage?: Message
+  mediaUrls?: string[]
+  createdAt: string
+  updatedAt: string
 }
 
 // Call Types

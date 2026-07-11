@@ -35,6 +35,9 @@ export class Message {
   @Prop({ type: Types.ObjectId, ref: 'User' })
   recipient: Types.ObjectId
 
+  @Prop({ type: Types.ObjectId, ref: 'Channel' })
+  channel: Types.ObjectId
+
   @Prop({
     type: String,
     enum: ['text', 'file'],

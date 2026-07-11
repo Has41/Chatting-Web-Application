@@ -1,0 +1,739 @@
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react"
+import {
+  Check,
+  Crown,
+  Hash,
+  Loader2,
+  Lock,
+  LogOut,
+  Plus,
+  Save,
+  Search,
+  Shield,
+  ShieldMinus,
+  ShieldPlus,
+  Trash2,
+  Users,
+  UserMinus,
+  UserRound,
+  X
+} from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
+import useAuth from "@auth/hooks/useAuth"
+import axiosInstance from "@shared/utils/axiosInstance"
+import { USER_PATHS } from "@shared/constants/apiPaths"
+import { CHAT_PAGE } from "@shared/constants/routePaths"
+import type { Channel, User } from "@shared/types"
+import {
+  useAddChannelMembers,
+  useDeleteChannel,
+  useDemoteChannelAdmin,
+  useLeaveChannel,
+  usePromoteChannelAdmin,
+  useRemoveChannelMembers,
+  useTransferChannelOwnership,
+  useUpdateChannel
+} from "../hooks/useChannels"
+import ChannelInfoFiles from "./ChannelInfoFiles"
+
+const getUserId = (value?: User | string | null) => (typeof value === "string" ? value : value?._id)
+
+const getUserLabel = (user: User) => user.displayName || user.username || "Member"
+
+interface ChannelInfoSidebarProps {
+  isOpen: boolean
+  onClose: () => void
+  channel: Channel
+}
+
+const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProps) => {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [name, setName] = useState(channel.name)
+  const [description, setDescription] = useState(channel.description || "")
+  const [visibility, setVisibility] = useState<"public" | "private">(channel.visibility)
+  const [sendPermissions, setSendPermissions] = useState<"admins" | "members">(channel.sendPermissions || "admins")
+  const [pendingAction, setPendingAction] = useState<string | null>(null)
+  const [showAddMembers, setShowAddMembers] = useState(false)
+  const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null)
+
+  const updateChannel = useUpdateChannel()
+  const addMembers = useAddChannelMembers()
+  const leaveChannel = useLeaveChannel()
+  const deleteChannel = useDeleteChannel()
+  const removeMember = useRemoveChannelMembers()
+  const transferOwnership = useTransferChannelOwnership()
+  const promoteAdmin = usePromoteChannelAdmin()
+  const demoteAdmin = useDemoteChannelAdmin()
+
+  const ownerId = getUserId(channel.owner)
+  const currentUserId = user?._id
+  const adminIds = useMemo(() => new Set(channel.admins.map(getUserId).filter(Boolean)), [channel.admins])
+  const currentUserIsOwner = Boolean(currentUserId && currentUserId === ownerId)
+  const currentUserIsAdmin = Boolean(currentUserId && (currentUserIsOwner || adminIds.has(currentUserId)))
+  const members = useMemo(
+    () =>
+      channel.members
+        .filter((member): member is User => typeof member !== "string")
+        .sort((first, second) => Number(getUserId(second) === ownerId) - Number(getUserId(first) === ownerId)),
+    [channel.members, ownerId]
+  )
+
+  const VisibilityIcon = channel.visibility === "private" ? Lock : Hash
+  const isSaving = updateChannel.isPending
+
+  useEffect(() => {
+    setName(channel.name)
+    setDescription(channel.description || "")
+    setVisibility(channel.visibility)
+    setSendPermissions(channel.sendPermissions || "admins")
+  }, [channel.description, channel.name, channel.sendPermissions, channel.visibility])
+
+  const handleSave = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!currentUserIsAdmin || !name.trim()) return
+
+    updateChannel.mutate({
+      channelId: channel._id,
+      payload: {
+        name: name.trim(),
+        description: description.trim(),
+        visibility,
+        sendPermissions
+      }
+    })
+  }
+
+  const executeMemberAction = async (
+    action: "remove" | "transfer" | "promote" | "demote",
+    target: User
+  ) => {
+    const actionKey = `${action}:${target._id}`
+    setPendingAction(actionKey)
+
+    try {
+      if (action === "remove") {
+        await removeMember.mutateAsync({ channelId: channel._id, members: [target._id] })
+      } else if (action === "transfer") {
+        await transferOwnership.mutateAsync({ channelId: channel._id, newOwnerId: target._id })
+      } else if (action === "promote") {
+        await promoteAdmin.mutateAsync({ channelId: channel._id, targetUserId: target._id })
+      } else {
+        await demoteAdmin.mutateAsync({ channelId: channel._id, targetUserId: target._id })
+      }
+    } finally {
+      setPendingAction(null)
+    }
+  }
+
+  const handleMemberAction = (
+    action: "remove" | "transfer" | "promote" | "demote",
+    target: User
+  ) => {
+    if (action === "remove") {
+      setConfirmation({
+        title: "Remove member?",
+        description: `${getUserLabel(target)} will lose access to ${channel.name} unless an admin adds them again.`,
+        confirmLabel: "Remove",
+        tone: "danger",
+        onConfirm: () => executeMemberAction(action, target)
+      })
+      return
+    }
+
+    if (action === "transfer") {
+      setConfirmation({
+        title: "Transfer ownership?",
+        description: `${getUserLabel(target)} will become the owner of ${channel.name}. You will remain a member unless they remove you later.`,
+        confirmLabel: "Transfer",
+        tone: "warning",
+        onConfirm: () => executeMemberAction(action, target)
+      })
+      return
+    }
+
+    void executeMemberAction(action, target)
+  }
+
+  const handleLeave = async () => {
+    setConfirmation({
+      title: "Leave channel?",
+      description: `You will leave ${channel.name} and lose access unless someone adds you again.`,
+      confirmLabel: "Leave",
+      tone: "warning",
+      onConfirm: async () => {
+        await leaveChannel.mutateAsync(channel._id)
+        onClose()
+        navigate(CHAT_PAGE)
+      }
+    })
+  }
+
+  const handleDelete = async () => {
+    setConfirmation({
+      title: "Delete channel?",
+      description: `${channel.name} and its messages will be deleted. This cannot be undone.`,
+      confirmLabel: "Delete",
+      tone: "danger",
+      onConfirm: async () => {
+        await deleteChannel.mutateAsync(channel._id)
+        onClose()
+        navigate(CHAT_PAGE)
+      }
+    })
+  }
+
+  return (
+    <>
+      {isOpen && <button className="fixed inset-0 z-40 cursor-default bg-black/10" onClick={onClose} aria-label="Close channel info" />}
+      <aside
+        className={`fixed right-0 top-0 z-50 flex h-full w-[27rem] max-w-[92vw] transform flex-col bg-white shadow-lg transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Channel Info</h2>
+            <p className="text-xs text-slate-500">{currentUserIsAdmin ? "Manage channel details and roles" : "View channel details"}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid size-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto">
+          <section className="px-5 py-5 text-center">
+            <div className="mx-auto grid size-24 place-items-center overflow-hidden rounded-full bg-[#e5f8e8] text-[#2f733c]">
+              {channel.avatar?.url ? (
+                <img src={channel.avatar.url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <VisibilityIcon size={34} />
+              )}
+            </div>
+            <form onSubmit={handleSave} className="mt-5 space-y-3 text-left">
+              <label className="block">
+                <span className="text-xs font-semibold text-slate-500">Name</span>
+                <input
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  disabled={!currentUserIsAdmin}
+                  className="mt-1 h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-xs font-semibold text-slate-500">Description</span>
+                <textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  disabled={!currentUserIsAdmin}
+                  rows={3}
+                  className="mt-1 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
+                  placeholder="No description"
+                />
+              </label>
+
+              <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-semibold text-slate-600">
+                <button
+                  type="button"
+                  disabled={!currentUserIsAdmin}
+                  onClick={() => setVisibility("public")}
+                  className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+                    visibility === "public" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                  }`}
+                >
+                  Public
+                </button>
+                <button
+                  type="button"
+                  disabled={!currentUserIsAdmin}
+                  onClick={() => setVisibility("private")}
+                  className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+                    visibility === "private" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                  }`}
+                >
+                  Private
+                </button>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">Who can send?</p>
+                    <p className="mt-0.5 text-xs text-slate-500">Channels usually keep posting to admins.</p>
+                  </div>
+                  <Shield size={18} className="shrink-0 text-green-600" />
+                </div>
+                <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-semibold text-slate-600">
+                  <button
+                    type="button"
+                    disabled={!currentUserIsAdmin}
+                    onClick={() => setSendPermissions("admins")}
+                    className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+                      sendPermissions === "admins" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                    }`}
+                  >
+                    <Shield size={15} />
+                    Admins
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!currentUserIsAdmin}
+                    onClick={() => setSendPermissions("members")}
+                    className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+                      sendPermissions === "members" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                    }`}
+                  >
+                    <Users size={15} />
+                    Members
+                  </button>
+                </div>
+              </div>
+
+              {currentUserIsAdmin && (
+                <button
+                  type="submit"
+                  disabled={isSaving || !name.trim()}
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#96e6a1] text-sm font-semibold text-[#102315] transition hover:bg-[#86dc92] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                  Save channel
+                </button>
+              )}
+            </form>
+          </section>
+
+          <ChannelInfoFiles channelId={channel._id} />
+
+          <section className="border-t border-slate-100 px-5 py-5">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-900">Members ({channel.members.length})</h3>
+              <div className="flex items-center gap-2">
+                {currentUserIsAdmin && (
+                  <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                    Admin tools
+                  </span>
+                )}
+                {currentUserIsAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddMembers(true)}
+                    className="grid size-8 place-items-center rounded-full bg-[#96e6a1] text-[#102315] transition hover:bg-[#86dc92] focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+                    aria-label="Add channel members"
+                    title="Add members"
+                  >
+                    <Plus size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {members.map((member) => (
+                <ChannelMemberRow
+                  key={member._id}
+                  member={member}
+                  isOwner={getUserId(member) === ownerId}
+                  isAdmin={adminIds.has(member._id) || getUserId(member) === ownerId}
+                  currentUserIsOwner={currentUserIsOwner}
+                  currentUserIsAdmin={currentUserIsAdmin}
+                  pendingAction={pendingAction}
+                  onAction={(action) => handleMemberAction(action, member)}
+                />
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <footer className="border-t border-slate-100 p-5">
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={handleLeave}
+              disabled={currentUserIsOwner || leaveChannel.isPending}
+              className="flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {leaveChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
+              Leave
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={!currentUserIsOwner || deleteChannel.isPending}
+              className="flex h-10 items-center justify-center gap-2 rounded-lg bg-red-50 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {deleteChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+              Delete
+            </button>
+          </div>
+        </footer>
+
+        {showAddMembers && (
+          <AddChannelMembersModal
+            channel={channel}
+            isAdding={addMembers.isPending}
+            onClose={() => setShowAddMembers(false)}
+            onAdd={async (memberIds) => {
+              await addMembers.mutateAsync({ channelId: channel._id, members: memberIds })
+              setShowAddMembers(false)
+            }}
+          />
+        )}
+        {confirmation && (
+          <ConfirmationModal
+            confirmation={confirmation}
+            onClose={() => setConfirmation(null)}
+          />
+        )}
+      </aside>
+    </>
+  )
+}
+
+interface ConfirmationState {
+  title: string
+  description: string
+  confirmLabel: string
+  tone: "warning" | "danger"
+  onConfirm: () => Promise<void>
+}
+
+const ConfirmationModal = ({
+  confirmation,
+  onClose
+}: {
+  confirmation: ConfirmationState
+  onClose: () => void
+}) => {
+  const [isWorking, setIsWorking] = useState(false)
+
+  const handleConfirm = async () => {
+    setIsWorking(true)
+    try {
+      await confirmation.onConfirm()
+      onClose()
+    } finally {
+      setIsWorking(false)
+    }
+  }
+
+  const danger = confirmation.tone === "danger"
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label={confirmation.title}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={`mb-4 grid size-11 place-items-center rounded-full ${danger ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"}`}>
+          {danger ? <Trash2 size={20} /> : <Crown size={20} />}
+        </div>
+        <h3 className="text-base font-semibold text-slate-900">{confirmation.title}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{confirmation.description}</p>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isWorking}
+            className="h-10 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={isWorking}
+            className={`flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+              danger ? "bg-red-600 text-white hover:bg-red-500" : "bg-[#96e6a1] text-[#102315] hover:bg-[#86dc92]"
+            }`}
+          >
+            {isWorking && <Loader2 size={15} className="animate-spin" />}
+            {confirmation.confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface ChannelMemberRowProps {
+  member: User
+  isOwner: boolean
+  isAdmin: boolean
+  currentUserIsOwner: boolean
+  currentUserIsAdmin: boolean
+  pendingAction: string | null
+  onAction: (action: "remove" | "transfer" | "promote" | "demote") => void
+}
+
+const ChannelMemberRow = ({
+  member,
+  isOwner,
+  isAdmin,
+  currentUserIsOwner,
+  currentUserIsAdmin,
+  pendingAction,
+  onAction
+}: ChannelMemberRowProps) => {
+  const canManage = !isOwner && (currentUserIsOwner || (currentUserIsAdmin && !isAdmin))
+  const isBusy = Boolean(pendingAction?.endsWith(`:${member._id}`))
+  const avatarUrl = member.profilePicture?.url || member.avatar || ""
+
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-lg p-2 transition hover:bg-slate-50">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            getUserLabel(member).charAt(0).toUpperCase()
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-800">{getUserLabel(member)}</p>
+          <p className="truncate text-xs text-slate-500">@{member.username}</p>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-1.5">
+        {isOwner ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700">
+            <Crown size={12} />
+            Owner
+          </span>
+        ) : isAdmin ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-[11px] font-semibold text-green-700">
+            <Shield size={12} />
+            Admin
+          </span>
+        ) : null}
+
+        {isBusy && <Loader2 size={16} className="animate-spin text-green-600" />}
+
+        {!isBusy && canManage && (
+          <>
+            {currentUserIsOwner && (
+              <button
+                type="button"
+                onClick={() => onAction("transfer")}
+                className="grid size-8 place-items-center rounded-full text-amber-700 transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                title="Transfer ownership"
+                aria-label={`Transfer ownership to ${member.username}`}
+              >
+                <Crown size={16} />
+              </button>
+            )}
+            {currentUserIsOwner && (
+              <button
+                type="button"
+                onClick={() => onAction(isAdmin ? "demote" : "promote")}
+                className="grid size-8 place-items-center rounded-full text-green-700 transition hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300"
+                title={isAdmin ? "Remove admin" : "Make admin"}
+                aria-label={isAdmin ? `Remove ${member.username} as admin` : `Make ${member.username} an admin`}
+              >
+                {isAdmin ? <ShieldMinus size={16} /> : <ShieldPlus size={16} />}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => onAction("remove")}
+              className="grid size-8 place-items-center rounded-full text-red-600 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200"
+              title="Remove member"
+              aria-label={`Remove ${member.username}`}
+            >
+              <UserMinus size={16} />
+            </button>
+          </>
+        )}
+      </div>
+    </li>
+  )
+}
+
+interface UserSearchResult extends User {
+  isFriend?: boolean
+}
+
+interface AddChannelMembersModalProps {
+  channel: Channel
+  isAdding: boolean
+  onClose: () => void
+  onAdd: (memberIds: string[]) => Promise<void>
+}
+
+const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChannelMembersModalProps) => {
+  const [query, setQuery] = useState("")
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const memberIds = useMemo(() => new Set(channel.members.map(getUserId).filter(Boolean)), [channel.members])
+
+  const { data = [], isFetching, error } = useQuery({
+    queryKey: ["channelMemberSearch", query],
+    queryFn: async () => {
+      const response = await axiosInstance.get<UserSearchResult[]>(USER_PATHS.SEARCH_FRIENDS_USERS, {
+        params: { dataToSearch: query.trim() }
+      })
+      return response.data
+    },
+    enabled: query.trim().length >= 3
+  })
+
+  useEffect(() => {
+    if (!error) return
+    console.error("Channel member search failed:", error)
+  }, [error])
+
+  const candidates = useMemo(
+    () => data.filter((candidate) => !memberIds.has(candidate._id)),
+    [data, memberIds]
+  )
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value)
+    if (event.target.value.trim().length < 3) setSelectedIds([])
+  }
+
+  const toggleSelected = (userId: string) => {
+    setSelectedIds((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]))
+  }
+
+  const handleAdd = async () => {
+    if (selectedIds.length === 0) return
+    await onAdd(selectedIds)
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Add channel members"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">Add members</h3>
+            <p className="text-xs text-slate-500">Invite people into {channel.name}.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid size-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+        </header>
+
+        <div className="p-5">
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-slate-400" />
+            <input
+              value={query}
+              onChange={handleSearchChange}
+              autoFocus
+              placeholder="Search by username or display name"
+              className="h-12 w-full rounded-lg border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40"
+            />
+          </label>
+
+          <div className="mt-4 max-h-80 overflow-y-auto">
+            {query.trim().length < 3 ? (
+              <p className="py-8 text-center text-sm text-slate-500">Type at least 3 characters to find people.</p>
+            ) : isFetching ? (
+              <div className="space-y-2">
+                {[0, 1, 2].map((item) => (
+                  <div key={item} className="flex animate-pulse items-center gap-3 rounded-lg p-2">
+                    <div className="size-10 rounded-full bg-slate-200" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-1/2 rounded bg-slate-200" />
+                      <div className="h-2 w-1/3 rounded bg-slate-100" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : candidates.length > 0 ? (
+              <ul className="space-y-1">
+                {candidates.map((candidate) => {
+                  const selected = selectedIds.includes(candidate._id)
+                  const avatarUrl = candidate.profilePicture?.url || candidate.avatar || ""
+
+                  return (
+                    <li key={candidate._id}>
+                      <button
+                        type="button"
+                        onClick={() => toggleSelected(candidate._id)}
+                        className={`flex w-full items-center gap-3 rounded-lg p-2 text-left transition ${
+                          selected ? "bg-green-50" : "hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
+                          {avatarUrl ? (
+                            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <UserRound size={19} />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-semibold text-slate-800">{getUserLabel(candidate)}</p>
+                            {candidate.isFriend && (
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[0.65rem] font-semibold text-emerald-700">
+                                Friend
+                              </span>
+                            )}
+                          </div>
+                          <p className="truncate text-xs text-slate-500">@{candidate.username}</p>
+                        </div>
+                        <span
+                          className={`grid size-8 place-items-center rounded-full ${
+                            selected ? "bg-[#96e6a1] text-[#102315]" : "border border-slate-200 text-slate-400"
+                          }`}
+                        >
+                          {selected ? <Check size={16} /> : <Plus size={16} />}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <p className="py-8 text-center text-sm text-slate-500">No users found outside this channel.</p>
+            )}
+          </div>
+        </div>
+
+        <footer className="flex items-center justify-between gap-3 border-t border-slate-100 px-5 py-4">
+          <p className="text-xs font-medium text-slate-500">
+            {selectedIds.length} {selectedIds.length === 1 ? "person" : "people"} selected
+          </p>
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={selectedIds.length === 0 || isAdding}
+            className="flex h-10 min-w-32 items-center justify-center gap-2 rounded-lg bg-[#96e6a1] px-4 text-sm font-semibold text-[#102315] transition hover:bg-[#86dc92] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isAdding ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            Add members
+          </button>
+        </footer>
+      </div>
+    </div>
+  )
+}
+
+export default ChannelInfoSidebar

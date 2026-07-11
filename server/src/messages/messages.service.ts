@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { Message, MessageDocument } from '../users/schemas/message.schema.js'
 import { Conversation, ConversationDocument } from '../users/schemas/conversation.schema.js'
+import { Channel, ChannelDocument } from '../channels/channel.schema.js'
 
 @Injectable()
 export class MessagesService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
     @InjectModel(Conversation.name) private conversationModel: Model<ConversationDocument>,
+    @InjectModel(Channel.name) private channelModel: Model<ChannelDocument>,
   ) {}
 
   async addReaction(messageId: string, userId: string, emoji: string) {
@@ -89,6 +91,33 @@ export class MessagesService {
       { messages: messageId },
       { $pull: { messages: messageId } },
     )
+
+    if (message.channel) {
+      const channel = await this.channelModel.findById(message.channel).select('messages lastMessage mediaUrls')
+
+      if (channel) {
+        const remainingMessages = channel.messages.filter((id) => id.toString() !== messageId)
+        const nextLastMessage =
+          channel.lastMessage?.toString() === messageId
+            ? remainingMessages[remainingMessages.length - 1]
+            : channel.lastMessage
+
+        const update: any = {
+          $pull: {
+            messages: message._id,
+            ...(message.media?.mediaUrl ? { mediaUrls: message.media.mediaUrl } : {}),
+          },
+        }
+
+        if (nextLastMessage) {
+          update.$set = { lastMessage: nextLastMessage }
+        } else {
+          update.$unset = { lastMessage: '' }
+        }
+
+        await this.channelModel.updateOne({ _id: message.channel }, update)
+      }
+    }
 
     return { message: 'Message deleted successfully!', messageId }
   }

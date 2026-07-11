@@ -1,7 +1,7 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react"
 import type { Conversation, Message, User } from "./index"
 
-export type ConversationType = "private" | "group"
+export type ConversationType = "private" | "group" | "channel"
 export type FileType = "image" | "video" | "audio" | "document"
 
 export interface MessageFileMeta {

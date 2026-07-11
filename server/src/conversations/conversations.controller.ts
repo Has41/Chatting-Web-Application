@@ -220,6 +220,48 @@ export class ConversationsController {
     return response.status(HttpStatus.OK).json(result)
   }
 
+  @Patch('promote-admin/:convoId/:targetUserId')
+  async promoteGroupAdmin(
+    @Param('convoId') convoId: string,
+    @Param('targetUserId') targetUserId: string,
+    @Req() request: AuthenticatedRequest,
+    @Res() response: Response,
+  ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.conversationsService.promoteGroupAdmin(
+      convoId,
+      userId,
+      targetUserId,
+    )
+    return response.status(HttpStatus.OK).json(result)
+  }
+
+  @Patch('demote-admin/:convoId/:targetUserId')
+  async demoteGroupAdmin(
+    @Param('convoId') convoId: string,
+    @Param('targetUserId') targetUserId: string,
+    @Req() request: AuthenticatedRequest,
+    @Res() response: Response,
+  ) {
+    const userId = request.user?.id
+
+    if (!userId) {
+      return response.status(HttpStatus.NOT_FOUND).json({ message: 'Unable to find user.' })
+    }
+
+    const result = await this.conversationsService.demoteGroupAdmin(
+      convoId,
+      userId,
+      targetUserId,
+    )
+    return response.status(HttpStatus.OK).json(result)
+  }
+
   @Delete('remove-group/:convoId')
   async removeGroupConversation(
     @Param('convoId') convoId: string,

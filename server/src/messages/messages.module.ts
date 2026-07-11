@@ -4,12 +4,14 @@ import { MessagesController } from './messages.controller'
 import { MessagesService } from './messages.service'
 import { Message, MessageSchema } from '../users/schemas/message.schema.js'
 import { Conversation, ConversationSchema } from '../users/schemas/conversation.schema.js'
+import { Channel, ChannelSchema } from '../channels/channel.schema.js'
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Message.name, schema: MessageSchema },
       { name: Conversation.name, schema: ConversationSchema },
+      { name: Channel.name, schema: ChannelSchema },
     ]),
   ],
   controllers: [MessagesController],
