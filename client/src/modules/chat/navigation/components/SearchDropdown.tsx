@@ -15,7 +15,7 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
     <div className="absolute top-full right-0 left-0 z-10 mt-3 rounded-md bg-white p-3 shadow-lg">
       <div className="flex items-center justify-between border-b border-gray-200 px-2 py-1">
         <h3 className="font-semibold text-gray-800">Search Results</h3>
-        <button className="text-gray-500 hover:text-gray-700" onClick={onClear} aria-label="Clear search">
+        <button type="button" className="text-gray-500 hover:text-gray-700" onClick={onClear} aria-label="Clear search">
           &#x2715;
         </button>
       </div>

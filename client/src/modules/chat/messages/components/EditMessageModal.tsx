@@ -31,6 +31,7 @@ const EditMessageModal = ({
 
         <div className="mt-6 flex flex-col gap-2">
           <button
+            type="button"
             onClick={() => {
               editMessage({ messageId: editingMessageId, content: editContent, field: editField })
               setShowEditModal(false)
@@ -40,6 +41,7 @@ const EditMessageModal = ({
             Save Changes
           </button>
           <button
+            type="button"
             onClick={() => setShowEditModal(false)}
             className="w-full rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-300"
           >

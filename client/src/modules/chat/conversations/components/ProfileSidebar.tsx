@@ -193,12 +193,14 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
         <div className="flex items-center justify-between border-b p-4">
           <h3 className="text-lg font-semibold">{data?.conversationType ? "Group Info" : "Chat Info"}</h3>
           <button
+            type="button"
             onClick={() => {
               setIsEditingInfo(false)
               setIsEditing(false)
               onClose()
             }}
             className="text-xl text-gray-500 hover:text-gray-700"
+            aria-label="Close chat info"
           >
             ✕
           </button>
@@ -227,9 +229,11 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
                   autoFocus
                 />
                 <button
+                  type="button"
                   onClick={() => handleSave({ groupName })}
                   className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
                   disabled={isLoading}
+                  aria-label="Save group name"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -250,8 +254,10 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
                 </h4>
                 {data?.conversationType && (
                   <button
+                    type="button"
                     onClick={() => setIsEditing(true)}
                     className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
+                    aria-label="Edit group name"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -284,8 +290,10 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
                 />
 
                 <button
+                  type="button"
                   onClick={() => handleSave({ groupInfo })}
                   className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
+                  aria-label="Save group info"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -304,8 +312,10 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
                 <p>{aboutText || (data?.conversationType ? "No group info available" : "No bio available")}</p>
                 {data?.conversationType && (
                   <button
+                    type="button"
                     onClick={() => setIsEditingInfo(true)}
                     className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
+                    aria-label="Edit group info"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

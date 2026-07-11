@@ -16,7 +16,9 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
   const [selectedMonth, setSelectedMonth] = useState("")
   const [selectedYear, setSelectedYear] = useState("")
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [dayOptions, setDayOptions] = useState(Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, "0")))
+  const [dayOptions, setDayOptions] = useState(() =>
+    Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, "0"))
+  )
   const [step, setStep] = useState(0)
   const [_, setDirection] = useState("next")
   const containerRef = useRef<HTMLDivElement | null>(null)

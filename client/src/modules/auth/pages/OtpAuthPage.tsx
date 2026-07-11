@@ -7,7 +7,7 @@ import LoadingSpinner from "@shared/components/LoadingSpinner"
 import type { AuthSwitchProps } from "@auth/types/forms"
 
 const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
-  const [otpValues, setOtpValues] = useState(Array(6).fill(""))
+  const [otpValues, setOtpValues] = useState(() => Array(6).fill(""))
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
   const { mutate, isLoading } = useMutation({
@@ -113,6 +113,7 @@ const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
                 <input
                   key={index}
                   type="text"
+                  aria-label={`Verification code digit ${index + 1}`}
                   ref={(el) => {
                     inputRefs.current[index] = el
                   }}
@@ -131,6 +132,7 @@ const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
 
           <div className="font-poppins mb-4 flex w-full justify-center">
             <button
+              type="button"
               onClick={verifyOtp}
               disabled={isLoading}
               className={`w-full ${

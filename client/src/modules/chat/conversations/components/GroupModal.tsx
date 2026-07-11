@@ -84,7 +84,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
       <div className="z-50 w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
         <div className="mb-4 flex items-center justify-between border-b pb-2">
           <h2 className="text-lg font-semibold text-gray-800">Create Group</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700" aria-label="Close group modal">
             x
           </button>
         </div>
@@ -124,6 +124,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
                   </div>
                   <input
                     type="checkbox"
+                    aria-label={`Add ${friend.username} to group`}
                     checked={selectedIds.includes(friend._id)}
                     onChange={() => handleToggle(friend._id)}
                     className="form-checkbox accent-custom-text h-4 w-4 cursor-pointer"
@@ -153,6 +154,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
                       </div>
                       <input
                         type="checkbox"
+                        aria-label={`Add ${other.username} to group`}
                         checked={selectedIds.includes(other._id)}
                         onChange={() => handleToggle(other._id)}
                         className="text-custom-text h-4 w-4 accent-green-500 focus:ring-green-500"
@@ -165,6 +167,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
         </div>
 
         <button
+          type="button"
           onClick={handleCreateGroup}
           disabled={selectedIds.length < 2}
           className="bg-custom-green mt-4 w-full rounded px-4 py-2 text-sm font-medium text-white hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"

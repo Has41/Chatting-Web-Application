@@ -6,7 +6,7 @@ const registerSchema = z
       .string()
       .min(1, { message: "Username is required" })
       .max(100, { message: "Username can't be longer than 100 characters" }),
-    email: z.string().email({ message: "Please enter a valid email address" }).min(1, { message: "Email is required" }),
+    email: z.email({ message: "Please enter a valid email address" }).min(1, { message: "Email is required" }),
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters long" })

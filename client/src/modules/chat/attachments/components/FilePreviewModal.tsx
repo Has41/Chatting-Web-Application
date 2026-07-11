@@ -129,7 +129,7 @@ const FilePreviewModal = ({
     >
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-medium">Preview</h3>
-        <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
+        <button type="button" onClick={handleClose} className="text-gray-500 hover:text-gray-700" aria-label="Close file preview">
           ✕
         </button>
       </div>
@@ -163,8 +163,10 @@ const FilePreviewModal = ({
           className="w-[70%] rounded border px-3 py-2 text-sm focus:outline-none"
         />
         <button
+          type="button"
           onClick={handleFileSend}
           className="bg-custom-green flex items-center justify-center rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
+          aria-label="Send file"
         >
           <LoadingSpinner
             size="size-5"

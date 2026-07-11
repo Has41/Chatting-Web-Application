@@ -220,8 +220,10 @@ const AudioRecorder = ({
       {!isRecording && (
         <div>
           <button
+            type="button"
             onClick={startRecording}
             className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
+            aria-label="Start voice recording"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -244,6 +246,7 @@ const AudioRecorder = ({
       {isRecording && (
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={cancelRecording}
             disabled={isSending}
             className="rounded-full bg-gray-200 text-gray-500 transition-opacity hover:opacity-100"
@@ -252,6 +255,7 @@ const AudioRecorder = ({
           </button>
           <span className="animate-pulse text-red-500">{isSending ? "Sending..." : "Recording..."}</span>
           <button
+            type="button"
             onClick={pauseResumeRecording}
             disabled={isSending}
             className="rounded-full bg-yellow-500 px-3 py-2 text-white hover:bg-yellow-600"
@@ -259,6 +263,7 @@ const AudioRecorder = ({
             {isPaused ? "▶" : "⏸"}
           </button>
           <button
+            type="button"
             onClick={sendRecording}
             disabled={isSending}
             className="rounded-lg bg-blue-500 px-3 py-1 text-white disabled:cursor-not-allowed disabled:opacity-60"

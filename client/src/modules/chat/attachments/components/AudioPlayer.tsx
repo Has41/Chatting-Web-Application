@@ -30,7 +30,12 @@ const AudioPlayer = ({ mediaUrl }: AudioPlayerProps) => {
     <div className="flex w-full items-center gap-3 rounded-lg bg-gray-100 p-3 shadow">
       <audio ref={audioRef} src={mediaUrl} onTimeUpdate={handleTimeUpdate} onEnded={() => setIsPlaying(false)} />
 
-      <button onClick={togglePlay} className="rounded-full bg-blue-500 p-2 text-white">
+      <button
+        type="button"
+        onClick={togglePlay}
+        className="rounded-full bg-blue-500 p-2 text-white"
+        aria-label={isPlaying ? "Pause audio" : "Play audio"}
+      >
         {isPlaying ? "⏸" : "▶️"}
       </button>
 

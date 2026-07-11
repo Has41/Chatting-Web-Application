@@ -10,7 +10,7 @@ import type { AuthFormView } from "@auth/types/forms"
 
 const GetStarted = () => {
   const [currentForm, setCurrentForm] = useState<AuthFormView>(
-    (localStorage.getItem("currentForm") as AuthFormView) || "Login"
+    () => (localStorage.getItem("currentForm") as AuthFormView) || "Login"
   )
   const shouldAnimateRef = useRef(false)
 

@@ -63,6 +63,7 @@ const ChatList = () => {
             {showDropdown && (
               <div className="absolute right-0 z-10 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black/5">
                 <button
+                  type="button"
                   onClick={() => {
                     setShowDropdown(false)
                     setOpenGroupModal(true)

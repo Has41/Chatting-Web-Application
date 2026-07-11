@@ -13,7 +13,7 @@ const HeroComponent = () => {
           asperiores harum eligendi ab quae.
         </p>
         <div className="mt-10 flex gap-x-6">
-          <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/90 px-2 py-1 text-white">
+          <button type="button" className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/90 px-2 py-1 text-white">
             <div className="pl-1">Try Out</div>
             <div className="rounded-full bg-white p-[9px]">
               <svg
@@ -28,7 +28,7 @@ const HeroComponent = () => {
               </svg>
             </div>
           </button>
-          <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-3 py-1 font-semibold">
+          <button type="button" className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-3 py-1 font-semibold">
             <div>Learn More</div>
             <div className="rounded-full bg-white p-[9px]">
               <svg

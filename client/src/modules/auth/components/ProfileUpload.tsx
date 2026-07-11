@@ -233,6 +233,7 @@ const ProfileUpload = () => {
               </ReactCrop>
             )}
             <button
+              type="button"
               onClick={confirmCrop}
               className="bg-button-color w-full rounded px-4 py-2 text-lg font-semibold text-white"
             >

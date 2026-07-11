@@ -71,7 +71,7 @@ const ConnectSection = () => {
             quibusdam nulla vel?
           </p>
           <div>
-            <button className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/80 px-2 py-1 text-white">
+            <button type="button" className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/80 px-2 py-1 text-white">
               <div className="pl-1">Get Started</div>
               <div className="rounded-full bg-white p-[9px]">
                 <svg

@@ -20,7 +20,14 @@ const PDFMeta = ({ mediaUrl, fileName }: { mediaUrl: string; fileName?: string }
         )}
       </div>
       <div>
-        <a href={mediaUrl} download={true} target="_blank" rel="noopener noreferrer" className="text-sm underline">
+        <a
+          href={mediaUrl}
+          download={true}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm underline"
+          aria-label={`Download ${displayFileName}`}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

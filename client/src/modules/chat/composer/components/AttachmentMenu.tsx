@@ -16,6 +16,7 @@ const AttachmentMenu = ({ onSelect, onClose: _onClose }: AttachmentMenuProps) =>
       <div className="grid grid-cols-2 gap-4">
         {attachmentMenuOptions.map((menu, index) => (
           <button
+            type="button"
             key={index}
             onClick={() => onSelect(menu.type as FileType)}
             className="flex flex-col items-center space-y-2 rounded p-3 text-gray-800 transition hover:bg-green-50"

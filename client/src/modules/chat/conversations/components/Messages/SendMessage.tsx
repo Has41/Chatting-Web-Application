@@ -300,8 +300,10 @@ const SendMessage = ({
           )}
           {/* File icon */}
           <button
+            type="button"
             onClick={() => setShowAttachmentOptions((prev) => !prev)}
             className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
+            aria-label="Add attachment"
           >
             <input
               type="file"
@@ -327,7 +329,11 @@ const SendMessage = ({
             </svg>
           </button>
           {/* Emoji icon */}
-          <button className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500">
+          <button
+            type="button"
+            className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
+            aria-label="Open emoji picker"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -344,6 +350,7 @@ const SendMessage = ({
             </svg>
           </button>
           <button
+            type="button"
             onClick={() => handleSendMessage({ conversationId, messageContent, messageType: "text" })}
             className="bg-custom-green rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
             aria-label="Send message"

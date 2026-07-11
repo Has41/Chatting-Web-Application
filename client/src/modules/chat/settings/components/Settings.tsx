@@ -50,6 +50,7 @@ const Settings = () => {
               </div>
             )}
             <button
+              type="button"
               className="absolute right-1 bottom-1 rounded-full border border-gray-300 bg-gray-100 p-1 shadow-sm hover:bg-gray-200"
               aria-label="Change Profile Picture"
             >
@@ -80,6 +81,7 @@ const Settings = () => {
           {/* Personal Info */}
           <div>
             <button
+              type="button"
               onClick={() => toggleSection("personal")}
               className="flex w-full cursor-pointer items-center justify-between p-2"
             >
@@ -105,6 +107,7 @@ const Settings = () => {
           {/* Themes */}
           <div>
             <button
+              type="button"
               onClick={() => toggleSection("themes")}
               className="flex w-full cursor-pointer items-center justify-between p-2"
             >
@@ -129,6 +132,7 @@ const Settings = () => {
 
           <div>
             <button
+              type="button"
               onClick={() => toggleSection("privacy")}
               className="flex w-full cursor-pointer items-center justify-between p-2"
             >
@@ -151,6 +155,7 @@ const Settings = () => {
 
           <div>
             <button
+              type="button"
               onClick={() => toggleSection("security")}
               className="flex w-full cursor-pointer items-center justify-between p-2"
             >
@@ -173,6 +178,7 @@ const Settings = () => {
 
           <div>
             <button
+              type="button"
               onClick={() => toggleSection("help")}
               className="flex w-full cursor-pointer items-center justify-between p-2"
             >

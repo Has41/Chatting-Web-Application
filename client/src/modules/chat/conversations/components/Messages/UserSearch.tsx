@@ -85,7 +85,7 @@ const UserSearch = ({
       <div className="flex items-center justify-between border-b border-slate-200 px-2 py-2">
         <h3 className="text-sm font-semibold text-slate-800">People</h3>
         {!isPanel && (
-          <button className="text-slate-500 hover:text-slate-700" onClick={handleClearSearch} aria-label="Clear search">
+          <button type="button" className="text-slate-500 hover:text-slate-700" onClick={handleClearSearch} aria-label="Clear search">
             <X className="size-4" />
           </button>
         )}

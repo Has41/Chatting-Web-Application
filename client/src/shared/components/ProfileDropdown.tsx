@@ -53,6 +53,7 @@ const ProfileDropdown = () => {
           <div className="py-1">
             {profileInfo.map((option) => (
               <button
+                type="button"
                 key={option.name}
                 onClick={() => handleOptionClick(option)}
                 className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"

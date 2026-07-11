@@ -368,12 +368,14 @@ const Message = ({
               >
                 {canEditMessage && (
                   <button
+                    type="button"
                     onClick={() => {
                       setEditContent(isFileMessage ? (message.media?.caption ?? "") : (message.content ?? ""))
                       setShowEditModal(true)
                       setShowDropdown(false)
                     }}
                     className="w-full py-1 text-center text-sm text-gray-700 hover:bg-gray-100"
+                    aria-label="Edit message"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -392,8 +394,10 @@ const Message = ({
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => deleteMessage(message._id)}
                   className="w-full py-1 text-left text-sm text-red-600 hover:bg-gray-100"
+                  aria-label="Delete message"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

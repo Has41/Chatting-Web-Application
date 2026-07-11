@@ -161,7 +161,7 @@ const AudioCallPanel = ({
 
   return (
     <div className="absolute top-20 left-1/2 z-40 w-[21rem] max-w-[calc(100%-2rem)] -translate-x-1/2 overflow-hidden rounded-xl bg-slate-950 text-white shadow-xl">
-      <audio ref={audioRef} autoPlay playsInline />
+      <audio ref={audioRef} autoPlay />
 
       <div className="relative px-5 pt-6 pb-4">
         <div className="absolute inset-0 bg-[linear-gradient(145deg,_rgba(15,23,42,0.98),_rgba(2,6,23,1))]" />

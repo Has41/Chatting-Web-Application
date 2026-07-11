@@ -36,6 +36,7 @@ const ThemeSettings = () => {
         <div className="flex space-x-3">
           {colors.map((color, index) => (
             <button
+              type="button"
               key={index}
               onClick={() => handleColorChange(color)}
               style={{ backgroundColor: color }}

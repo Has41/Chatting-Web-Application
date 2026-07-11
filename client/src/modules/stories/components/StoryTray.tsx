@@ -54,6 +54,7 @@ const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
                 : "bg-gradient-to-br from-slate-200 via-white to-slate-300"
             }`}
             title={ownStories.length > 0 ? "View your story" : "Add story"}
+            aria-label={ownStories.length > 0 ? "View your story" : "Add story"}
           >
             {user?.profilePicture?.url ? (
               <img src={user.profilePicture.url} alt="" className="size-14 rounded-full border-2 border-gray-50 object-cover" />
