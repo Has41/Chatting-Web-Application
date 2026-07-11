@@ -91,9 +91,13 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
-      <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+      <p className="block text-sm font-medium text-gray-700">Date of Birth</p>
       <div className="mt-1 flex space-x-2">
-        <select {...register("day")} className="w-16 border-b border-gray-300 p-2 text-center text-sm">
+        <select
+          {...register("day")}
+          aria-label="Day of birth"
+          className="w-16 border-b border-gray-300 p-2 text-center text-sm"
+        >
           <option value="">DD</option>
           {days.map((day) => (
             <option key={day} value={day}>
@@ -102,7 +106,11 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
           ))}
         </select>
 
-        <select {...register("month")} className="w-32 border-b border-gray-300 p-2 text-center text-sm">
+        <select
+          {...register("month")}
+          aria-label="Month of birth"
+          className="w-32 border-b border-gray-300 p-2 text-center text-sm"
+        >
           <option value="">Month</option>
           {months.map((month, index) => (
             <option key={month} value={String(index + 1).padStart(2, "0")}>
@@ -111,7 +119,11 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
           ))}
         </select>
 
-        <select {...register("year")} className="w-20 border-b border-gray-300 p-2 text-center text-sm">
+        <select
+          {...register("year")}
+          aria-label="Year of birth"
+          className="w-20 border-b border-gray-300 p-2 text-center text-sm"
+        >
           <option value="">YYYY</option>
           {years.map((year) => (
             <option key={year} value={year}>

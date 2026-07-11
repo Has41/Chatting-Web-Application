@@ -88,8 +88,8 @@ const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
         </button>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {interests.map((interest: string, idx: number) => (
-          <span key={idx} className="bg-custom-white inline-flex items-center rounded-2xl px-3 py-1 text-sm shadow-md">
+        {interests.map((interest: string) => (
+          <span key={interest} className="bg-custom-white inline-flex items-center rounded-2xl px-3 py-1 text-sm shadow-md">
             {interest}
             <button type="button" onClick={() => removeUserInterest(interest)} className="ml-2" aria-label="Remove Interest">
               <svg

@@ -1,18 +1,17 @@
 import { useState } from "react"
 import DarkModeSwitch from "@shared/components/DarkModeSwitch"
 
-const ThemeSettings = () => {
-  // Define six theme colors (you can adjust these values as needed)
-  const colors = [
-    "#ff6347", // Tomato
-    "#4682b4", // Steel Blue
-    "#32cd32", // Lime Green
-    "#ffd700", // Gold
-    "#8a2be2", // Blue Violet
-    "#ff8c00" // Dark Orange
-  ]
+const THEME_COLORS = [
+  "#ff6347",
+  "#4682b4",
+  "#32cd32",
+  "#ffd700",
+  "#8a2be2",
+  "#ff8c00"
+]
 
-  const [selectedColor, setSelectedColor] = useState(colors[0])
+const ThemeSettings = () => {
+  const [selectedColor, setSelectedColor] = useState(THEME_COLORS[0])
   const [darkMode, setDarkMode] = useState(false)
 
   // Handle when a user selects a theme color
@@ -34,10 +33,10 @@ const ThemeSettings = () => {
       <div className="mb-6">
         <p className="mb-2 text-sm">Select a theme color:</p>
         <div className="flex space-x-3">
-          {colors.map((color, index) => (
+          {THEME_COLORS.map((color) => (
             <button
               type="button"
-              key={index}
+              key={color}
               onClick={() => handleColorChange(color)}
               style={{ backgroundColor: color }}
               className={`h-8 w-8 rounded-full border-2 ${

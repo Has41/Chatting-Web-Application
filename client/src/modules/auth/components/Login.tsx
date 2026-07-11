@@ -113,9 +113,13 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
             <div className="py-4 text-center">
               <p className="text-sm text-black/80">
                 Not signed in yet?{" "}
-                <span onClick={() => onButtonClick?.("Register")} className="cursor-pointer font-bold">
+                <button
+                  type="button"
+                  onClick={() => onButtonClick?.("Register")}
+                  className="cursor-pointer bg-transparent p-0 font-bold"
+                >
                   Sign up now!
-                </span>
+                </button>
               </p>
             </div>
           </form>

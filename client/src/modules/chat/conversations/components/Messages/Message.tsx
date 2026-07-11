@@ -338,11 +338,13 @@ const Message = ({
           </div>
           <div>
             {!isSending && !hasFailed && (
-              <div
+              <button
+                type="button"
                 className={`absolute top-1/2 hidden -translate-y-1/2 transform cursor-pointer group-hover:block ${
                   isSender ? "-left-5" : "-right-4"
                 }`}
                 onClick={() => setShowDropdown((prev) => !prev)}
+                aria-label="Open message actions"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -358,7 +360,7 @@ const Message = ({
                     d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"
                   />
                 </svg>
-              </div>
+              </button>
             )}
 
             {showDropdown && isSender && (
@@ -441,10 +443,12 @@ const Message = ({
             <div className="mt-2 flex flex-col items-end text-xs font-medium text-gray-600">
               {conversationType === "group" ? (
                 <>
-                  <div
-                    className="flex cursor-pointer -space-x-2"
+                  <button
+                    type="button"
+                    className="flex cursor-pointer -space-x-2 bg-transparent p-0"
                     onClick={() => setShowSeenUsernames((prev) => !prev)}
                     title="Seen by"
+                    aria-label="Show seen by list"
                   >
                     {(lastMessage.seenBy ?? []).map((seen) => (
                       <img
@@ -454,7 +458,7 @@ const Message = ({
                         className="size-7 rounded-full border-2 border-white object-cover"
                       />
                     ))}
-                  </div>
+                  </button>
 
                   {showSeenUsernames && (
                     <div className="animate-fadeIn mt-2 flex max-w-48 rounded bg-gray-100 px-2 py-1 transition-all duration-300 ease-in-out">

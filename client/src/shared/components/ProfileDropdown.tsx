@@ -37,16 +37,19 @@ const ProfileDropdown = () => {
 
   return (
     <div className="font-poppins relative">
-      <div
+      <button
+        type="button"
         className="flex size-10 cursor-pointer items-center justify-center rounded-full bg-slate-300"
         onClick={() => setIsDropdownOpen((prev) => !prev)}
+        aria-expanded={isDropdownOpen}
+        aria-label="Open profile menu"
       >
         {profilePictureUrl ? (
           <img className="h-full w-full rounded-full object-cover" src={profilePictureUrl} alt="User Profile" />
         ) : (
           <span className="text-sm font-semibold text-white">{user?.username?.charAt(0).toUpperCase() || "U"}</span>
         )}
-      </div>
+      </button>
 
       {isDropdownOpen && (
         <div className="ring-opacity-5 absolute bottom-12 left-1 z-10 w-40 rounded-md bg-white shadow-xl ring-1 ring-black">

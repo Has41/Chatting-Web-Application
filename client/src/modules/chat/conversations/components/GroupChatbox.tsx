@@ -70,7 +70,12 @@ const GroupChatbox = () => {
   return (
     <section className="font-poppins relative flex h-screen w-[69%] flex-col">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
-        <div onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="flex cursor-pointer items-center gap-x-3">
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="flex cursor-pointer items-center gap-x-3 bg-transparent p-0 text-left"
+          aria-label="Open group info"
+        >
           {groupData?.groupPicture?.url ? (
             <img
               src={groupData?.groupPicture?.url}
@@ -85,7 +90,7 @@ const GroupChatbox = () => {
           <div className="flex items-center gap-x-2">
             <h1 className="mb-[0.1rem] font-semibold">{groupData?.groupName || "Group Chat"}</h1>
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center gap-4">
           {chatOptions.map((option, index) => (

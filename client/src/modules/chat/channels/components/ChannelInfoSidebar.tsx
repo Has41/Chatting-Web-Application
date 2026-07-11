@@ -189,7 +189,14 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
 
   return (
     <>
-      {isOpen && <button className="fixed inset-0 z-40 cursor-default bg-black/10" onClick={onClose} aria-label="Close channel info" />}
+      {isOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 cursor-default bg-black/10"
+          onClick={onClose}
+          aria-label="Close channel info"
+        />
+      )}
       <aside
         className={`fixed right-0 top-0 z-50 flex h-full w-[27rem] max-w-[92vw] transform flex-col bg-white shadow-lg transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"

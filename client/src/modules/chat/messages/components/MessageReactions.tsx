@@ -114,8 +114,8 @@ const MessageReactions = ({
             </div>
             <div className="max-h-48 overflow-y-auto py-1">
               {reaction.users.length > 0 ? (
-                reaction.users.map((reactionUser, index) => (
-                  <div key={`${reactionUser.id ?? reactionUser.label}-${index}`} className="flex items-center gap-2 py-1.5">
+                reaction.users.map((reactionUser) => (
+                  <div key={reactionUser.id ?? reactionUser.label} className="flex items-center gap-2 py-1.5">
                     <div className="grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e5f8e8] text-[11px] font-bold text-[#2f733c]">
                       {reactionUser.avatarUrl ? (
                         <img src={reactionUser.avatarUrl} alt="" className="h-full w-full object-cover" />

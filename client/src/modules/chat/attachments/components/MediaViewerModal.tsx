@@ -141,7 +141,7 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
           <div className="flex h-20 shrink-0 items-center gap-2 overflow-x-auto border-t border-white/10 bg-zinc-950 px-4">
             {items.map((item, index) => (
               <button
-                key={`${item.mediaUrl}-${index}`}
+                key={item.mediaUrl}
                 type="button"
                 onClick={() => onCurrentIndexChange(index)}
                 className={`relative h-14 w-16 shrink-0 overflow-hidden rounded border transition ${

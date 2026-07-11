@@ -10,11 +10,14 @@ const DarkModeSwitch = () => {
   return (
     <div className="inline-flex items-center space-x-2">
       <h1>Dark Mode: </h1>
-      <div
+      <button
+        type="button"
         className={`relative flex h-10 w-[4.5rem] cursor-pointer items-center rounded-full border-2 border-gray-300 transition-colors duration-300 ${
           isDark ? "bg-black/85" : "bg-custom-white"
         }`}
         onClick={toggleDarkMode}
+        aria-pressed={isDark}
+        aria-label="Toggle dark mode"
       >
         <div
           className={`bg-custom-green absolute top-1 left-1 flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${
@@ -46,7 +49,7 @@ const DarkModeSwitch = () => {
             </svg>
           )}
         </div>
-      </div>
+      </button>
     </div>
   )
 }

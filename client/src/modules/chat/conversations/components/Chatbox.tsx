@@ -68,7 +68,12 @@ const Chatbox = () => {
   return (
     <section className="font-poppins relative flex h-screen w-[69%] flex-col">
       <nav className="flex items-center justify-between border-b px-4 py-3 text-black/80">
-        <div onClick={() => dispatch({ type: "TOGGLE_SIDEBAR" })} className="flex cursor-pointer items-center gap-x-3">
+        <button
+          type="button"
+          onClick={() => dispatch({ type: "TOGGLE_SIDEBAR" })}
+          className="flex cursor-pointer items-center gap-x-3 bg-transparent p-0 text-left"
+          aria-label="Open chat info"
+        >
           <img
             src={state.userData?.profilePicture?.url || "https://via.placeholder.com/40"}
             alt="Profile"
@@ -78,7 +83,7 @@ const Chatbox = () => {
             <h1 className="mb-[0.1rem] font-semibold">{state.userData?.username || "Username"}</h1>
             <div className="bg-custom-green size-[0.6rem] rounded-full"></div>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-4">
           <button
             type="button"

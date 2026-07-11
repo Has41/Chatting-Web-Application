@@ -557,7 +557,7 @@ const ChannelChatbox = () => {
                   accept={getAcceptedTypes(attachmentType)}
                   onChange={handleFileChange}
                 />
-                <label className="flex min-h-12 flex-1 items-center rounded-[24px] bg-[#f1f6f2] px-4 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-[#96e6a1]">
+                <div className="flex min-h-12 flex-1 items-center rounded-[24px] bg-[#f1f6f2] px-4 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-[#96e6a1]">
                   <textarea
                     value={messageText}
                     onChange={(event) => handleMessageInputChange(event.target.value)}
@@ -570,10 +570,11 @@ const ChannelChatbox = () => {
                     }}
                     disabled={!canSendInChannel}
                     rows={1}
+                    aria-label={`Message ${channel.name}`}
                     placeholder={canSendInChannel ? `Message ${channel.name}` : "Admins only"}
                     className="max-h-32 min-h-6 w-full resize-none bg-transparent py-3 text-sm text-[#18251b] outline-none placeholder:text-[#9aa99d] disabled:cursor-not-allowed"
                   />
-                </label>
+                </div>
                 <button
                   type="submit"
                   disabled={!messageText.trim() || !canSendInChannel}

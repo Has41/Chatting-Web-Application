@@ -90,9 +90,13 @@ const Register = ({ onButtonClick }: AuthSwitchProps) => {
                 <div className="py-6 text-center">
                   <p className="text-sm text-black/80">
                     Already have an account?{" "}
-                    <span onClick={() => onButtonClick?.("Login")} className="cursor-pointer font-bold">
+                    <button
+                      type="button"
+                      onClick={() => onButtonClick?.("Login")}
+                      className="cursor-pointer bg-transparent p-0 font-bold"
+                    >
                       Log in!
-                    </span>
+                    </button>
                   </p>
                 </div>
               </>

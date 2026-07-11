@@ -63,12 +63,13 @@ const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
-      <label className="block text-sm font-medium text-gray-700">Gender</label>
+      <p className="block text-sm font-medium text-gray-700">Gender</p>
       <div className="mt-2 flex gap-4">
         {genders.map((gender) => (
           <button
             key={gender.value}
             type="button"
+            aria-pressed={selectedGender === gender.value}
             onClick={() => {
               setValue("gender", gender.value)
             }}

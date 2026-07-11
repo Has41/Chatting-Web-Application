@@ -175,14 +175,16 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
   return (
     <>
       {isOpen && (
-        <div
+        <button
+          type="button"
           className="bg-opacity-40 fixed inset-0 z-40"
           onClick={() => {
             setIsEditing(false)
             setIsEditingInfo(false)
             onClose()
           }}
-        ></div>
+          aria-label="Close chat info"
+        />
       )}
 
       <div
@@ -226,6 +228,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   className="border-b border-gray-400 text-center text-lg font-bold outline-none"
+                  aria-label="Group name"
                   autoFocus
                 />
                 <button
@@ -286,6 +289,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
                   value={groupInfo}
                   onChange={(e) => setGroupInfo(e.target.value)}
                   className="border-b border-gray-400 text-center text-sm outline-none"
+                  aria-label="Group info"
                   autoFocus
                 />
 
@@ -339,8 +343,8 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
         </div>
         <div className="mt-4 w-full px-6">
           <div className="flex justify-around">
-            {profileInfoData.map((item, index) => (
-              <div key={index} className="flex cursor-pointer flex-col items-center">
+            {profileInfoData.map((item) => (
+              <div key={item.name} className="flex cursor-pointer flex-col items-center">
                 <div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-white shadow">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

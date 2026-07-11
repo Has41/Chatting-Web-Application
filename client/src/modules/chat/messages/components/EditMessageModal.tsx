@@ -26,6 +26,7 @@ const EditMessageModal = ({
         <textarea
           value={editContent}
           onChange={(e) => setEditContent(e.target.value)}
+          aria-label={editField === "caption" ? "Edit caption" : "Edit message"}
           className="focus:ring-custom-green h-28 w-full resize-none rounded-lg border border-gray-300 p-3 text-sm text-gray-800 shadow-sm focus:ring-2 focus:outline-none"
         />
 
