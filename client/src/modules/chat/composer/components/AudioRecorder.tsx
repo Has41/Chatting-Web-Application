@@ -16,10 +16,10 @@ const AudioRecorder = ({
 }: AudioRecorderProps) => {
   const { uploadFile } = useCloudinaryUpload()
   const { user } = useAuth()
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const [isPaused, setIsPaused] = useState(false)
   const [isSending, setIsSending] = useState(false)
-  const [audioURL, setAudioURL] = useState<File | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioFileRef = useRef<File | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const stopTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const stopResolverRef = useRef<((file: File | null) => void) | null>(null)
@@ -43,7 +43,7 @@ const AudioRecorder = ({
           type: "audio/webm"
         })
         if (keepStoppedAudioRef.current) {
-          setAudioURL(file)
+          audioFileRef.current = file
         }
         stopResolverRef.current?.(file)
         stopResolverRef.current = null
@@ -58,10 +58,10 @@ const AudioRecorder = ({
       }
 
       recorder.start()
-      setMediaRecorder(recorder)
+      mediaRecorderRef.current = recorder
       setIsRecording(true)
       setIsPaused(false)
-      setAudioURL(null)
+      audioFileRef.current = null
 
       // auto-stop after 2 minutes
       stopTimeoutRef.current = setTimeout(() => {
@@ -75,6 +75,7 @@ const AudioRecorder = ({
   }
 
   const pauseResumeRecording = () => {
+    const mediaRecorder = mediaRecorderRef.current
     if (!mediaRecorder) return
     if (mediaRecorder.state === "recording") {
       mediaRecorder.pause()
@@ -86,6 +87,7 @@ const AudioRecorder = ({
   }
 
   const cancelRecording = () => {
+    const mediaRecorder = mediaRecorderRef.current
     if (mediaRecorder) {
       if (mediaRecorder.state !== "inactive") {
         keepStoppedAudioRef.current = false
@@ -94,16 +96,17 @@ const AudioRecorder = ({
       mediaRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
       setIsRecording(false)
       setIsPaused(false)
-      setAudioURL(null)
+      audioFileRef.current = null
       chunksRef.current = []
     }
   }
 
   const stopAndGetRecording = () => {
-    if (!mediaRecorder) return Promise.resolve(audioURL)
+    const mediaRecorder = mediaRecorderRef.current
+    if (!mediaRecorder) return Promise.resolve(audioFileRef.current)
 
     if (mediaRecorder.state === "inactive") {
-      return Promise.resolve(audioURL)
+      return Promise.resolve(audioFileRef.current)
     }
 
     keepStoppedAudioRef.current = false
@@ -120,7 +123,7 @@ const AudioRecorder = ({
     if (isSending) return
 
     setIsSending(true)
-    const audioFile = audioURL ?? (await stopAndGetRecording())
+    const audioFile = audioFileRef.current ?? (await stopAndGetRecording())
 
     if (!audioFile) {
       console.log("Audio file not available!")
@@ -144,6 +147,7 @@ const AudioRecorder = ({
       optimisticOnly: true
     })
 
+    const mediaRecorder = mediaRecorderRef.current
     if (mediaRecorder) {
       if (mediaRecorder.state !== "inactive") {
         keepStoppedAudioRef.current = false
@@ -198,12 +202,13 @@ const AudioRecorder = ({
     setIsRecording(false)
     setIsPaused(false)
     setIsSending(false)
-    setAudioURL(null)
+    audioFileRef.current = null
     chunksRef.current = []
   }
 
   useEffect(() => {
     return () => {
+      const mediaRecorder = mediaRecorderRef.current
       if (mediaRecorder) {
         if (mediaRecorder.state !== "inactive") {
           keepStoppedAudioRef.current = false
@@ -212,7 +217,7 @@ const AudioRecorder = ({
         mediaRecorder.stream.getTracks().forEach((track: MediaStreamTrack) => track.stop())
       }
     }
-  }, [mediaRecorder])
+  }, [])
 
   return (
     <div className="flex items-center gap-2">

@@ -26,7 +26,6 @@ const UserSearch = ({
 }: UserSearchProps) => {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
-  const [userResults, setUserResults] = useState<UserSearchResult[]>([])
   const isPanel = variant === "panel"
 
   const { data: searchData, error: searchError, isFetching } = useQuery({
@@ -40,29 +39,20 @@ const UserSearch = ({
     enabled: searchQuery.trim().length >= 3
   })
 
-  useEffect(() => {
-    if (!searchData) return
-    setUserResults(searchData)
-  }, [searchData])
+  const userResults = searchData ?? []
 
   useEffect(() => {
     if (!searchError) return
     console.error("Error fetching user search results:", searchError)
-    setUserResults([])
   }, [searchError])
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value)
-
-    if (value.trim().length < 3) {
-      setUserResults([])
-    }
   }
 
   const handleClearSearch = () => {
     setSearchQuery("")
-    setUserResults([])
   }
 
   const { mutate: sendFriendRequest, isPending: isSendingRequest } = useMutation({
@@ -70,7 +60,9 @@ const UserSearch = ({
       return axiosInstance.post(`${USER_PATHS.SEND_FRIEND_REQUEST}/${userId}`)
     },
     onSuccess: (_data, userId) => {
-      setUserResults((prev) => prev.map((result) => (result._id === userId ? { ...result, isRequestSent: true } : result)))
+      queryClient.setQueriesData<UserSearchResult[]>({ queryKey: ["userSearch"] }, (results) =>
+        results?.map((result) => (result._id === userId ? { ...result, isRequestSent: true } : result))
+      )
       queryClient.invalidateQueries({ queryKey: ["userSearch"] })
       queryClient.invalidateQueries({ queryKey: ["friendList&Requests"] })
     },

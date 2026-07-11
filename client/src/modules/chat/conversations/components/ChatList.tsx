@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import useAuth from "@auth/hooks/useAuth"
-import moment from "moment"
+import dayjs from "dayjs"
 import GroupModal from "./GroupModal"
 import ChatSearch from "./Messages/ChatSearch"
 import { getChatConversationRoute, getGroupConversationRoute } from "@shared/constants/routePaths"
@@ -44,21 +44,29 @@ const ChatList = () => {
         <div className="relative mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-black/80">Chats</h2>
           <div className="relative">
-            <svg
+            <button
+              type="button"
               onClick={toggleDropdown}
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6 cursor-pointer text-black/80"
+              className="inline-flex size-8 items-center justify-center rounded-full text-black/80 transition hover:bg-slate-100 focus:ring-2 focus:ring-custom-green focus:outline-none"
+              aria-label="Open chat list menu"
+              aria-expanded={showDropdown}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
-              />
-            </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
+                />
+              </svg>
+            </button>
 
             {showDropdown && (
               <div className="absolute right-0 z-10 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black/5">
@@ -155,7 +163,7 @@ const ChatList = () => {
 
                         {conversation?.lastMessage?.createdAt && (
                           <div className="mb-auto flex flex-col text-xs text-gray-500">
-                            <p>{moment(conversation?.lastMessage?.createdAt).format("h:mm a")}</p>
+                            <p>{dayjs(conversation?.lastMessage?.createdAt).format("h:mm a")}</p>
                           </div>
                         )}
                       </Link>

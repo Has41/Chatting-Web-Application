@@ -1,4 +1,4 @@
-import moment from "moment"
+import dayjs from "dayjs"
 import { Link } from "react-router-dom"
 import { getNewChatRoute } from "@shared/constants/routePaths"
 import type { SearchConversation, SearchFriend } from "@chat/navigation/types/search"
@@ -49,7 +49,7 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
 
                   {lastMessage && (
                     <span className="text-xs whitespace-nowrap text-gray-400">
-                      {moment(lastMessage.createdAt).format("h:mm a")}
+                      {dayjs(lastMessage.createdAt).format("h:mm a")}
                     </span>
                   )}
                 </Link>

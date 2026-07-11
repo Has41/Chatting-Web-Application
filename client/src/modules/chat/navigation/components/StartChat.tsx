@@ -1,25 +1,37 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Search, X } from "lucide-react"
 import ChatLogo from "@shared/components/ChatLogo"
 import UserSearch from "@chat/conversations/components/Messages/UserSearch"
 
+const SUGGESTIONS = [
+  {
+    title: "Pick a conversation",
+    description: "Choose any recent chat from the left panel to continue where you left off."
+  },
+  {
+    title: "Find people",
+    description: "Search for any user and open a private chat directly."
+  },
+  {
+    title: "Create a group",
+    description: "Open the chat menu to bring multiple people into one conversation."
+  }
+]
+
 const StartChat = () => {
   const [showSearchModal, setShowSearchModal] = useState(false)
+  const searchDialogRef = useRef<HTMLDialogElement | null>(null)
 
-  const suggestions = [
-    {
-      title: "Pick a conversation",
-      description: "Choose any recent chat from the left panel to continue where you left off."
-    },
-    {
-      title: "Find people",
-      description: "Search for any user and open a private chat directly."
-    },
-    {
-      title: "Create a group",
-      description: "Open the chat menu to bring multiple people into one conversation."
+  useEffect(() => {
+    const dialog = searchDialogRef.current
+    if (!dialog) return
+
+    if (showSearchModal && !dialog.open) {
+      dialog.showModal()
+    } else if (!showSearchModal && dialog.open) {
+      dialog.close()
     }
-  ]
+  }, [showSearchModal])
 
   return (
     <section className="font-poppins relative flex h-screen flex-1 overflow-hidden bg-[#f7f8fb]" aria-label="Start chat">
@@ -68,7 +80,7 @@ const StartChat = () => {
         </div>
 
         <div className="mt-8 grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-3">
-          {suggestions.map((suggestion) => (
+          {SUGGESTIONS.map((suggestion) => (
             <article key={suggestion.title} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
               <h2 className="text-sm font-semibold text-slate-800">{suggestion.title}</h2>
               <p className="mt-2 text-xs leading-5 text-slate-500">{suggestion.description}</p>
@@ -77,39 +89,39 @@ const StartChat = () => {
         </div>
       </div>
 
-      {showSearchModal && (
+      <dialog
+        ref={searchDialogRef}
+        className="m-auto w-full max-w-xl overflow-visible bg-transparent p-4 backdrop:bg-black/55 backdrop:backdrop-blur-sm"
+        aria-label="Find people"
+        onClose={() => setShowSearchModal(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setShowSearchModal(false)
+        }}
+      >
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Find people"
-          onClick={() => setShowSearchModal(false)}
+          className="w-full overflow-hidden rounded-lg bg-white shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
         >
-          <div
-            className="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Find people</h2>
-                <p className="text-xs text-slate-500">Search users and open a private chat.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSearchModal(false)}
-                className="inline-flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-                aria-label="Close"
-              >
-                <X className="size-5" />
-              </button>
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Find people</h2>
+              <p className="text-xs text-slate-500">Search users and open a private chat.</p>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowSearchModal(false)}
+              className="inline-flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Close"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
 
-            <div className="p-4">
-              <UserSearch variant="panel" placeholder="Search by username or display name" autoFocus />
-            </div>
+          <div className="p-4">
+            <UserSearch variant="panel" placeholder="Search by username or display name" autoFocus />
           </div>
         </div>
-      )}
+      </dialog>
     </section>
   )
 }

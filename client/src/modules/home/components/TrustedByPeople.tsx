@@ -7,33 +7,17 @@ import tempImg2 from "@/assets/female.jpg"
 import { CustomerCard } from "@shared/components/Cards"
 
 const TrustedByPeople = () => {
-  const tempRefs = {
-    temp1Ref: useRef(null),
-    temp2Ref: useRef(null),
-    temp2TitleRef: useRef(null),
-    temp2DetailRef: useRef(null),
-    temp2NameRef: useRef(null),
-    temp2PostRef: useRef(null),
-    temp3Ref: useRef(null),
-    temp3TitleRef: useRef(null),
-    temp3DetailRef: useRef(null),
-    temp3NameRef: useRef(null),
-    temp3PostRef: useRef(null)
-  }
-
-  const {
-    temp1Ref,
-    temp2Ref,
-    temp2TitleRef,
-    temp2DetailRef,
-    temp2NameRef,
-    temp2PostRef,
-    temp3Ref,
-    temp3TitleRef,
-    temp3DetailRef,
-    temp3NameRef,
-    temp3PostRef
-  } = tempRefs
+  const temp1Ref = useRef(null)
+  const temp2Ref = useRef(null)
+  const temp2TitleRef = useRef(null)
+  const temp2DetailRef = useRef(null)
+  const temp2NameRef = useRef(null)
+  const temp2PostRef = useRef(null)
+  const temp3Ref = useRef(null)
+  const temp3TitleRef = useRef(null)
+  const temp3DetailRef = useRef(null)
+  const temp3NameRef = useRef(null)
+  const temp3PostRef = useRef(null)
 
   useGSAP(() => {
     const timeLine = gsap.timeline({ repeat: -1, repeatDelay: 1 })

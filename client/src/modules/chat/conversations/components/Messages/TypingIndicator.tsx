@@ -21,9 +21,9 @@ const TypingIndicator = ({ typingUsers, avatarUrl, avatarLabel }: TypingIndicato
         )}
       </div>
       <div className="bg-custom-white flex w-fit items-center gap-1 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
-        <span className="size-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
-        <span className="size-2 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
-        <span className="size-2 animate-bounce rounded-full bg-slate-400" />
+        <span className="size-2 animate-pulse rounded-full bg-slate-400 [animation-delay:-0.2s]" />
+        <span className="size-2 animate-pulse rounded-full bg-slate-400 [animation-delay:-0.1s]" />
+        <span className="size-2 animate-pulse rounded-full bg-slate-400" />
       </div>
     </div>
   )

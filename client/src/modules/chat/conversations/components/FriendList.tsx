@@ -21,8 +21,6 @@ interface FriendConversation {
 const FriendList = () => {
   const queryClient = useQueryClient()
   const [openNotifcation, setOpenNotification] = useState(false)
-  const [friendList, setFriendList] = useState<User[]>([])
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([])
 
   const toggleNotification = () => setOpenNotification((prev) => !prev)
 
@@ -42,11 +40,8 @@ const FriendList = () => {
     }
   })
 
-  useEffect(() => {
-    if (!friendsData) return
-    setFriendList(friendsData.friends || [])
-    setFriendRequests(friendsData.friendRequests || [])
-  }, [friendsData])
+  const friendList = friendsData?.friends || []
+  const friendRequests = friendsData?.friendRequests || []
 
   useEffect(() => {
     if (!friendsError) return

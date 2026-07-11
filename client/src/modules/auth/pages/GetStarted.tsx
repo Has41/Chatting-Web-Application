@@ -13,16 +13,11 @@ const GetStarted = () => {
     () => (localStorage.getItem("currentForm") as AuthFormView) || "Login"
   )
   const shouldAnimateRef = useRef(false)
-
-  const formPickerRefs = {
-    greenSectionRef: useRef(null),
-    greenSectionTextRef: useRef(null),
-    subGreenSectionRef: useRef(null),
-    formContainerRef: useRef(null),
-    isFirstRender: useRef(true)
-  }
-
-  const { greenSectionRef, greenSectionTextRef, subGreenSectionRef, formContainerRef, isFirstRender } = formPickerRefs
+  const greenSectionRef = useRef(null)
+  const greenSectionTextRef = useRef(null)
+  const subGreenSectionRef = useRef(null)
+  const formContainerRef = useRef(null)
+  const isFirstRender = useRef(true)
 
   const handleFormSwitch = useCallback((formSwitch: AuthFormView) => {
     setCurrentForm(formSwitch)

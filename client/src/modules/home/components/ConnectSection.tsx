@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import { useRef } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import firstOperator from "@/assets/operator1.jpg"
@@ -8,14 +8,10 @@ import fourthOperator from "@/assets/operator4.jpg"
 import { connectIcons } from "@shared/utils/dynamicData"
 
 const ConnectSection = () => {
-  const imgRefs = {
-    firstImgRef: useRef(null),
-    secondImgRef: useRef(null),
-    thirdImgRef: useRef(null),
-    fourthImgRef: useRef(null)
-  }
-
-  const { firstImgRef, secondImgRef, thirdImgRef, fourthImgRef } = imgRefs
+  const firstImgRef = useRef(null)
+  const secondImgRef = useRef(null)
+  const thirdImgRef = useRef(null)
+  const fourthImgRef = useRef(null)
 
   useGSAP(() => {
     const timeLine = gsap.timeline()
@@ -44,10 +40,10 @@ const ConnectSection = () => {
             Connect Instantly, Communicate Effortlessly - <span className="rounded-3xl bg-green-200 px-3">ChitChat</span>
           </h1>
           <div className="mt-6 flex justify-center gap-x-4">
-            {connectIcons.map((icon, index) => {
+            {connectIcons.map((icon) => {
               return (
                 <div
-                  key={index}
+                  key={icon.path}
                   className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white shadow-md"
                 >
                   <svg

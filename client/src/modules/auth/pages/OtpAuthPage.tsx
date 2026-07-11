@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type ClipboardEvent } from "react"
 import ChatLogo from "@shared/components/ChatLogo"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
-import { AUTH_PATHS } from "@shared/constants/apiPaths"
+import { AUTH_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import type { AuthSwitchProps } from "@auth/types/forms"
 
 const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
+  const queryClient = useQueryClient()
   const [otpValues, setOtpValues] = useState(() => Array(6).fill(""))
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
   const { mutate, isLoading } = useMutation({
     mutationFn: async ({ otp, email }: { otp: string; email: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.VERIFY_OTP, { otp, email })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [USER_PATHS.GET_INFO] })
     },
     onError: (error: unknown) => {
       if (import.meta.env.PROD) return

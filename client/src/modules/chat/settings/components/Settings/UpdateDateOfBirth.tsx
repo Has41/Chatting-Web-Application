@@ -19,6 +19,24 @@ interface UpdateDateOfBirthProps {
   currentDateOfBirth?: string
 }
 
+const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"))
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+]
+const CURRENT_YEAR = new Date().getFullYear()
+const YEARS = Array.from({ length: 121 }, (_, i) => CURRENT_YEAR - i)
+
 const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
   const { refetch } = useAuth()
   const currentFormattedDate = currentDateOfBirth?.split("T")[0] ?? ""
@@ -71,24 +89,6 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
     mutate({ dateOfBirth: dateString })
   }
 
-  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"))
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
-  ]
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 121 }, (_, i) => currentYear - i)
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
       <p className="block text-sm font-medium text-gray-700">Date of Birth</p>
@@ -99,7 +99,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
           className="w-16 border-b border-gray-300 p-2 text-center text-sm"
         >
           <option value="">DD</option>
-          {days.map((day) => (
+          {DAYS.map((day) => (
             <option key={day} value={day}>
               {day}
             </option>
@@ -112,7 +112,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
           className="w-32 border-b border-gray-300 p-2 text-center text-sm"
         >
           <option value="">Month</option>
-          {months.map((month, index) => (
+          {MONTHS.map((month, index) => (
             <option key={month} value={String(index + 1).padStart(2, "0")}>
               {month}
             </option>
@@ -125,7 +125,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
           className="w-20 border-b border-gray-300 p-2 text-center text-sm"
         >
           <option value="">YYYY</option>
-          {years.map((year) => (
+          {YEARS.map((year) => (
             <option key={year} value={year}>
               {year}
             </option>

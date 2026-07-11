@@ -3,7 +3,7 @@ import StatusDropdown from "@shared/components/StatusDropdown"
 import InfoDetails from "./Settings/InfoDetails"
 import useAuth from "@auth/hooks/useAuth"
 import ThemeSettings from "./Settings/ThemeSettings"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { useNavigate } from "react-router-dom"
@@ -12,6 +12,7 @@ import { Loader2, LogOut } from "lucide-react"
 const Settings = () => {
   const { user, setUser, setIsAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [openSection, setOpenSection] = useState<string | null>("")
   const profilePictureUrl = user?.profilePicture?.url
 
@@ -24,6 +25,7 @@ const Settings = () => {
       return await axiosInstance.post(AUTH_PATHS.LOG_OUT)
     },
     onSuccess: () => {
+      queryClient.clear()
       setUser(null)
       setIsAuthenticated(false)
       navigate("/auth", { replace: true })

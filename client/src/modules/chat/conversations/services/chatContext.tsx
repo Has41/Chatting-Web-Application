@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useEffect, useReducer, type Dispatch, type SetStateAction } from "react"
+import { createContext, ReactNode, useCallback, useEffect, useMemo, useReducer, type Dispatch, type SetStateAction } from "react"
 import type { Conversation } from "@shared/types"
 import { useChatListQuery } from "@chat/conversations/queries/chatQueries"
 import useAuth from "@auth/hooks/useAuth"
@@ -58,15 +58,24 @@ const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   }, [canLoadChats, data, isError])
 
+  const setChatList = useCallback(
+    (chatList: SetStateAction<Conversation[]>) => {
+      dispatch({ type: "SET_CHAT_LIST", payload: typeof chatList === "function" ? chatList(state.chatList) : chatList })
+    },
+    [state.chatList]
+  )
+
+  const value = useMemo(
+    () => ({
+      chatList: state.chatList,
+      setChatList,
+      isLoading
+    }),
+    [isLoading, setChatList, state.chatList]
+  )
+
   return (
-    <ChatContext.Provider
-      value={{
-        chatList: state.chatList,
-        setChatList: (chatList) =>
-          dispatch({ type: "SET_CHAT_LIST", payload: typeof chatList === "function" ? chatList(state.chatList) : chatList }),
-        isLoading
-      }}
-    >
+    <ChatContext.Provider value={value}>
       {children}
     </ChatContext.Provider>
   )

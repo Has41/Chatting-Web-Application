@@ -162,7 +162,9 @@ const GroupTest = () => {
             value={conversationId}
             onChange={(e) => setConversationId(e.target.value)}
           />
-          <button onClick={() => setUserId(userId)}>Connect</button>
+          <button type="button" onClick={() => setUserId(userId)}>
+            Connect
+          </button>
         </div>
       ) : (
         <div>
@@ -173,7 +175,9 @@ const GroupTest = () => {
             onChange={(e) => setMessageContent(e.target.value)}
             placeholder="Send messages to group"
           />
-          <button onClick={sendGroupMessage}>Send</button>
+          <button type="button" onClick={sendGroupMessage}>
+            Send
+          </button>
           <div>
             <h2>Messages</h2>
             <ul>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import { CONVERSATION_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 import type { Conversation, User } from "@shared/types"
@@ -20,9 +20,8 @@ interface GroupModalProps {
 }
 
 const GroupModal = ({ onClose }: GroupModalProps) => {
+  const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
-  const [filteredFriends, setFilteredFriends] = useState<User[]>([])
-  const [filteredConversations, setFilteredConversations] = useState<FriendConversation[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const { data, error } = useQuery({
@@ -41,6 +40,9 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
     },
     onSuccess: (data: unknown) => {
       console.log("Group created successfully:", data)
+      queryClient.invalidateQueries({ queryKey: [CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER] })
+      queryClient.invalidateQueries({ queryKey: ["friendConversations"] })
+      queryClient.invalidateQueries({ queryKey: ["userFriendsAndConversations"] })
       onClose()
     },
     onError: (error: unknown) => {
@@ -48,22 +50,19 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
     }
   })
 
-  useEffect(() => {
-    if (!data) return
-
+  const typedData = data as GroupModalData | undefined
+  const { filteredFriends, filteredConversations } = useMemo(() => {
+    if (!typedData) return { filteredFriends: [], filteredConversations: [] }
     const query = searchQuery.toLowerCase()
 
-    const typedData = data as GroupModalData
-
-    setFilteredFriends(typedData.friends.filter((f: User) => f.username.toLowerCase().includes(query)))
-
-    setFilteredConversations(
-      typedData.conversations.filter((c: FriendConversation) => {
+    return {
+      filteredFriends: typedData.friends.filter((friend: User) => friend.username.toLowerCase().includes(query)),
+      filteredConversations: typedData.conversations.filter((c: FriendConversation) => {
         const other = c.participants.find((p): p is User => typeof p !== "string" && p._id !== typedData._id)
         return other?.username?.toLowerCase().includes(query)
       })
-    )
-  }, [searchQuery, data])
+    }
+  }, [searchQuery, typedData])
 
   useEffect(() => {
     if (!error) return
@@ -78,6 +77,8 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
     if (selectedIds.length < 2) return
     createGroup({ participants: selectedIds })
   }
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds])
+  const nonFriendConversations = filteredConversations.filter((conversation) => !conversation.isFriend)
 
   return createPortal(
     <div className="font-poppins fixed inset-0 z-50 flex items-center justify-center shadow-lg backdrop-blur-sm">
@@ -125,7 +126,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
                   <input
                     type="checkbox"
                     aria-label={`Add ${friend.username} to group`}
-                    checked={selectedIds.includes(friend._id)}
+                    checked={selectedIdSet.has(friend._id)}
                     onChange={() => handleToggle(friend._id)}
                     className="form-checkbox accent-custom-text h-4 w-4 cursor-pointer"
                   />
@@ -137,10 +138,8 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
           {filteredConversations.length > 0 && (
             <>
               <h4 className="mt-4 px-1 text-xs font-bold text-gray-500">From Conversations</h4>
-              {filteredConversations
-                .filter((con) => con.isFriend === false)
-                .map((conv) => {
-                  const other = conv.participants.find((p): p is User => typeof p !== "string" && p._id !== data._id)
+              {nonFriendConversations.map((conv) => {
+                  const other = conv.participants.find((p): p is User => typeof p !== "string" && p._id !== typedData?._id)
                   if (!other) return null
                   return (
                     <div key={other._id} className="flex items-center justify-between rounded px-3 py-2 hover:bg-gray-50">
@@ -155,7 +154,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
                       <input
                         type="checkbox"
                         aria-label={`Add ${other.username} to group`}
-                        checked={selectedIds.includes(other._id)}
+                        checked={selectedIdSet.has(other._id)}
                         onChange={() => handleToggle(other._id)}
                         className="text-custom-text h-4 w-4 accent-green-500 focus:ring-green-500"
                       />

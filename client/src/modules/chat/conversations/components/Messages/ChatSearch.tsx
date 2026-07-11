@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import SearchDropdown from "@chat/navigation/components/SearchDropdown"
 import axiosInstance from "@shared/api/api-client"
 import { USER_PATHS } from "@shared/constants/apiPaths"
@@ -9,6 +9,7 @@ import type { SearchConversation, SearchFriend } from "@chat/navigation/types/se
 
 const ChatSearch = () => {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState("")
   const [conversationResults, setConversationResults] = useState<SearchConversation[]>([])
   const [friendResults, setfriendResults] = useState<SearchFriend[]>([])
@@ -21,6 +22,7 @@ const ChatSearch = () => {
     },
     onSuccess: ({ data }: { data: { conversation?: SearchConversation[]; friendsData?: SearchFriend[] } }) => {
       console.log("Search results:", data)
+      queryClient.setQueryData(["chatSearch", searchQuery], data)
       setConversationResults(data.conversation || [])
       setfriendResults(data.friendsData || [])
     },

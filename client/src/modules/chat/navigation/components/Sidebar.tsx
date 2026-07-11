@@ -17,19 +17,26 @@ const Sidebar = ({ setSelectedMenu }: SidebarProps) => {
       </div>
 
       <ul className="flex flex-col justify-start gap-y-10">
-        {navOptions.map((option, index) => (
-          <li className="cursor-pointer" onClick={() => setSelectedMenu(option.menu)} key={index}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-6 w-6 text-gray-700"
+        {navOptions.map((option) => (
+          <li key={option.menu}>
+            <button
+              type="button"
+              onClick={() => setSelectedMenu(option.menu)}
+              className="inline-flex size-10 items-center justify-center rounded-full transition hover:bg-slate-100 focus:ring-2 focus:ring-custom-green focus:outline-none"
               aria-label={option.name}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d={option.path} />
-            </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="h-6 w-6 text-gray-700"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d={option.path} />
+              </svg>
+            </button>
           </li>
         ))}
       </ul>

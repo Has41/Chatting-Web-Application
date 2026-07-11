@@ -6,18 +6,14 @@ import sectionImage from "@/assets/whiteBG.jpeg"
 import { IntroCard } from "@shared/components/Cards"
 
 const IntroSection = () => {
-  const imgRefs = {
-    introRef: useRef(null),
-    textRef: useRef(null),
-    titleRef: useRef(null),
-    mainImageRef: useRef(null),
-    card1Ref: useRef(null),
-    card2Ref: useRef(null),
-    card3Ref: useRef(null),
-    card4Ref: useRef(null)
-  }
-
-  const { introRef, textRef, titleRef, mainImageRef, card1Ref, card2Ref, card3Ref, card4Ref } = imgRefs
+  const introRef = useRef(null)
+  const textRef = useRef(null)
+  const titleRef = useRef(null)
+  const mainImageRef = useRef(null)
+  const card1Ref = useRef(null)
+  const card2Ref = useRef(null)
+  const card3Ref = useRef(null)
+  const card4Ref = useRef(null)
 
   gsap.registerPlugin(ScrollTrigger)
 

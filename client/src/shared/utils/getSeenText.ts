@@ -1,7 +1,12 @@
-import moment from "moment"
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
+import updateLocale from "dayjs/plugin/updateLocale"
 
-// Shorten "minutes" to "min" and remove "ago"
-moment.updateLocale("en", {
+dayjs.extend(relativeTime)
+dayjs.extend(updateLocale)
+
+// Shorten "minutes" to "min" and remove "ago"; the caller adds "ago".
+dayjs.updateLocale("en", {
   relativeTime: {
     future: "in %s",
     past: "%s",
@@ -20,12 +25,12 @@ moment.updateLocale("en", {
 })
 
 const getSeenText = (seenAt: string | Date): string => {
-  const diffSeconds = moment().diff(moment(seenAt), "seconds")
+  const diffSeconds = dayjs().diff(dayjs(seenAt), "seconds")
 
   if (diffSeconds < 5) {
     return "Seen just now"
   } else {
-    return `Seen ${moment(seenAt).fromNow()} ago`
+    return `Seen ${dayjs(seenAt).fromNow()} ago`
   }
 }
 

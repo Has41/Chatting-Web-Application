@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type SetStateAction } from "react"
 import { chatOptions } from "@shared/utils/dynamicData"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
@@ -16,9 +16,8 @@ const GroupChatbox = () => {
   const { conversationId } = useParams()
 
   const [messages, setMessages] = useState<any[]>([])
-  const [lastMessage, setLastMessage] = useState("")
   const [messageContent, setMessageContent] = useState("")
-  const [groupData, setGroupData] = useState<Conversation | null>(null)
+  const [groupOverride, setGroupOverride] = useState<Conversation | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const { socketRef, sendMessage, typingUsers, emitTypingStart, emitTypingStop } = useChatSocket({
@@ -38,17 +37,22 @@ const GroupChatbox = () => {
   })
 
   useEffect(() => {
-    if (!groupResponse) return
-    setGroupData(groupResponse.conversation)
-    setLastMessage(groupResponse.conversation.lastMessage)
-  }, [groupResponse])
-
-  useEffect(() => {
     if (!groupError) return
     console.error("Failed to load group:", groupError)
   }, [groupError])
 
   if (!user) return null
+
+  const serverGroupData = groupResponse?.conversation ?? null
+  const groupData =
+    groupOverride && serverGroupData && groupOverride._id === serverGroupData._id
+      ? { ...serverGroupData, ...groupOverride }
+      : serverGroupData
+  const lastMessage = groupData?.lastMessage ?? ""
+
+  const setGroupData = (value: SetStateAction<Conversation | null>) => {
+    setGroupOverride((previous) => (typeof value === "function" ? value(previous ?? serverGroupData) : value))
+  }
 
   // const handleSendMessage = () => {
   //   if (!messageContent.trim()) return

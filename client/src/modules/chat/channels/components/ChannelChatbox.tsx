@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react"
 import { AlertCircle, Hash, Loader2, Lock, MoreVertical, Paperclip, Pencil, Send, Trash2, Users } from "lucide-react"
-import moment from "moment"
+import dayjs from "dayjs"
 import { useParams } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
@@ -119,18 +119,22 @@ const ChannelChatbox = () => {
 
   const mediaGallery = useMemo<MediaViewerItem[]>(
     () =>
-      messages
-        .filter(
-          (message) =>
-            message.messageType === "file" &&
-            message.media?.mediaUrl &&
-            ["image", "video"].includes(message.media.mediaType || "")
-        )
-        .map((message) => ({
-          mediaUrl: message.media?.mediaUrl ?? "",
-          mediaType: message.media?.mediaType ?? "",
-          title: message.media?.caption || message.media?.fileName || channelQuery.data?.name
-        })),
+      messages.reduce<MediaViewerItem[]>((items, message) => {
+        if (
+          message.messageType !== "file" ||
+          !message.media?.mediaUrl ||
+          !["image", "video"].includes(message.media.mediaType || "")
+        ) {
+          return items
+        }
+
+        items.push({
+          mediaUrl: message.media.mediaUrl,
+          mediaType: message.media.mediaType ?? "",
+          title: message.media.caption || message.media.fileName || channelQuery.data?.name
+        })
+        return items
+      }, []),
     [channelQuery.data?.name, messages]
   )
   const typingMember = useMemo(() => {
@@ -684,19 +688,19 @@ const ChannelMessageBubble = ({
         const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
         return reactionUserId === currentUserId || reaction.users?.includes(currentUserId)
       })
-      const reactionsWithoutMine = reactions
-        .map((reaction) => {
-          if (reaction.users?.includes(currentUserId)) {
-            return { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
-          }
-
-          return reaction
-        })
-        .filter((reaction) => {
+      const reactionsWithoutMine = reactions.reduce<typeof reactions>((nextReactions, reaction) => {
+        const nextReaction = reaction.users?.includes(currentUserId)
+          ? { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
+          : reaction
           const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
-          const hasGroupedUsers = !reaction.users || reaction.users.length > 0
-          return reactionUserId !== currentUserId && hasGroupedUsers
-        })
+        const hasGroupedUsers = !nextReaction.users || nextReaction.users.length > 0
+
+        if (reactionUserId !== currentUserId && hasGroupedUsers) {
+          nextReactions.push(nextReaction)
+        }
+
+        return nextReactions
+      }, [])
 
       const nextReactions =
         existingReaction?.emoji === emoji ? reactionsWithoutMine : [...reactionsWithoutMine, { user: currentUserId, emoji }]
@@ -744,7 +748,7 @@ const ChannelMessageBubble = ({
               }`}
             >
               {message.editedAt && <span className="font-medium">Edited</span>}
-              <span>{moment(message.createdAt).format("h:mm A")}</span>
+              <span>{dayjs(message.createdAt).format("h:mm A")}</span>
               {message.localStatus === "sending" && (
                 <span className="inline-flex items-center gap-1">
                   <Send size={11} />

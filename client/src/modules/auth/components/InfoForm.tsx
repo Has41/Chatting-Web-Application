@@ -5,20 +5,45 @@ import { otherDetailSchema } from "@shared/utils/zodSchema"
 import InputField from "@shared/components/InputField"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
-import { AUTH_PATHS } from "@shared/constants/apiPaths"
+import { AUTH_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import type { AuthSwitchProps, InfoFormData } from "@auth/types/forms"
 
+const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, "0"))
+
+const DISPLAY_NAME_FIELD = {
+  id: "displayName",
+  label: "Display Name",
+  type: "text",
+  iconPath:
+    "M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+}
+
+const DATE_OF_BIRTH_FIELD = {
+  id: "dateOfBirth",
+  label: "Date Of Birth",
+  type: "date",
+  iconPath:
+    "M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
+}
+
+const BIO_FIELD = {
+  id: "bio",
+  label: "Bio",
+  type: "text",
+  iconPath:
+    "M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z"
+}
+
 const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
+  const queryClient = useQueryClient()
   const [selectedDay, setSelectedDay] = useState("")
   const [selectedMonth, setSelectedMonth] = useState("")
   const [selectedYear, setSelectedYear] = useState("")
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [dayOptions, setDayOptions] = useState(() =>
-    Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, "0"))
-  )
+  const [dayOptions, setDayOptions] = useState(() => DAY_OPTIONS)
   const [step, setStep] = useState(0)
   const [_, setDirection] = useState("next")
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -35,32 +60,11 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
   const { mutate, isLoading } = useMutation({
     mutationFn: async (formData: InfoFormData & { dateOfBirth: Date; userId: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.OTHER_DETAIL, formData)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [USER_PATHS.GET_INFO] })
     }
   })
-
-  const displayNameField = {
-    id: "displayName",
-    label: "Display Name",
-    type: "text",
-    iconPath:
-      "M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-  }
-
-  const dateOfBirthField = {
-    id: "dateOfBirth",
-    label: "Date Of Birth",
-    type: "date",
-    iconPath:
-      "M6.75 2.994v2.25m10.5-2.25v2.25m-14.252 13.5V7.491a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v11.251m-18 0a2.25 2.25 0 0 0 2.25 2.25h13.5a2.25 2.25 0 0 0 2.25-2.25m-18 0v-7.5a2.25 2.25 0 0 1 2.25-2.25h13.5a2.25 2.25 0 0 1 2.25 2.25v7.5m-6.75-6h2.25m-9 2.25h4.5m.002-2.25h.005v.006H12v-.006Zm-.001 4.5h.006v.006h-.006v-.005Zm-2.25.001h.005v.006H9.75v-.006Zm-2.25 0h.005v.005h-.006v-.005Zm6.75-2.247h.005v.005h-.005v-.005Zm0 2.247h.006v.006h-.006v-.006Zm2.25-2.248h.006V15H16.5v-.005Z"
-  }
-
-  const bioField = {
-    id: "bio",
-    label: "Bio",
-    type: "text",
-    iconPath:
-      "M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z"
-  }
 
   const handleNext = async () => {
     if (isTransitioning) return
@@ -99,7 +103,7 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
           <InputField
             register={register}
             error={errors}
-            field={displayNameField}
+            field={DISPLAY_NAME_FIELD}
             trigger={trigger}
             clearErrors={clearErrors}
           />
@@ -117,13 +121,13 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
             selectedYear={selectedYear}
             setSelectedYear={setSelectedYear}
             error={errors}
-            field={dateOfBirthField}
+            field={DATE_OF_BIRTH_FIELD}
             trigger={trigger}
             clearErrors={clearErrors}
           />
         )
       case 2:
-        return <InputField register={register} error={errors} field={bioField} trigger={trigger} clearErrors={clearErrors} />
+        return <InputField register={register} error={errors} field={BIO_FIELD} trigger={trigger} clearErrors={clearErrors} />
       default:
         return null
     }

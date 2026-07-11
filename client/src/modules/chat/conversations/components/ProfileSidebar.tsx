@@ -67,6 +67,8 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
     onSuccess: () => {
       setIsEditingInfo(false)
       setIsEditing(false)
+      queryClient.invalidateQueries({ queryKey: [CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER] })
+      queryClient.invalidateQueries({ queryKey: ["groupConversation", conversationId] })
       console.log("Edited successfully!")
     },
     onError: (error: unknown) => {
@@ -78,7 +80,10 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
 
   const ownerId = getUserId(data?.groupOwner)
   const currentUserId = user?._id
-  const adminIds = useMemo(() => new Set((data?.admins || []).map(getUserId).filter(Boolean)), [data?.admins])
+  const adminIds = useMemo(
+    () => new Set((data?.admins || []).flatMap((admin) => (getUserId(admin) ? [getUserId(admin) as string] : []))),
+    [data?.admins]
+  )
   const currentUserIsOwner = Boolean(currentUserId && ownerId === currentUserId)
   const currentUserIsAdmin = Boolean(currentUserId && (currentUserIsOwner || adminIds.has(currentUserId)))
 
@@ -154,14 +159,19 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
   }
 
   const ownerUser = data?.groupOwner && typeof data.groupOwner !== "string" ? data.groupOwner : null
-  const memberRows = useMemo(
-    () =>
-      [
-        ...(ownerUser ? [ownerUser] : []),
-        ...(data?.participants || []).filter((member): member is User => typeof member !== "string")
-      ].filter((member, index, rows) => rows.findIndex((row) => row._id === member._id) === index),
-    [data?.participants, ownerUser]
-  )
+  const memberRows = useMemo(() => {
+    const seenIds = new Set<string>()
+    const rows: User[] = []
+    const addMember = (member?: User | string | null) => {
+      if (!member || typeof member === "string" || seenIds.has(member._id)) return
+      seenIds.add(member._id)
+      rows.push(member)
+    }
+
+    addMember(ownerUser)
+    data?.participants?.forEach(addMember)
+    return rows
+  }, [data?.participants, ownerUser])
   const filteredMembers = useMemo(() => {
     if (!searchQuery.trim()) return memberRows
     const normalizedQuery = searchQuery.trim().toLowerCase()

@@ -11,6 +11,8 @@ import TypingIndicator from "./TypingIndicator"
 import type { TypingUser } from "@chat/socket/useChatSocket"
 import type { User } from "@shared/types"
 
+const EMPTY_TYPING_USERS: TypingUser[] = []
+
 interface ChatMessagesProps {
   conversationId?: string
   userData?: any
@@ -31,7 +33,7 @@ const ChatMessages = ({
   lastMessage,
   socket,
   conversationType,
-  typingUsers = []
+  typingUsers = EMPTY_TYPING_USERS
 }: ChatMessagesProps) => {
   const { user } = useAuth()
   const scrollRef = useRef<HTMLDivElement | null>(null)

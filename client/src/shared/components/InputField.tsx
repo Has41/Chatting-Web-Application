@@ -1,4 +1,44 @@
-import { useEffect } from "react"
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+]
+
+const MONTH_DAYS: Record<string, number> = {
+  January: 31,
+  February: 28,
+  March: 31,
+  April: 30,
+  May: 31,
+  June: 30,
+  July: 31,
+  August: 31,
+  September: 30,
+  October: 31,
+  November: 30,
+  December: 31
+}
+
+const getDayOptionsForMonth = (month?: string, year?: string) => {
+  if (!month) return []
+  let daysInMonth = MONTH_DAYS[month]
+
+  if (month === "February" && year) {
+    const parsedYear = parseInt(year, 10)
+    daysInMonth = (parsedYear % 4 === 0 && parsedYear % 100 !== 0) || parsedYear % 400 === 0 ? 29 : 28
+  }
+
+  return Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString().padStart(2, "0"))
+}
 
 interface InputFieldProps {
   register: any
@@ -31,53 +71,8 @@ const InputField = ({
   selectedYear,
   setSelectedYear = (_value: string) => {}
 }: InputFieldProps) => {
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
-  ]
-
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 100 }, (_, i) => (currentYear - i).toString())
-
-  const monthDays: Record<string, number> = {
-    January: 31,
-    February: 28,
-    March: 31,
-    April: 30,
-    May: 31,
-    June: 30,
-    July: 31,
-    August: 31,
-    September: 30,
-    October: 31,
-    November: 30,
-    December: 31
-  }
-
-  useEffect(() => {
-    if (selectedMonth) {
-      let daysInMonth = monthDays[selectedMonth]
-      if (selectedMonth === "February" && selectedYear) {
-        const yr = parseInt(selectedYear, 10)
-        if ((yr % 4 === 0 && yr % 100 !== 0) || yr % 400 === 0) {
-          daysInMonth = 29
-        } else {
-          daysInMonth = 28
-        }
-      }
-      setDayOptions(Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString().padStart(2, "0")))
-    }
-  }, [selectedMonth, selectedYear])
 
   if (field.type === "date") {
     const dateError = error.dateOfBirth?.day || error.dateOfBirth?.month || error.dateOfBirth?.year
@@ -127,13 +122,17 @@ const InputField = ({
                   value={selectedMonth}
                   onBlur={() => trigger("dateOfBirth.month")}
                   onFocus={() => clearErrors("dateOfBirth.month")}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  onChange={(e) => {
+                    const month = e.target.value
+                    setSelectedMonth(month)
+                    setDayOptions(getDayOptionsForMonth(month, selectedYear))
+                  }}
                   defaultValue=""
                 >
                   <option value="" disabled>
                     Month
                   </option>
-                  {months.map((month) => (
+                  {MONTHS.map((month) => (
                     <option key={month} value={month}>
                       {month}
                     </option>
@@ -149,7 +148,11 @@ const InputField = ({
                   value={selectedYear}
                   onBlur={() => trigger("dateOfBirth.year")}
                   onFocus={() => clearErrors("dateOfBirth.year")}
-                  onChange={(e) => setSelectedYear(e.target.value)}
+                  onChange={(e) => {
+                    const year = e.target.value
+                    setSelectedYear(year)
+                    setDayOptions(getDayOptionsForMonth(selectedMonth, year))
+                  }}
                   defaultValue=""
                 >
                   <option value="" disabled>

@@ -5,37 +5,19 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { SlidingCard } from "@shared/components/Cards"
 
 const AppBenefits = () => {
-  const tileRefs = {
-    containerRef: useRef<HTMLDivElement | null>(null),
-    tile1Ref: useRef<HTMLDivElement | null>(null),
-    subTileLogo1Ref: useRef<HTMLDivElement | null>(null),
-    subTileSection1Ref: useRef<HTMLDivElement | null>(null),
-    tile2Ref: useRef<HTMLDivElement | null>(null),
-    subTileLogo2Ref: useRef<HTMLDivElement | null>(null),
-    subTileSection2Ref: useRef<HTMLDivElement | null>(null),
-    tile3Ref: useRef<HTMLDivElement | null>(null),
-    subTileLogo3Ref: useRef<HTMLDivElement | null>(null),
-    subTileSection3Ref: useRef<HTMLDivElement | null>(null),
-    tile4Ref: useRef<HTMLDivElement | null>(null),
-    subTileLogo4Ref: useRef<HTMLDivElement | null>(null),
-    subTileSection4Ref: useRef<HTMLDivElement | null>(null)
-  }
-
-  const {
-    containerRef,
-    tile1Ref,
-    subTileLogo1Ref,
-    subTileSection1Ref,
-    tile2Ref,
-    subTileLogo2Ref,
-    subTileSection2Ref,
-    tile3Ref,
-    subTileLogo3Ref,
-    subTileSection3Ref,
-    tile4Ref,
-    subTileLogo4Ref,
-    subTileSection4Ref
-  } = tileRefs
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const tile1Ref = useRef<HTMLDivElement | null>(null)
+  const subTileLogo1Ref = useRef<HTMLDivElement | null>(null)
+  const subTileSection1Ref = useRef<HTMLDivElement | null>(null)
+  const tile2Ref = useRef<HTMLDivElement | null>(null)
+  const subTileLogo2Ref = useRef<HTMLDivElement | null>(null)
+  const subTileSection2Ref = useRef<HTMLDivElement | null>(null)
+  const tile3Ref = useRef<HTMLDivElement | null>(null)
+  const subTileLogo3Ref = useRef<HTMLDivElement | null>(null)
+  const subTileSection3Ref = useRef<HTMLDivElement | null>(null)
+  const tile4Ref = useRef<HTMLDivElement | null>(null)
+  const subTileLogo4Ref = useRef<HTMLDivElement | null>(null)
+  const subTileSection4Ref = useRef<HTMLDivElement | null>(null)
 
   gsap.registerPlugin(ScrollTrigger)
 

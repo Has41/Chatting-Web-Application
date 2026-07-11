@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { profileInfo } from "@shared/utils/dynamicData"
 import useAuth from "@auth/hooks/useAuth"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import { AUTH_PATHS } from "@shared/constants/apiPaths"
 import { useNavigate } from "react-router-dom"
@@ -10,6 +10,7 @@ const ProfileDropdown = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const { user, setUser, setIsAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const profilePictureUrl = user?.profilePicture?.url
 
   const { mutate } = useMutation({
@@ -18,6 +19,7 @@ const ProfileDropdown = () => {
     },
     onSuccess: () => {
       console.log("Logged out successfully.")
+      queryClient.clear()
       setUser(null)
       setIsAuthenticated(false)
       navigate("/")

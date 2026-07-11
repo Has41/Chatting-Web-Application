@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { io } from "socket.io-client"
 import useFetch from "../hooks/useFetch"
 
@@ -190,7 +190,9 @@ const PrivateTest = () => {
             value={conversationId}
             onChange={(e) => setConversationId(e.target.value)}
           />
-          <button onClick={() => setUserId(userId)}>Connect</button>
+          <button type="button" onClick={() => setUserId(userId)}>
+            Connect
+          </button>
         </div>
       ) : (
         <div>
@@ -201,8 +203,10 @@ const PrivateTest = () => {
             onChange={(e) => setMessageContent(e.target.value)}
             placeholder={`Type message for ${userId === "66c30544b750978ff0c18b60" ? "User B" : "User A"}`}
           />
-          <button onClick={sendMessage}>Send</button>
-          <input type="file" onChange={handleFileUpload} />
+          <button type="button" onClick={sendMessage}>
+            Send
+          </button>
+          <input aria-label="Message attachment" type="file" onChange={handleFileUpload} />
           <div>
             <h2>Messages</h2>
             <ul>

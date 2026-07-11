@@ -1,15 +1,16 @@
 import { useForm } from "react-hook-form"
 import { firstStepRegister } from "@shared/utils/dynamicData"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import InputField from "@shared/components/InputField"
-import { AUTH_PATHS } from "@shared/constants/apiPaths"
+import { AUTH_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerSchema } from "@shared/utils/zodSchema"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import type { AuthSwitchProps, RegisterFormData } from "@auth/types/forms"
 
 const Register = ({ onButtonClick }: AuthSwitchProps) => {
+  const queryClient = useQueryClient()
   const {
     register,
     clearErrors,
@@ -27,6 +28,7 @@ const Register = ({ onButtonClick }: AuthSwitchProps) => {
     },
     onSuccess: ({ data }: { data: { user: { email: string; username: string; id: string } } }) => {
       reset()
+      queryClient.invalidateQueries({ queryKey: [USER_PATHS.GET_INFO] })
       localStorage.setItem("verificationEmail", data?.user.email)
       localStorage.setItem("newUser", data?.user.username)
       localStorage.setItem("userId", data?.user.id)

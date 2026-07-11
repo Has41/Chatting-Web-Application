@@ -8,6 +8,21 @@ import type { ConversationType, FileType, MessageFileMeta } from "@chat/attachme
 
 const createTempMessageId = () => `temp-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`
 
+const getAcceptedTypes = (type: FileType | null) => {
+  switch (type) {
+    case "image":
+      return "image/*"
+    case "video":
+      return "video/*"
+    case "document":
+      return ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+    case "audio":
+      return "audio/*"
+    default:
+      return "*"
+  }
+}
+
 interface SendMessageProps {
   setMessageContent: (value: string) => void
   messageContent: string
@@ -227,21 +242,6 @@ const SendMessage = ({
     typingTimeoutRef.current = setTimeout(() => {
       stopTyping()
     }, 2200)
-  }
-
-  const getAcceptedTypes = (type: FileType | null) => {
-    switch (type) {
-      case "image":
-        return "image/*"
-      case "video":
-        return "video/*"
-      case "document":
-        return ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
-      case "audio":
-        return "audio/*"
-      default:
-        return "*"
-    }
   }
 
   return (

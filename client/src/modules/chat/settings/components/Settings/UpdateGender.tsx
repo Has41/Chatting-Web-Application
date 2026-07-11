@@ -15,6 +15,12 @@ interface GenderFormData {
   gender: "Male" | "Female" | "Prefer not to say"
 }
 
+const GENDERS = [
+  { label: "Male", value: "Male", icon: "M12 6V4m0 0V4m0 2a4 4 0 100 8 4 4 0 100-8zM6 20h12" },
+  { label: "Female", value: "Female", icon: "M12 4a4 4 0 014 4 4 4 0 01-8 0 4 4 0 014-4zm0 6v6m-4 0h8" },
+  { label: "Other", value: "Prefer not to say", icon: "M12 6V4m0 0V4m0 2a4 4 0 100 8 4 4 0 100-8zM6 20h12" }
+] as const
+
 const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
   const { refetch } = useAuth()
   const normalizedGender = ["Male", "Female", "Prefer not to say"].includes(currentGender)
@@ -55,17 +61,11 @@ const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
     mutate(data)
   }
 
-  const genders = [
-    { label: "Male", value: "Male", icon: "M12 6V4m0 0V4m0 2a4 4 0 100 8 4 4 0 100-8zM6 20h12" },
-    { label: "Female", value: "Female", icon: "M12 4a4 4 0 014 4 4 4 0 01-8 0 4 4 0 014-4zm0 6v6m-4 0h8" },
-    { label: "Other", value: "Prefer not to say", icon: "M12 6V4m0 0V4m0 2a4 4 0 100 8 4 4 0 100-8zM6 20h12" }
-  ] as const
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
       <p className="block text-sm font-medium text-gray-700">Gender</p>
       <div className="mt-2 flex gap-4">
-        {genders.map((gender) => (
+        {GENDERS.map((gender) => (
           <button
             key={gender.value}
             type="button"

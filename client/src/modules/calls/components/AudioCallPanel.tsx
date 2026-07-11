@@ -36,7 +36,7 @@ const AudioCallPanel = ({
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null)
   const localVideoRef = useRef<HTMLVideoElement | null>(null)
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const [timerState, setTimerState] = useState({ status, elapsedSeconds: 0 })
   const isVisible = status !== "idle" || !!error
   const peerName = peer?.displayName || peer?.username || "User"
   const isCallLive = status === "active"
@@ -61,21 +61,24 @@ const AudioCallPanel = ({
     }
   }, [localStream])
 
-  useEffect(() => {
-    if (status !== "active") {
-      setElapsedSeconds(0)
-      return
-    }
+  if (timerState.status !== status) {
+    setTimerState({ status, elapsedSeconds: 0 })
+  }
 
-    const intervalId = window.setInterval(() => setElapsedSeconds((seconds) => seconds + 1), 1000)
+  useEffect(() => {
+    if (status !== "active") return
+    const intervalId = window.setInterval(
+      () => setTimerState((current) => ({ ...current, elapsedSeconds: current.elapsedSeconds + 1 })),
+      1000
+    )
     return () => window.clearInterval(intervalId)
   }, [status])
 
   const callDuration = useMemo(() => {
-    const minutes = Math.floor(elapsedSeconds / 60)
-    const seconds = elapsedSeconds % 60
+    const minutes = Math.floor(timerState.elapsedSeconds / 60)
+    const seconds = timerState.elapsedSeconds % 60
     return `${minutes}:${seconds.toString().padStart(2, "0")}`
-  }, [elapsedSeconds])
+  }, [timerState.elapsedSeconds])
 
   if (!isVisible) return null
 
@@ -101,7 +104,9 @@ const AudioCallPanel = ({
       <div className="absolute inset-x-4 top-20 z-40 overflow-hidden rounded-xl bg-zinc-950 text-white shadow-2xl">
         <div className="relative h-[min(65vh,34rem)] min-h-80 bg-black">
           {remoteStream ? (
-            <video ref={remoteVideoRef} autoPlay playsInline className="h-full w-full object-cover" />
+            <video ref={remoteVideoRef} autoPlay playsInline className="h-full w-full object-cover">
+              <track kind="captions" label="Live captions unavailable" />
+            </video>
           ) : (
             <div className="flex h-full flex-col items-center justify-center bg-[linear-gradient(145deg,_#0f172a,_#020617)] px-6 text-center">
               <AvatarPulse peer={peer} peerName={peerName} isCallLive={isCallLive} size="large" />
@@ -116,7 +121,9 @@ const AudioCallPanel = ({
 
           <div className="absolute right-4 bottom-4 h-32 w-24 overflow-hidden rounded-lg border border-white/15 bg-slate-900 shadow-xl sm:h-40 sm:w-30">
             {localStream && !isCameraOff ? (
-              <video ref={localVideoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+              <video ref={localVideoRef} autoPlay playsInline muted className="h-full w-full object-cover">
+                <track kind="captions" label="Local live captions unavailable" />
+              </video>
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-slate-800 text-white/70">
                 <CameraOff className="size-6" />
@@ -161,7 +168,9 @@ const AudioCallPanel = ({
 
   return (
     <div className="absolute top-20 left-1/2 z-40 w-[21rem] max-w-[calc(100%-2rem)] -translate-x-1/2 overflow-hidden rounded-xl bg-slate-950 text-white shadow-xl">
-      <audio ref={audioRef} autoPlay />
+      <audio ref={audioRef} autoPlay>
+        <track kind="captions" label="Live captions unavailable" />
+      </audio>
 
       <div className="relative px-5 pt-6 pb-4">
         <div className="absolute inset-0 bg-[linear-gradient(145deg,_rgba(15,23,42,0.98),_rgba(2,6,23,1))]" />

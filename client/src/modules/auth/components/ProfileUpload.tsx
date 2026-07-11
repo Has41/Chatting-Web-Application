@@ -3,15 +3,14 @@ import ReactCrop, { centerCrop, convertToPixelCrop, makeAspectCrop, type Crop, t
 import "react-image-crop/dist/ReactCrop.css"
 import setCanvasPreview from "@shared/utils/setCanvasPreview"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
-import { AUTH_PATHS } from "@shared/constants/apiPaths"
+import { AUTH_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 import { useNavigate } from "react-router-dom"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import { ROOT_FOLDER } from "@shared/constants/constantValues"
 
 const ProfileUpload = () => {
-  const [profilePhoto, setProfilePhoto] = useState<File | null>(null)
   const [profilePreview, setProfilePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [upImg, setUpImg] = useState<string | null>(null)
@@ -19,9 +18,11 @@ const ProfileUpload = () => {
   const [crop, setCrop] = useState<Crop | undefined>(undefined)
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null)
   const imageRef = useRef<HTMLImageElement | null>(null)
+  const profilePhotoRef = useRef<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const { uploadFile } = useCloudinaryUpload()
 
@@ -32,6 +33,7 @@ const ProfileUpload = () => {
     onSuccess: (res: unknown) => {
       setIsLoading(false)
       console.log("Profile pic saved successfully!", res)
+      queryClient.invalidateQueries({ queryKey: [USER_PATHS.GET_INFO] })
       localStorage.removeItem("currentForm")
       localStorage.removeItem("newUser")
       localStorage.removeItem("verificationEmail")
@@ -103,13 +105,13 @@ const ProfileUpload = () => {
       ? await new Promise<Blob | null>((resolve) => previewCanvasRef.current?.toBlob(resolve, "image/png"))
       : null
     if (blob) {
-      setProfilePhoto(new File([blob], "profile.png", { type: "image/png" }))
+      profilePhotoRef.current = new File([blob], "profile.png", { type: "image/png" })
     }
     setModalOpen(false)
   }
 
   const clearImage = () => {
-    setProfilePhoto(null)
+    profilePhotoRef.current = null
     setProfilePreview(null)
     setUpImg(null)
     setCrop(undefined)
@@ -124,13 +126,14 @@ const ProfileUpload = () => {
 
   const confirmUpload = async () => {
     setIsLoading(true)
-    if (!profilePhoto) {
+    if (!profilePhotoRef.current) {
       setIsLoading(false)
       return
     }
     const username = localStorage.getItem("newUser")
     const userId = localStorage.getItem("userId")
 
+    const profilePhoto = profilePhotoRef.current
     const res = await uploadFile(profilePhoto, `${ROOT_FOLDER}/${userId}/profile-upload`, profilePhoto.type, "image")
 
     if (res?.secure_url && res?.public_id) {
@@ -173,17 +176,24 @@ const ProfileUpload = () => {
                 )}
               </div>
               {profilePreview && (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
+                <button
+                  type="button"
                   onClick={clearImage}
-                  className="absolute top-2 right-10 z-50 mt-2 size-6 rounded-full bg-red-500 p-1 text-xs text-white hover:bg-red-600"
+                  className="absolute top-2 right-10 z-50 mt-2 inline-flex size-6 items-center justify-center rounded-full bg-red-500 p-1 text-xs text-white hover:bg-red-600"
+                  aria-label="Remove selected profile photo"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-full"
+                    aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
               )}
             </div>
           </label>
@@ -208,17 +218,24 @@ const ProfileUpload = () => {
           <div className="w-full max-w-[30%] space-y-4 rounded-lg bg-white p-4">
             <div className="flex items-center justify-between py-2">
               <h3 className="font-mont text-center text-xl font-semibold">Crop your photo</h3>
-              <svg
+              <button
+                type="button"
                 onClick={closeModal}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6 cursor-pointer"
+                className="inline-flex size-6 items-center justify-center"
+                aria-label="Close crop dialog"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-6"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
             {upImg && (
               <ReactCrop

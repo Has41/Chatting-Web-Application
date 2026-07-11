@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react"
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react"
 import {
   Check,
   Crown,
@@ -41,6 +41,14 @@ const getUserId = (value?: User | string | null) => (typeof value === "string" ?
 
 const getUserLabel = (user: User) => user.displayName || user.username || "Member"
 
+const getChannelDraft = (channel: Channel) => ({
+  channelId: channel._id,
+  name: channel.name,
+  description: channel.description || "",
+  visibility: channel.visibility,
+  sendPermissions: channel.sendPermissions || "admins"
+})
+
 interface ChannelInfoSidebarProps {
   isOpen: boolean
   onClose: () => void
@@ -50,10 +58,7 @@ interface ChannelInfoSidebarProps {
 const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProps) => {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [name, setName] = useState(channel.name)
-  const [description, setDescription] = useState(channel.description || "")
-  const [visibility, setVisibility] = useState<"public" | "private">(channel.visibility)
-  const [sendPermissions, setSendPermissions] = useState<"admins" | "members">(channel.sendPermissions || "admins")
+  const [draft, setDraft] = useState(() => getChannelDraft(channel))
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [showAddMembers, setShowAddMembers] = useState(false)
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null)
@@ -69,7 +74,10 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
 
   const ownerId = getUserId(channel.owner)
   const currentUserId = user?._id
-  const adminIds = useMemo(() => new Set(channel.admins.map(getUserId).filter(Boolean)), [channel.admins])
+  const adminIds = useMemo(
+    () => new Set(channel.admins.flatMap((admin) => (getUserId(admin) ? [getUserId(admin) as string] : []))),
+    [channel.admins]
+  )
   const currentUserIsOwner = Boolean(currentUserId && currentUserId === ownerId)
   const currentUserIsAdmin = Boolean(currentUserId && (currentUserIsOwner || adminIds.has(currentUserId)))
   const currentUserIsMember = Boolean(
@@ -86,24 +94,21 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
   const VisibilityIcon = channel.visibility === "private" ? Lock : Hash
   const isSaving = updateChannel.isPending
 
-  useEffect(() => {
-    setName(channel.name)
-    setDescription(channel.description || "")
-    setVisibility(channel.visibility)
-    setSendPermissions(channel.sendPermissions || "admins")
-  }, [channel.description, channel.name, channel.sendPermissions, channel.visibility])
+  if (draft.channelId !== channel._id) {
+    setDraft(getChannelDraft(channel))
+  }
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!currentUserIsAdmin || !name.trim()) return
+    if (!currentUserIsAdmin || !draft.name.trim()) return
 
     updateChannel.mutate({
       channelId: channel._id,
       payload: {
-        name: name.trim(),
-        description: description.trim(),
-        visibility,
-        sendPermissions
+        name: draft.name.trim(),
+        description: draft.description.trim(),
+        visibility: draft.visibility,
+        sendPermissions: draft.sendPermissions
       }
     })
   }
@@ -230,8 +235,8 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
               <label className="block">
                 <span className="text-xs font-semibold text-slate-500">Name</span>
                 <input
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
+                  value={draft.name}
+                  onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
                   disabled={!currentUserIsAdmin}
                   className="mt-1 h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
                 />
@@ -240,8 +245,8 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
               <label className="block">
                 <span className="text-xs font-semibold text-slate-500">Description</span>
                 <textarea
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
+                  value={draft.description}
+                  onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
                   disabled={!currentUserIsAdmin}
                   rows={3}
                   className="mt-1 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
@@ -253,9 +258,9 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
                 <button
                   type="button"
                   disabled={!currentUserIsAdmin}
-                  onClick={() => setVisibility("public")}
+                  onClick={() => setDraft((current) => ({ ...current, visibility: "public" }))}
                   className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                    visibility === "public" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                    draft.visibility === "public" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
                   }`}
                 >
                   Public
@@ -263,9 +268,9 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
                 <button
                   type="button"
                   disabled={!currentUserIsAdmin}
-                  onClick={() => setVisibility("private")}
+                  onClick={() => setDraft((current) => ({ ...current, visibility: "private" }))}
                   className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                    visibility === "private" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                    draft.visibility === "private" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
                   }`}
                 >
                   Private
@@ -284,9 +289,9 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
                   <button
                     type="button"
                     disabled={!currentUserIsAdmin}
-                    onClick={() => setSendPermissions("admins")}
+                    onClick={() => setDraft((current) => ({ ...current, sendPermissions: "admins" }))}
                     className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                      sendPermissions === "admins" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                      draft.sendPermissions === "admins" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
                     }`}
                   >
                     <Shield size={15} />
@@ -295,9 +300,9 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
                   <button
                     type="button"
                     disabled={!currentUserIsAdmin}
-                    onClick={() => setSendPermissions("members")}
+                    onClick={() => setDraft((current) => ({ ...current, sendPermissions: "members" }))}
                     className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                      sendPermissions === "members" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+                      draft.sendPermissions === "members" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
                     }`}
                   >
                     <Users size={15} />
@@ -309,7 +314,7 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
               {currentUserIsAdmin && (
                 <button
                   type="submit"
-                  disabled={isSaving || !name.trim()}
+                  disabled={isSaving || !draft.name.trim()}
                   className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#96e6a1] text-sm font-semibold text-[#102315] transition hover:bg-[#86dc92] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
@@ -420,7 +425,13 @@ const ConfirmationModal = ({
   confirmation: ConfirmationState
   onClose: () => void
 }) => {
+  const dialogRef = useRef<HTMLDialogElement | null>(null)
   const [isWorking, setIsWorking] = useState(false)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog?.open) dialog?.showModal()
+  }, [])
 
   const handleConfirm = async () => {
     setIsWorking(true)
@@ -435,12 +446,14 @@ const ConfirmationModal = ({
   const danger = confirmation.tone === "danger"
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialogRef}
+      className="m-auto w-full max-w-sm bg-transparent p-4 backdrop:bg-black/45 backdrop:backdrop-blur-sm"
       aria-label={confirmation.title}
-      onClick={onClose}
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
     >
       <div
         className="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl"
@@ -473,7 +486,7 @@ const ConfirmationModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }
 
@@ -583,9 +596,14 @@ interface AddChannelMembersModalProps {
 }
 
 const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChannelMembersModalProps) => {
+  const dialogRef = useRef<HTMLDialogElement | null>(null)
   const [query, setQuery] = useState("")
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const memberIds = useMemo(() => new Set(channel.members.map(getUserId).filter(Boolean)), [channel.members])
+  const memberIds = useMemo(
+    () => new Set(channel.members.flatMap((member) => (getUserId(member) ? [getUserId(member) as string] : []))),
+    [channel.members]
+  )
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds])
 
   const { data = [], isFetching, error } = useQuery({
     queryKey: ["channelMemberSearch", query],
@@ -622,13 +640,20 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
     await onAdd(selectedIds)
   }
 
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog?.open) dialog?.showModal()
+  }, [])
+
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialogRef}
+      className="m-auto w-full max-w-lg bg-transparent p-4 backdrop:bg-black/45 backdrop:backdrop-blur-sm"
       aria-label="Add channel members"
-      onClick={onClose}
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
     >
       <div
         className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl"
@@ -679,7 +704,7 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
             ) : candidates.length > 0 ? (
               <ul className="space-y-1">
                 {candidates.map((candidate) => {
-                  const selected = selectedIds.includes(candidate._id)
+                  const selected = selectedIdSet.has(candidate._id)
                   const avatarUrl = candidate.profilePicture?.url || candidate.avatar || ""
 
                   return (
@@ -742,7 +767,7 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
           </button>
         </footer>
       </div>
-    </div>
+    </dialog>
   )
 }
 

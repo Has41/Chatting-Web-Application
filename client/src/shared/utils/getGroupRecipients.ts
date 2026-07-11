@@ -10,13 +10,16 @@ const getGroupRecipients = (userData: GroupData | null, currentUserId: string): 
 
   const { participants = [], groupOwner } = userData
   const allMembers = [...participants, groupOwner]
+  const seenUserIds = new Set<string>()
 
-  return allMembers
-    .filter((member): member is User => {
-      if (!member) return false
-      if (typeof member === "string") return member !== currentUserId
-      return member._id !== currentUserId
-    })
-    .filter((member, index, self) => index === self.findIndex((m) => m._id === member._id))
+  return allMembers.reduce<User[]>((recipients, member) => {
+    if (!member || typeof member === "string" || member._id === currentUserId || seenUserIds.has(member._id)) {
+      return recipients
+    }
+
+    seenUserIds.add(member._id)
+    recipients.push(member)
+    return recipients
+  }, [])
 }
 export default getGroupRecipients

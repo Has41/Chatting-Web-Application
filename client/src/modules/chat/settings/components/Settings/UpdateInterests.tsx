@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/api/api-client"
@@ -8,14 +8,11 @@ interface UpdateInterestsProps {
   currentInterests?: string[]
 }
 
-const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
-  const { refetch } = useAuth()
-  const [interests, setInterests] = useState<string[]>(currentInterests)
-  const [input, setInput] = useState("")
+const EMPTY_INTERESTS: string[] = []
 
-  useEffect(() => {
-    setInterests(currentInterests)
-  }, [currentInterests])
+const UpdateInterests = ({ currentInterests = EMPTY_INTERESTS }: UpdateInterestsProps) => {
+  const { refetch } = useAuth()
+  const [input, setInput] = useState("")
 
   const { mutate: insertInterest } = useMutation({
     mutationFn: async (data: { newInterest: string }) => {
@@ -43,16 +40,13 @@ const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
 
   const addUserInterest = () => {
     const newInterest = input.trim()
-    if (newInterest && !interests.includes(newInterest)) {
-      setInterests((prev: string[]) => [...prev, newInterest])
+    if (newInterest && !currentInterests.includes(newInterest)) {
       setInput("")
       insertInterest({ newInterest })
     }
   }
 
   const removeUserInterest = (userInterest: string) => {
-    const updatedInterest = interests.filter((interest: string) => interest !== userInterest)
-    setInterests(updatedInterest)
     removeInterest({ interestToRemove: userInterest })
   }
 
@@ -88,7 +82,7 @@ const UpdateInterests = ({ currentInterests = [] }: UpdateInterestsProps) => {
         </button>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {interests.map((interest: string) => (
+        {currentInterests.map((interest: string) => (
           <span key={interest} className="bg-custom-white inline-flex items-center rounded-2xl px-3 py-1 text-sm shadow-md">
             {interest}
             <button type="button" onClick={() => removeUserInterest(interest)} className="ml-2" aria-label="Remove Interest">

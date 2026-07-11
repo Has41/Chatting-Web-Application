@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { ArrowDownLeft, ArrowUpRight, Clock, MessageCircle, Phone, Search, Video, X } from "lucide-react"
-import moment from "moment"
+import dayjs from "dayjs"
+import calendar from "dayjs/plugin/calendar"
 import useAuth from "@auth/hooks/useAuth"
 import useChatList from "@chat/conversations/hooks/useChatList"
 import useCallSocket from "@calls/socket/useCallSocket"
@@ -10,6 +11,8 @@ import { CHAT_PAGE, getChatConversationRoute, getNewChatRoute } from "@shared/co
 import { useCallLogsQuery } from "@calls/queries/callLogQueries"
 import type { CallLogEntry, CallLogStatus } from "@calls/types/callLogs"
 import type { Conversation, User } from "@shared/types"
+
+dayjs.extend(calendar)
 
 const getUserName = (user?: User) => user?.displayName || user?.username || "Member"
 
@@ -129,8 +132,15 @@ const ChatCalls = () => {
                       </div>
 
                       <div className="shrink-0 text-right text-[11px] font-semibold text-[#7a8a7d]">
-                        <p>{moment(log.startedAt).format("h:mm A")}</p>
-                        <p className="mt-1">{moment(log.startedAt).calendar(null, { sameDay: "[Today]", lastDay: "[Yesterday]", lastWeek: "ddd", sameElse: "MMM D" })}</p>
+                        <p>{dayjs(log.startedAt).format("h:mm A")}</p>
+                        <p className="mt-1">
+                          {dayjs(log.startedAt).calendar(null, {
+                            sameDay: "[Today]",
+                            lastDay: "[Yesterday]",
+                            lastWeek: "ddd",
+                            sameElse: "MMM D"
+                          })}
+                        </p>
                       </div>
 
                       <div className="flex shrink-0 items-center gap-1">

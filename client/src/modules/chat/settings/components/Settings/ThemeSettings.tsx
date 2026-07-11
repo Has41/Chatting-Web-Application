@@ -12,20 +12,12 @@ const THEME_COLORS = [
 
 const ThemeSettings = () => {
   const [selectedColor, setSelectedColor] = useState(THEME_COLORS[0])
-  const [darkMode, setDarkMode] = useState(false)
 
   // Handle when a user selects a theme color
   const handleColorChange = (color: string) => {
     setSelectedColor(color)
     // Optionally update a context or global CSS variable here
     // document.documentElement.style.setProperty('--theme-color', color)
-  }
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev)
-    // For example, update the document's class list to apply dark styles globally
-    // document.body.classList.toggle("dark", !darkMode)
   }
 
   return (

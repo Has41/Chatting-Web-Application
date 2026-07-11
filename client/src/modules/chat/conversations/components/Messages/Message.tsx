@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import useIntersectionObserver from "@shared/hooks/useIntersectionObserver"
 import useAuth from "@auth/hooks/useAuth"
 import getSeenText from "@shared/utils/getSeenText"
-import moment from "moment"
+import dayjs from "dayjs"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
@@ -72,7 +72,7 @@ const Message = ({
   const queryClient = useQueryClient()
   const isVisible = useIntersectionObserver(messageRef as RefObject<Element>)
   const currentUserId = user?._id
-  const [messageId, _] = useState(message._id)
+  const messageId = message._id
   const [editContent, setEditContent] = useState<string>(message.content ?? "")
   const [showDropdown, setShowDropdown] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -142,19 +142,19 @@ const Message = ({
       const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
       return reactionUserId === currentUserId || reaction.users?.includes(currentUserId)
     })
-    const reactionsWithoutMine = reactions
-      .map((reaction) => {
-        if (reaction.users?.includes(currentUserId)) {
-          return { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
-        }
+    const reactionsWithoutMine = reactions.reduce<typeof reactions>((nextReactions, reaction) => {
+      const nextReaction = reaction.users?.includes(currentUserId)
+        ? { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
+        : reaction
+      const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
+      const hasGroupedUsers = !nextReaction.users || nextReaction.users.length > 0
 
-        return reaction
-      })
-      .filter((reaction) => {
-        const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
-        const hasGroupedUsers = !reaction.users || reaction.users.length > 0
-        return reactionUserId !== currentUserId && hasGroupedUsers
-      })
+      if (reactionUserId !== currentUserId && hasGroupedUsers) {
+        nextReactions.push(nextReaction)
+      }
+
+      return nextReactions
+    }, [])
 
     const nextReactions =
       existingReaction?.emoji === emoji ? reactionsWithoutMine : [...reactionsWithoutMine, { user, emoji }]
@@ -310,7 +310,7 @@ const Message = ({
                       Failed
                     </span>
                   ) : (
-                    moment(message.createdAt).format("h:mm a")
+                    dayjs(message.createdAt).format("h:mm a")
                   )}
                 </div>
               </div>
@@ -330,7 +330,7 @@ const Message = ({
                       Failed
                     </span>
                   ) : (
-                    moment(message.createdAt).format("h:mm a")
+                    dayjs(message.createdAt).format("h:mm a")
                   )}
                 </div>
               </div>

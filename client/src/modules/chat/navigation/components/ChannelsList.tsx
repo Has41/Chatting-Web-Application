@@ -13,6 +13,8 @@ const isMember = (channel: Channel, userId?: string) => {
   return channel.members.some((member) => getUserId(member) === userId)
 }
 
+const EMPTY_CHANNELS: Channel[] = []
+
 const ChannelsList = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -24,7 +26,10 @@ const ChannelsList = () => {
   const publicChannels = usePublicChannels(query.trim())
   const joinChannel = useJoinChannel()
 
-  const visibleChannels = activeTab === "my" ? myChannels.data ?? [] : publicChannels.data ?? []
+  const visibleChannels = useMemo(
+    () => (activeTab === "my" ? myChannels.data ?? EMPTY_CHANNELS : publicChannels.data ?? EMPTY_CHANNELS),
+    [activeTab, myChannels.data, publicChannels.data]
+  )
   const isLoading = activeTab === "my" ? myChannels.isLoading : publicChannels.isLoading
 
   const filteredMyChannels = useMemo(() => {

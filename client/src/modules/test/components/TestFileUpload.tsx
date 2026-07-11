@@ -26,16 +26,16 @@ const TestFileUpload = () => {
     <div>
       <h1>Test File Upload</h1>
 
-      <select onChange={handleFileTypeChange} value={fileType}>
+      <select aria-label="File type" onChange={handleFileTypeChange} value={fileType}>
         <option value="image">Image</option>
         <option value="video">Video</option>
         <option value="audio">Audio</option>
         <option value="other">Other</option>
       </select>
 
-      <input type="file" onChange={handleFileChange} />
+      <input aria-label="File to upload" type="file" onChange={handleFileChange} />
 
-      <button onClick={handleUpload} disabled={isUploading}>
+      <button type="button" onClick={handleUpload} disabled={isUploading}>
         {isUploading ? "Uploading..." : `Upload ${fileType}`}
       </button>
 

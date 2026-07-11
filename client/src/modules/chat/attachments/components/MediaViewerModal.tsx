@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Download, ExternalLink, X } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 export interface MediaViewerItem {
   mediaUrl: string
@@ -15,12 +15,17 @@ interface MediaViewerModalProps {
 }
 
 const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }: MediaViewerModalProps) => {
+  const dialogRef = useRef<HTMLDialogElement | null>(null)
   const currentItem = items[currentIndex] ?? items[0]
   const hasMultipleItems = items.length > 1
 
   useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog?.open) dialog?.showModal()
+  }, [])
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose()
       if (event.key === "ArrowLeft" && hasMultipleItems) {
         onCurrentIndexChange(currentIndex === 0 ? items.length - 1 : currentIndex - 1)
       }
@@ -29,14 +34,12 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
       }
     }
 
-    document.body.style.overflow = "hidden"
     window.addEventListener("keydown", handleKeyDown)
 
     return () => {
-      document.body.style.overflow = ""
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [currentIndex, hasMultipleItems, items.length, onClose, onCurrentIndexChange])
+  }, [currentIndex, hasMultipleItems, items.length, onCurrentIndexChange])
 
   if (!currentItem) return null
 
@@ -49,12 +52,14 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 text-white backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialogRef}
+      className="m-auto w-full max-w-5xl bg-transparent p-4 text-white backdrop:bg-black/80 backdrop:backdrop-blur-sm"
       aria-label={currentItem.title || "Media viewer"}
-      onClick={onClose}
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
     >
       <div
         className="relative flex h-[86vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-zinc-950 shadow-2xl"
@@ -121,7 +126,9 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
               className="max-h-full max-w-full object-contain"
             />
           ) : (
-            <video key={currentItem.mediaUrl} src={currentItem.mediaUrl} controls autoPlay className="max-h-full max-w-full rounded" />
+            <video key={currentItem.mediaUrl} src={currentItem.mediaUrl} controls autoPlay className="max-h-full max-w-full rounded">
+              <track kind="captions" label="Captions unavailable" />
+            </video>
           )}
 
           {hasMultipleItems && (
@@ -153,7 +160,9 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
                   <img src={item.mediaUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <>
-                    <video src={item.mediaUrl} preload="metadata" muted className="h-full w-full object-cover" />
+                    <video src={item.mediaUrl} preload="metadata" muted className="h-full w-full object-cover">
+                      <track kind="captions" label="Captions unavailable" />
+                    </video>
                     <span className="absolute inset-0 flex items-center justify-center bg-black/25">
                       <PlayIcon />
                     </span>
@@ -164,7 +173,7 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
           </div>
         )}
       </div>
-    </div>
+    </dialog>
   )
 }
 
