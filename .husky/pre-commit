@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 cd client || exit 1
 
 npx lint-staged || exit 1
