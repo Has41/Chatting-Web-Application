@@ -5,7 +5,7 @@ import FriendList from "@chat/conversations/components/FriendList"
 import ChatList from "@chat/conversations/components/ChatList"
 import ChatCalls from "@calls/components/ChatCalls"
 import ChannelsList from "@chat/navigation/components/ChannelsList"
-import Settings from "@chat/settings/components/Settings"
+import Settings from "@profile/components/Settings"
 
 const ChatLayout = () => {
   const [selectedMenu, setSelectedMenu] = useState("chatList")
