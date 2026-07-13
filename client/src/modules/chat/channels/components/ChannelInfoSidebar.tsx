@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react"
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react"
 import {
   Check,
   Crown,
@@ -207,186 +207,42 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">Channel Info</h2>
-            <p className="text-xs text-slate-500">{currentUserIsAdmin ? "Manage channel details and roles" : "View channel details"}</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="grid size-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
-            aria-label="Close"
-          >
-            <X size={18} />
-          </button>
-        </header>
+        <ChannelInfoHeader currentUserIsAdmin={currentUserIsAdmin} onClose={onClose} />
 
         <div className="flex-1 overflow-y-auto">
-          <section className="px-5 py-5 text-center">
-            <div className="mx-auto grid size-24 place-items-center overflow-hidden rounded-full bg-[#e5f8e8] text-[#2f733c]">
-              {channel.avatar?.url ? (
-                <img src={channel.avatar.url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <VisibilityIcon size={34} />
-              )}
-            </div>
-            <form onSubmit={handleSave} className="mt-5 space-y-3 text-left">
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-500">Name</span>
-                <input
-                  value={draft.name}
-                  onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                  disabled={!currentUserIsAdmin}
-                  className="mt-1 h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
-                />
-              </label>
-
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-500">Description</span>
-                <textarea
-                  value={draft.description}
-                  onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-                  disabled={!currentUserIsAdmin}
-                  rows={3}
-                  className="mt-1 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
-                  placeholder="No description"
-                />
-              </label>
-
-              <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-semibold text-slate-600">
-                <button
-                  type="button"
-                  disabled={!currentUserIsAdmin}
-                  onClick={() => setDraft((current) => ({ ...current, visibility: "public" }))}
-                  className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                    draft.visibility === "public" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
-                  }`}
-                >
-                  Public
-                </button>
-                <button
-                  type="button"
-                  disabled={!currentUserIsAdmin}
-                  onClick={() => setDraft((current) => ({ ...current, visibility: "private" }))}
-                  className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                    draft.visibility === "private" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
-                  }`}
-                >
-                  Private
-                </button>
-              </div>
-
-              <div className="rounded-lg border border-slate-200 p-3">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Who can send?</p>
-                    <p className="mt-0.5 text-xs text-slate-500">Channels usually keep posting to admins.</p>
-                  </div>
-                  <Shield size={18} className="shrink-0 text-green-600" />
-                </div>
-                <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-semibold text-slate-600">
-                  <button
-                    type="button"
-                    disabled={!currentUserIsAdmin}
-                    onClick={() => setDraft((current) => ({ ...current, sendPermissions: "admins" }))}
-                    className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                      draft.sendPermissions === "admins" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
-                    }`}
-                  >
-                    <Shield size={15} />
-                    Admins
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!currentUserIsAdmin}
-                    onClick={() => setDraft((current) => ({ ...current, sendPermissions: "members" }))}
-                    className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
-                      draft.sendPermissions === "members" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
-                    }`}
-                  >
-                    <Users size={15} />
-                    Members
-                  </button>
-                </div>
-              </div>
-
-              {currentUserIsAdmin && (
-                <button
-                  type="submit"
-                  disabled={isSaving || !draft.name.trim()}
-                  className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#96e6a1] text-sm font-semibold text-[#102315] transition hover:bg-[#86dc92] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                  Save channel
-                </button>
-              )}
-            </form>
-          </section>
+          <ChannelDetailsSection
+            channel={channel}
+            VisibilityIcon={VisibilityIcon}
+            draft={draft}
+            currentUserIsAdmin={currentUserIsAdmin}
+            isSaving={isSaving}
+            onDraftChange={setDraft}
+            onSave={handleSave}
+          />
 
           <ChannelInfoFiles channelId={channel._id} />
 
-          <section className="border-t border-slate-100 px-5 py-5">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900">Members ({channel.members.length})</h3>
-              <div className="flex items-center gap-2">
-                {currentUserIsAdmin && (
-                  <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-                    Admin tools
-                  </span>
-                )}
-                {currentUserIsAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAddMembers(true)}
-                    className="grid size-8 place-items-center rounded-full bg-[#96e6a1] text-[#102315] transition hover:bg-[#86dc92] focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
-                    aria-label="Add channel members"
-                    title="Add members"
-                  >
-                    <Plus size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-            <ul className="space-y-2">
-              {members.map((member) => (
-                <ChannelMemberRow
-                  key={member._id}
-                  member={member}
-                  isOwner={getUserId(member) === ownerId}
-                  isAdmin={adminIds.has(member._id) || getUserId(member) === ownerId}
-                  currentUserIsOwner={currentUserIsOwner}
-                  currentUserIsAdmin={currentUserIsAdmin}
-                  pendingAction={pendingAction}
-                  onAction={(action) => handleMemberAction(action, member)}
-                />
-              ))}
-            </ul>
-          </section>
+          <ChannelMembersSection
+            members={members}
+            memberCount={channel.members.length}
+            ownerId={ownerId}
+            adminIds={adminIds}
+            currentUserIsOwner={currentUserIsOwner}
+            currentUserIsAdmin={currentUserIsAdmin}
+            pendingAction={pendingAction}
+            onAddMembers={() => setShowAddMembers(true)}
+            onMemberAction={handleMemberAction}
+          />
         </div>
 
-        <footer className="border-t border-slate-100 p-5">
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={handleLeave}
-              disabled={!currentUserIsMember || currentUserIsOwner || leaveChannel.isPending}
-              className="flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {leaveChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
-              Leave
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={!currentUserIsOwner || deleteChannel.isPending}
-              className="flex h-10 items-center justify-center gap-2 rounded-lg bg-red-50 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {deleteChannel.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-              Delete
-            </button>
-          </div>
-        </footer>
+        <ChannelDangerFooter
+          currentUserIsMember={currentUserIsMember}
+          currentUserIsOwner={currentUserIsOwner}
+          leavePending={leaveChannel.isPending}
+          deletePending={deleteChannel.isPending}
+          onLeave={handleLeave}
+          onDelete={handleDelete}
+        />
 
         {showAddMembers && (
           <AddChannelMembersModal
@@ -409,6 +265,277 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
     </>
   )
 }
+
+type ChannelDraft = ReturnType<typeof getChannelDraft>
+
+const ChannelInfoHeader = ({
+  currentUserIsAdmin,
+  onClose
+}: {
+  currentUserIsAdmin: boolean
+  onClose: () => void
+}) => (
+  <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+    <div>
+      <h2 className="text-lg font-semibold text-slate-900">Channel Info</h2>
+      <p className="text-xs text-slate-500">{currentUserIsAdmin ? "Manage channel details and roles" : "View channel details"}</p>
+    </div>
+    <button
+      type="button"
+      onClick={onClose}
+      className="grid size-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+      aria-label="Close"
+    >
+      <X size={18} />
+    </button>
+  </header>
+)
+
+const ChannelDetailsSection = ({
+  channel,
+  VisibilityIcon,
+  draft,
+  currentUserIsAdmin,
+  isSaving,
+  onDraftChange,
+  onSave
+}: {
+  channel: Channel
+  VisibilityIcon: typeof Hash
+  draft: ChannelDraft
+  currentUserIsAdmin: boolean
+  isSaving: boolean
+  onDraftChange: Dispatch<SetStateAction<ChannelDraft>>
+  onSave: (event: FormEvent<HTMLFormElement>) => void
+}) => (
+  <section className="px-5 py-5 text-center">
+    <div className="mx-auto grid size-24 place-items-center overflow-hidden rounded-full bg-[#e5f8e8] text-[#2f733c]">
+      {channel.avatar?.url ? <img src={channel.avatar.url} alt="" className="h-full w-full object-cover" /> : <VisibilityIcon size={34} />}
+    </div>
+    <form onSubmit={onSave} className="mt-5 space-y-3 text-left">
+      <label className="block">
+        <span className="text-xs font-semibold text-slate-500">Name</span>
+        <input
+          value={draft.name}
+          onChange={(event) => onDraftChange((current) => ({ ...current, name: event.target.value }))}
+          disabled={!currentUserIsAdmin}
+          className="mt-1 h-11 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
+        />
+      </label>
+
+      <label className="block">
+        <span className="text-xs font-semibold text-slate-500">Description</span>
+        <textarea
+          value={draft.description}
+          onChange={(event) => onDraftChange((current) => ({ ...current, description: event.target.value }))}
+          disabled={!currentUserIsAdmin}
+          rows={3}
+          className="mt-1 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40 disabled:bg-slate-50 disabled:text-slate-600"
+          placeholder="No description"
+        />
+      </label>
+
+      <VisibilitySegmentedControl
+        visibility={draft.visibility}
+        disabled={!currentUserIsAdmin}
+        onChange={(visibility) => onDraftChange((current) => ({ ...current, visibility }))}
+      />
+
+      <SendPermissionControl
+        sendPermissions={draft.sendPermissions}
+        disabled={!currentUserIsAdmin}
+        onChange={(sendPermissions) => onDraftChange((current) => ({ ...current, sendPermissions }))}
+      />
+
+      {currentUserIsAdmin && (
+        <button
+          type="submit"
+          disabled={isSaving || !draft.name.trim()}
+          className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#96e6a1] text-sm font-semibold text-[#102315] transition hover:bg-[#86dc92] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          Save channel
+        </button>
+      )}
+    </form>
+  </section>
+)
+
+const VisibilitySegmentedControl = ({
+  visibility,
+  disabled,
+  onChange
+}: {
+  visibility: ChannelDraft["visibility"]
+  disabled: boolean
+  onChange: (visibility: ChannelDraft["visibility"]) => void
+}) => (
+  <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-semibold text-slate-600">
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => onChange("public")}
+      className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+        visibility === "public" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+      }`}
+    >
+      Public
+    </button>
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => onChange("private")}
+      className={`rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+        visibility === "private" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+      }`}
+    >
+      Private
+    </button>
+  </div>
+)
+
+const SendPermissionControl = ({
+  sendPermissions,
+  disabled,
+  onChange
+}: {
+  sendPermissions: ChannelDraft["sendPermissions"]
+  disabled: boolean
+  onChange: (sendPermissions: ChannelDraft["sendPermissions"]) => void
+}) => (
+  <div className="rounded-lg border border-slate-200 p-3">
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <div>
+        <p className="text-sm font-semibold text-slate-900">Who can send?</p>
+        <p className="mt-0.5 text-xs text-slate-500">Channels usually keep posting to admins.</p>
+      </div>
+      <Shield size={18} className="shrink-0 text-green-600" />
+    </div>
+    <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 text-sm font-semibold text-slate-600">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onChange("admins")}
+        className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+          sendPermissions === "admins" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+        }`}
+      >
+        <Shield size={15} />
+        Admins
+      </button>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onChange("members")}
+        className={`flex items-center justify-center gap-2 rounded-md px-3 py-2 transition disabled:cursor-not-allowed ${
+          sendPermissions === "members" ? "bg-white text-slate-900 shadow-sm" : "hover:text-slate-900"
+        }`}
+      >
+        <Users size={15} />
+        Members
+      </button>
+    </div>
+  </div>
+)
+
+const ChannelMembersSection = ({
+  members,
+  memberCount,
+  ownerId,
+  adminIds,
+  currentUserIsOwner,
+  currentUserIsAdmin,
+  pendingAction,
+  onAddMembers,
+  onMemberAction
+}: {
+  members: User[]
+  memberCount: number
+  ownerId?: string
+  adminIds: Set<string>
+  currentUserIsOwner: boolean
+  currentUserIsAdmin: boolean
+  pendingAction: string | null
+  onAddMembers: () => void
+  onMemberAction: (action: "remove" | "transfer" | "promote" | "demote", target: User) => void
+}) => (
+  <section className="border-t border-slate-100 px-5 py-5">
+    <div className="mb-3 flex items-center justify-between">
+      <h3 className="text-sm font-semibold text-slate-900">Members ({memberCount})</h3>
+      <div className="flex items-center gap-2">
+        {currentUserIsAdmin && (
+          <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+            Admin tools
+          </span>
+        )}
+        {currentUserIsAdmin && (
+          <button
+            type="button"
+            onClick={onAddMembers}
+            className="grid size-8 place-items-center rounded-full bg-[#96e6a1] text-[#102315] transition hover:bg-[#86dc92] focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+            aria-label="Add channel members"
+            title="Add members"
+          >
+            <Plus size={16} />
+          </button>
+        )}
+      </div>
+    </div>
+    <ul className="space-y-2">
+      {members.map((member) => (
+        <ChannelMemberRow
+          key={member._id}
+          member={member}
+          isOwner={getUserId(member) === ownerId}
+          isAdmin={adminIds.has(member._id) || getUserId(member) === ownerId}
+          currentUserIsOwner={currentUserIsOwner}
+          currentUserIsAdmin={currentUserIsAdmin}
+          pendingAction={pendingAction}
+          onAction={(action) => onMemberAction(action, member)}
+        />
+      ))}
+    </ul>
+  </section>
+)
+
+const ChannelDangerFooter = ({
+  currentUserIsMember,
+  currentUserIsOwner,
+  leavePending,
+  deletePending,
+  onLeave,
+  onDelete
+}: {
+  currentUserIsMember: boolean
+  currentUserIsOwner: boolean
+  leavePending: boolean
+  deletePending: boolean
+  onLeave: () => void
+  onDelete: () => void
+}) => (
+  <footer className="border-t border-slate-100 p-5">
+    <div className="grid grid-cols-2 gap-3">
+      <button
+        type="button"
+        onClick={onLeave}
+        disabled={!currentUserIsMember || currentUserIsOwner || leavePending}
+        className="flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {leavePending ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
+        Leave
+      </button>
+      <button
+        type="button"
+        onClick={onDelete}
+        disabled={!currentUserIsOwner || deletePending}
+        className="flex h-10 items-center justify-center gap-2 rounded-lg bg-red-50 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {deletePending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+        Delete
+      </button>
+    </div>
+  </footer>
+)
 
 interface ConfirmationState {
   title: string
@@ -451,14 +578,8 @@ const ConfirmationModal = ({
       className="m-auto w-full max-w-sm bg-transparent p-4 backdrop:bg-black/45 backdrop:backdrop-blur-sm"
       aria-label={confirmation.title}
       onClose={onClose}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
     >
-      <div
-        className="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-2xl">
         <div className={`mb-4 grid size-11 place-items-center rounded-full ${danger ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-700"}`}>
           {danger ? <Trash2 size={20} /> : <Crown size={20} />}
         </div>
@@ -651,14 +772,8 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
       className="m-auto w-full max-w-lg bg-transparent p-4 backdrop:bg-black/45 backdrop:backdrop-blur-sm"
       aria-label="Add channel members"
       onClose={onClose}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
     >
-      <div
-        className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-2xl">
         <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div>
             <h3 className="text-base font-semibold text-slate-900">Add members</h3>

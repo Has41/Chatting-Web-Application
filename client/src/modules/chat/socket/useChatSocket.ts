@@ -89,37 +89,38 @@ export const useChatSocket = (config?: any) => {
     if (socketRef.current?.connected && type === "group" && conversationId && userId) {
       socketRef.current.emit("join-group", { conversationId, userId })
     }
-  }, [conversationId, setMessages, type, userId])
+  }, [config?.conversationId, config?.setMessages, config?.type, config?.userId, conversationId, setMessages, type, user?._id, userId])
 
   useEffect(() => {
     if (!userId) return
 
-    socketRef.current = io(SOCKET_URL, {
+    const socket = io(SOCKET_URL, {
       query: { userId },
       transports: ["websocket"],
       autoConnect: true
     })
+    socketRef.current = socket
 
-    socketRef.current.on("connect", () => {
+    const handleConnect = () => {
       console.log("Socket connected:", socketRef.current?.id)
 
       if (typeRef.current === "group" && conversationIdRef.current) {
         socketRef.current?.emit("join-group", { conversationId: conversationIdRef.current, userId })
       }
-    })
+    }
 
-    socketRef.current.on("disconnect", () => {
+    const handleDisconnect = () => {
       console.log("Socket disconnected")
-    })
+    }
 
-    socketRef.current.on("receive-group-messages", (messageData, convoId) => {
+    const handleReceiveGroupMessages = (messageData: any, convoId: any) => {
       if (typeRef.current === "group" && convoId?.toString() === conversationIdRef.current?.toString()) {
         mergeIncomingMessage(messageData)
         refreshConversationFiles(messageData, convoId?.toString())
       }
-    })
+    }
 
-    socketRef.current.on("receiveMessage", (messageData) => {
+    const handleReceiveMessage = (messageData: any) => {
       if (typeRef.current === "group") return
 
       if (!conversationIdRef.current && messageData.conversation) {
@@ -128,9 +129,9 @@ export const useChatSocket = (config?: any) => {
 
       mergeIncomingMessage(messageData)
       refreshConversationFiles(messageData)
-    })
+    }
 
-    socketRef.current.on("typing:start", (typingData: TypingUser & { conversationId?: string; conversationType?: string }) => {
+    const handleTypingStart = (typingData: TypingUser & { conversationId?: string; conversationType?: string }) => {
       if (!typingData?.userId || typingData.userId === userId) return
 
       if (
@@ -151,45 +152,48 @@ export const useChatSocket = (config?: any) => {
         setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
         delete typingTimeoutsRef.current[typingData.userId]
       }, 3000)
-    })
+    }
 
-    socketRef.current.on("typing:stop", (typingData: TypingUser) => {
+    const handleTypingStop = (typingData: TypingUser) => {
       if (!typingData?.userId) return
 
       window.clearTimeout(typingTimeoutsRef.current[typingData.userId])
       delete typingTimeoutsRef.current[typingData.userId]
       setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
-    })
+    }
 
-    socketRef.current.on("message-reaction-updated", (data: { message?: any }) => {
+    const handleReactionUpdated = (data: { message?: any }) => {
       mergeReactionUpdate(data?.message)
-    })
+    }
+
+    socket.on("connect", handleConnect)
+    socket.on("disconnect", handleDisconnect)
+    socket.on("receive-group-messages", handleReceiveGroupMessages)
+    socket.on("receiveMessage", handleReceiveMessage)
+    socket.on("typing:start", handleTypingStart)
+    socket.on("typing:stop", handleTypingStop)
+    socket.on("message-reaction-updated", handleReactionUpdated)
 
     return () => {
+      socket.off("connect", handleConnect)
+      socket.off("disconnect", handleDisconnect)
+      socket.off("receive-group-messages", handleReceiveGroupMessages)
+      socket.off("receiveMessage", handleReceiveMessage)
+      socket.off("typing:start", handleTypingStart)
+      socket.off("typing:stop", handleTypingStop)
+      socket.off("message-reaction-updated", handleReactionUpdated)
       Object.values(typingTimeoutsRef.current).forEach((timeoutId) => window.clearTimeout(timeoutId))
       typingTimeoutsRef.current = {}
-      if (socketRef.current) {
-        socketRef.current.disconnect()
+      if (socketRef.current === socket) {
+        socket.disconnect()
         socketRef.current = null
       }
     }
-  }, [mergeIncomingMessage, mergeReactionUpdate, navigate, refreshConversationFiles, userId])
+  }, [config?.userId, mergeIncomingMessage, mergeReactionUpdate, navigate, refreshConversationFiles, user?._id, userId])
 
   const emit = useCallback((event: string, ...args: unknown[]) => {
     if (socketRef.current) {
       socketRef.current.emit(event, ...args)
-    }
-  }, [])
-
-  const on = useCallback((event: string, callback: (...args: unknown[]) => void) => {
-    if (socketRef.current) {
-      socketRef.current.on(event, callback)
-    }
-  }, [])
-
-  const off = useCallback((event: string, callback?: (...args: unknown[]) => void) => {
-    if (socketRef.current) {
-      socketRef.current.off(event, callback)
     }
   }, [])
 
@@ -211,35 +215,38 @@ export const useChatSocket = (config?: any) => {
 
   const reactToMessage = useCallback(
     (payload: { messageId: string; emoji: string }) => {
-      if (!userId) return
+      const activeUserId = config?.userId ?? user?._id
+      if (!activeUserId) return
       socketRef.current?.emit("react-to-message", {
         ...payload,
-        userId
+        userId: activeUserId
       })
     },
-    [userId]
+    [config?.userId, user?._id]
   )
 
   const emitTypingStart = useCallback(
     (payload: { conversationId?: string; conversationType: "private" | "group"; recipientId?: string; username?: string }) => {
-      if (!userId) return
+      const activeUserId = config?.userId ?? user?._id
+      if (!activeUserId) return
       socketRef.current?.emit("typing:start", {
         ...payload,
-        senderId: userId
+        senderId: activeUserId
       })
     },
-    [userId]
+    [config?.userId, user?._id]
   )
 
   const emitTypingStop = useCallback(
     (payload: { conversationId?: string; conversationType: "private" | "group"; recipientId?: string; username?: string }) => {
-      if (!userId) return
+      const activeUserId = config?.userId ?? user?._id
+      if (!activeUserId) return
       socketRef.current?.emit("typing:stop", {
         ...payload,
-        senderId: userId
+        senderId: activeUserId
       })
     },
-    [userId]
+    [config?.userId, user?._id]
   )
 
   return {
@@ -250,9 +257,7 @@ export const useChatSocket = (config?: any) => {
     emitTypingStart,
     emitTypingStop,
     typingUsers,
-    emit,
-    on,
-    off
+    emit
   }
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState, type ChangeEvent } from "react"
+import { useMemo, useState, type ChangeEvent, type ReactNode } from "react"
 import { Crown, Loader2, Shield, ShieldMinus, ShieldPlus, UserMinus } from "lucide-react"
 import { profileInfoData } from "@shared/utils/dynamicData"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -202,241 +202,331 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b p-4">
-          <h3 className="text-lg font-semibold">{data?.conversationType ? "Group Info" : "Chat Info"}</h3>
-          <button
-            type="button"
-            onClick={() => {
-              setIsEditingInfo(false)
-              setIsEditing(false)
-              onClose()
-            }}
-            className="text-xl text-gray-500 hover:text-gray-700"
-            aria-label="Close chat info"
-          >
-            ✕
-          </button>
-        </div>
+        <ProfileSidebarHeader
+          title={data?.conversationType ? "Group Info" : "Chat Info"}
+          onClose={() => {
+            setIsEditingInfo(false)
+            setIsEditing(false)
+            onClose()
+          }}
+        />
 
-        <div className="p-4 text-center">
-          {data?.conversationType ? (
-            <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-gray-300 text-xl font-semibold text-white">
-              {data?.groupName?.charAt(0).toUpperCase()}
-            </div>
-          ) : profilePictureUrl ? (
-            <img src={profilePictureUrl} alt="Profile" className="mx-auto h-24 w-24 rounded-full object-cover" />
-          ) : (
-            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-300 text-xl font-semibold text-white">
-              {("username" in (data ?? {}) ? data?.username?.charAt(0).toUpperCase() : undefined) || "U"}
-            </div>
-          )}
-          <div className="mt-4 flex items-center justify-center gap-2">
-            {isEditing && data?.conversationType ? (
-              <>
-                <input
-                  type="text"
-                  value={groupName}
-                  onChange={(e) => setGroupName(e.target.value)}
-                  className="border-b border-gray-400 text-center text-lg font-bold outline-none"
-                  aria-label="Group name"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSave({ groupName })}
-                  className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
-                  disabled={isLoading}
-                  aria-label="Save group name"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-4 text-white"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
-                </button>
-              </>
-            ) : (
-              <>
-                <h4 className="text-lg font-bold">
-                  {("username" in (data ?? {}) ? data?.username : undefined) || data?.groupName || "Unknown"}
-                </h4>
-                {data?.conversationType && (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
-                    aria-label="Edit group name"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-4 text-white"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-          <div className="mt-2 flex items-center justify-center gap-x-2 text-sm text-gray-600">
-            {isEditingInfo ? (
-              <>
-                <input
-                  type="text"
-                  value={groupInfo}
-                  onChange={(e) => setGroupInfo(e.target.value)}
-                  className="border-b border-gray-400 text-center text-sm outline-none"
-                  aria-label="Group info"
-                  autoFocus
-                />
-
-                <button
-                  type="button"
-                  onClick={() => handleSave({ groupInfo })}
-                  className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
-                  aria-label="Save group info"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="size-4 text-white"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <p>{aboutText || (data?.conversationType ? "No group info available" : "No bio available")}</p>
-                {data?.conversationType && (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingInfo(true)}
-                    className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
-                    aria-label="Edit group info"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-4 text-white"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                      />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="mt-4 w-full px-6">
-          <div className="flex justify-around">
-            {profileInfoData.map((item) => (
-              <div key={item.name} className="flex cursor-pointer flex-col items-center">
-                <div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-white shadow">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="text-custom-text size-5"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-gray-700">{item.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ProfileIdentity
+          data={data}
+          profilePictureUrl={profilePictureUrl}
+          groupName={groupName}
+          groupInfo={groupInfo}
+          aboutText={aboutText}
+          isEditing={isEditing}
+          isEditingInfo={isEditingInfo}
+          isLoading={isLoading}
+          setGroupName={setGroupName}
+          setGroupInfo={setGroupInfo}
+          setIsEditing={setIsEditing}
+          setIsEditingInfo={setIsEditingInfo}
+          onSave={handleSave}
+        />
+        <ProfileActionShortcuts />
         <ChatInfoFiles conversationId={conversationId} />
 
-        {data?.conversationType && (
-          <div className="mt-6 max-h-[35%] overflow-y-auto border-t px-4 pt-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-md font-semibold">Members ({memberRows.length})</h4>
-              {currentUserIsAdmin && (
-                <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-                  Admin tools
-                </span>
-              )}
-            </div>
-
-            <div className="relative mx-auto mb-4 w-full">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-5 w-5 text-gray-400"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-4.35-4.35m2.7-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0z"
-                  />
-                </svg>
-              </span>
-              <input
-                value={searchQuery}
-                onChange={handleSearchChange}
-                type="text"
-                placeholder="Search members"
-                className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
-              />
-            </div>
-
-            {filteredMembers.length > 0 ? (
-              <ul className="space-y-2">
-                {filteredMembers.map((member) => (
-                  <GroupMemberRow
-                    key={member._id}
-                    member={member}
-                    isOwner={ownerId === member._id}
-                    isAdmin={adminIds.has(member._id) || ownerId === member._id}
-                    currentUserIsOwner={currentUserIsOwner}
-                    currentUserIsAdmin={currentUserIsAdmin}
-                    pendingAction={pendingAction}
-                    onAction={(action) => managementMutation.mutate({ action, target: member })}
-                  />
-                ))}
-              </ul>
-            ) : (
-              <p className="py-6 text-center text-sm text-gray-500">No members found</p>
-            )}
-          </div>
-        )}
+        <GroupMembersPanel
+          enabled={Boolean(data?.conversationType)}
+          memberCount={memberRows.length}
+          members={filteredMembers}
+          searchQuery={searchQuery}
+          ownerId={ownerId}
+          adminIds={adminIds}
+          currentUserIsOwner={currentUserIsOwner}
+          currentUserIsAdmin={currentUserIsAdmin}
+          pendingAction={pendingAction}
+          onSearchChange={handleSearchChange}
+          onMemberAction={(action, member) => managementMutation.mutate({ action, target: member })}
+        />
       </div>
     </>
   )
 }
 
 const getUserId = (value?: User | string | null) => (typeof value === "string" ? value : value?._id)
+
+const ProfileSidebarHeader = ({ title, onClose }: { title: string; onClose: () => void }) => (
+  <div className="flex items-center justify-between border-b p-4">
+    <h3 className="text-lg font-semibold">{title}</h3>
+    <button
+      type="button"
+      onClick={onClose}
+      className="text-xl text-gray-500 hover:text-gray-700"
+      aria-label="Close chat info"
+    >
+      ✕
+    </button>
+  </div>
+)
+
+const ProfileIdentity = ({
+  data,
+  profilePictureUrl,
+  groupName,
+  groupInfo,
+  aboutText,
+  isEditing,
+  isEditingInfo,
+  isLoading,
+  setGroupName,
+  setGroupInfo,
+  setIsEditing,
+  setIsEditingInfo,
+  onSave
+}: {
+  data: ProfileSidebarData | null
+  profilePictureUrl?: string
+  groupName: string
+  groupInfo: string
+  aboutText?: string
+  isEditing: boolean
+  isEditingInfo: boolean
+  isLoading: boolean
+  setGroupName: Dispatch<SetStateAction<string>>
+  setGroupInfo: Dispatch<SetStateAction<string>>
+  setIsEditing: Dispatch<SetStateAction<boolean>>
+  setIsEditingInfo: Dispatch<SetStateAction<boolean>>
+  onSave: (payload: { groupName?: string; groupInfo?: string }) => void
+}) => (
+  <div className="p-4 text-center">
+    <ProfileAvatar data={data} profilePictureUrl={profilePictureUrl} />
+    <div className="mt-4 flex items-center justify-center gap-2">
+      {isEditing && data?.conversationType ? (
+        <>
+          <input
+            type="text"
+            value={groupName}
+            onChange={(event) => setGroupName(event.target.value)}
+            className="border-b border-gray-400 text-center text-lg font-bold outline-none"
+            aria-label="Group name"
+            autoFocus
+          />
+          <RoundIconButton onClick={() => onSave({ groupName })} disabled={isLoading} label="Save group name">
+            <SaveIcon strokeWidth={1.5} />
+          </RoundIconButton>
+        </>
+      ) : (
+        <>
+          <h4 className="text-lg font-bold">
+            {("username" in (data ?? {}) ? data?.username : undefined) || data?.groupName || "Unknown"}
+          </h4>
+          {data?.conversationType && (
+            <RoundIconButton onClick={() => setIsEditing(true)} label="Edit group name">
+              <EditInfoIcon />
+            </RoundIconButton>
+          )}
+        </>
+      )}
+    </div>
+    <div className="mt-2 flex items-center justify-center gap-x-2 text-sm text-gray-600">
+      {isEditingInfo ? (
+        <>
+          <input
+            type="text"
+            value={groupInfo}
+            onChange={(event) => setGroupInfo(event.target.value)}
+            className="border-b border-gray-400 text-center text-sm outline-none"
+            aria-label="Group info"
+            autoFocus
+          />
+          <RoundIconButton onClick={() => onSave({ groupInfo })} label="Save group info">
+            <SaveIcon strokeWidth={2} />
+          </RoundIconButton>
+        </>
+      ) : (
+        <div className="flex items-center justify-center gap-2">
+          <p>{aboutText || (data?.conversationType ? "No group info available" : "No bio available")}</p>
+          {data?.conversationType && (
+            <RoundIconButton onClick={() => setIsEditingInfo(true)} label="Edit group info">
+              <EditInfoIcon />
+            </RoundIconButton>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)
+
+const ProfileAvatar = ({
+  data,
+  profilePictureUrl
+}: {
+  data: ProfileSidebarData | null
+  profilePictureUrl?: string
+}) => {
+  if (data?.conversationType) {
+    return (
+      <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-gray-300 text-xl font-semibold text-white">
+        {data?.groupName?.charAt(0).toUpperCase()}
+      </div>
+    )
+  }
+
+  if (profilePictureUrl) {
+    return <img src={profilePictureUrl} alt="Profile" className="mx-auto h-24 w-24 rounded-full object-cover" />
+  }
+
+  return (
+    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-300 text-xl font-semibold text-white">
+      {("username" in (data ?? {}) ? data?.username?.charAt(0).toUpperCase() : undefined) || "U"}
+    </div>
+  )
+}
+
+const ProfileActionShortcuts = () => (
+  <div className="mt-4 w-full px-6">
+    <div className="flex justify-around">
+      {profileInfoData.map((item) => (
+        <div key={item.name} className="flex cursor-pointer flex-col items-center">
+          <div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-white shadow">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="text-custom-text size-5"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
+            </svg>
+          </div>
+          <span className="text-sm font-medium text-gray-700">{item.name}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
+const GroupMembersPanel = ({
+  enabled,
+  memberCount,
+  members,
+  searchQuery,
+  ownerId,
+  adminIds,
+  currentUserIsOwner,
+  currentUserIsAdmin,
+  pendingAction,
+  onSearchChange,
+  onMemberAction
+}: {
+  enabled: boolean
+  memberCount: number
+  members: User[]
+  searchQuery: string
+  ownerId?: string
+  adminIds: Set<string>
+  currentUserIsOwner: boolean
+  currentUserIsAdmin: boolean
+  pendingAction: string | null
+  onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onMemberAction: (action: "remove" | "transfer" | "promote" | "demote", member: User) => void
+}) => {
+  if (!enabled) return null
+
+  return (
+    <div className="mt-6 max-h-[35%] overflow-y-auto border-t px-4 pt-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h4 className="text-md font-semibold">Members ({memberCount})</h4>
+        {currentUserIsAdmin && (
+          <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+            Admin tools
+          </span>
+        )}
+      </div>
+
+      <MemberSearchInput searchQuery={searchQuery} onSearchChange={onSearchChange} />
+
+      {members.length > 0 ? (
+        <ul className="space-y-2">
+          {members.map((member) => (
+            <GroupMemberRow
+              key={member._id}
+              member={member}
+              isOwner={ownerId === member._id}
+              isAdmin={adminIds.has(member._id) || ownerId === member._id}
+              currentUserIsOwner={currentUserIsOwner}
+              currentUserIsAdmin={currentUserIsAdmin}
+              pendingAction={pendingAction}
+              onAction={(action) => onMemberAction(action, member)}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p className="py-6 text-center text-sm text-gray-500">No members found</p>
+      )}
+    </div>
+  )
+}
+
+const MemberSearchInput = ({
+  searchQuery,
+  onSearchChange
+}: {
+  searchQuery: string
+  onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void
+}) => (
+  <div className="relative mx-auto mb-4 w-full">
+    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+      <SearchIcon />
+    </span>
+    <input
+      value={searchQuery}
+      onChange={onSearchChange}
+      type="text"
+      placeholder="Search members"
+      className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
+    />
+  </div>
+)
+
+const RoundIconButton = ({
+  children,
+  onClick,
+  disabled,
+  label
+}: {
+  children: ReactNode
+  onClick: () => void
+  disabled?: boolean
+  label: string
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
+    disabled={disabled}
+    aria-label={label}
+  >
+    {children}
+  </button>
+)
+
+const SaveIcon = ({ strokeWidth }: { strokeWidth: number }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className="size-4 text-white">
+    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+  </svg>
+)
+
+const EditInfoIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-white">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+    />
+  </svg>
+)
+
+const SearchIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-gray-400">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m2.7-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0z" />
+  </svg>
+)
 
 interface GroupMemberRowProps {
   member: User

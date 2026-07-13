@@ -50,7 +50,7 @@ const GroupModal = ({ onClose }: GroupModalProps) => {
     }
   })
 
-  const typedData = data as GroupModalData | undefined
+  const typedData = useMemo(() => data as GroupModalData | undefined, [data])
   const { filteredFriends, filteredConversations } = useMemo(() => {
     if (!typedData) return { filteredFriends: [], filteredConversations: [] }
     const query = searchQuery.toLowerCase()

@@ -91,19 +91,20 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
   useEffect(() => {
     if (!userId || !enabled) return
 
-    socketRef.current = io(SOCKET_URL, {
+    const socket = io(SOCKET_URL, {
       query: { userId },
       transports: ["websocket"],
       autoConnect: true
     })
+    socketRef.current = socket
 
-    socketRef.current.on("connect", () => {
+    const handleConnect = () => {
       if (channelIdRef.current) {
         socketRef.current?.emit("join-channel", { channelId: channelIdRef.current, userId })
       }
-    })
+    }
 
-    socketRef.current.on("receive-channel-message", (messageData: Message & { channel?: string; clientTempId?: string }) => {
+    const handleReceiveChannelMessage = (messageData: Message & { channel?: string; clientTempId?: string }) => {
       if (messageData.channel?.toString() !== channelIdRef.current?.toString()) return
       mergeIncomingMessage(messageData)
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
@@ -111,58 +112,70 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
       if (messageData.messageType === "file") {
         queryClient.invalidateQueries({ queryKey: channelKeys.files(channelIdRef.current) })
       }
-    })
+    }
 
-    socketRef.current.on(
-      "typing:start",
-      (typingData: ChannelTypingUser & { conversationId?: string; conversationType?: string }) => {
-        if (!typingData?.userId || typingData.userId === userId) return
-        if (typingData.conversationType !== "channel") return
-        if (typingData.conversationId?.toString() !== channelIdRef.current?.toString()) return
+    const handleTypingStart = (typingData: ChannelTypingUser & { conversationId?: string; conversationType?: string }) => {
+      if (!typingData?.userId || typingData.userId === userId) return
+      if (typingData.conversationType !== "channel") return
+      if (typingData.conversationId?.toString() !== channelIdRef.current?.toString()) return
 
-        window.clearTimeout(typingTimeoutsRef.current[typingData.userId])
-        setTypingUsers((prev) => {
-          if (prev.some((typingUser) => typingUser.userId === typingData.userId)) return prev
-          return [...prev, { userId: typingData.userId, username: typingData.username }]
-        })
+      window.clearTimeout(typingTimeoutsRef.current[typingData.userId])
+      setTypingUsers((prev) => {
+        if (prev.some((typingUser) => typingUser.userId === typingData.userId)) return prev
+        return [...prev, { userId: typingData.userId, username: typingData.username }]
+      })
 
-        typingTimeoutsRef.current[typingData.userId] = window.setTimeout(() => {
-          setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
-          delete typingTimeoutsRef.current[typingData.userId]
-        }, 3000)
-      }
-    )
+      typingTimeoutsRef.current[typingData.userId] = window.setTimeout(() => {
+        setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
+        delete typingTimeoutsRef.current[typingData.userId]
+      }, 3000)
+    }
 
-    socketRef.current.on("typing:stop", (typingData: ChannelTypingUser & { conversationId?: string }) => {
+    const handleTypingStop = (typingData: ChannelTypingUser & { conversationId?: string }) => {
       if (!typingData?.userId) return
       if (typingData.conversationId?.toString() !== channelIdRef.current?.toString()) return
 
       window.clearTimeout(typingTimeoutsRef.current[typingData.userId])
       delete typingTimeoutsRef.current[typingData.userId]
       setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
-    })
+    }
 
-    socketRef.current.on("channel-message-error", () => {
+    const handleChannelMessageError = () => {
       setMessagesRef.current((prev) =>
         prev.map((message: any) =>
           message.localStatus === "sending" ? { ...message, localStatus: "failed" } : message
         )
       )
-    })
+    }
 
-    socketRef.current.on("message-reaction-updated", (data: { message?: Message }) => {
+    const handleReactionUpdated = (data: { message?: Message }) => {
       if (data?.message?.channel?.toString() !== channelIdRef.current?.toString()) return
       mergeReactionUpdate(data.message)
-    })
+    }
+
+    socket.on("connect", handleConnect)
+    socket.on("receive-channel-message", handleReceiveChannelMessage)
+    socket.on("typing:start", handleTypingStart)
+    socket.on("typing:stop", handleTypingStop)
+    socket.on("channel-message-error", handleChannelMessageError)
+    socket.on("message-reaction-updated", handleReactionUpdated)
 
     return () => {
+      socket.off("connect", handleConnect)
+      socket.off("receive-channel-message", handleReceiveChannelMessage)
+      socket.off("typing:start", handleTypingStart)
+      socket.off("typing:stop", handleTypingStop)
+      socket.off("channel-message-error", handleChannelMessageError)
+      socket.off("message-reaction-updated", handleReactionUpdated)
       Object.values(typingTimeoutsRef.current).forEach((timeoutId) => window.clearTimeout(timeoutId))
       typingTimeoutsRef.current = {}
       if (channelIdRef.current) {
-        socketRef.current?.emit("leave-channel", { channelId: channelIdRef.current })
+        socket.emit("leave-channel", { channelId: channelIdRef.current })
       }
-      socketRef.current?.disconnect()
-      socketRef.current = null
+      if (socketRef.current === socket) {
+        socket.disconnect()
+        socketRef.current = null
+      }
     }
   }, [enabled, mergeIncomingMessage, mergeReactionUpdate, queryClient, userId])
 

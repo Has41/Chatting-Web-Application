@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react"
+import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type RefObject, type SetStateAction } from "react"
 import { Send } from "lucide-react"
 import AttachmentMenu from "@chat/composer/components/AttachmentMenu"
 import FilePreviewModal from "@chat/attachments/components/FilePreviewModal"
@@ -35,6 +35,16 @@ interface SendMessageProps {
   onTypingStart?: () => void
   onTypingStop?: () => void
 }
+
+type ComposerSendHandler = (payload: {
+  conversationId?: string
+  messageContent?: string
+  messageType: "text" | "file"
+  fileMeta?: MessageFileMeta | null
+  clientTempId?: string
+  optimisticOnly?: boolean
+  markFailed?: boolean
+}) => void
 
 const SendMessage = ({
   setMessageContent,
@@ -246,121 +256,219 @@ const SendMessage = ({
 
   return (
     <div className="relative flex max-w-full items-center gap-3 border-t p-4">
-      {previewFile && (
-        <FilePreviewModal
-          file={previewFile}
-          type={attachmentType ?? "document"}
-          recipientId={recipientId}
-          conversationId={conversationId}
-          conversationType={conversationType}
-          onSend={handleSendMessage}
-          onCancel={() => setPreviewFile(null)}
-        />
-      )}
-      {/* Audio icon */}
-      <div className={`${isRecording ? "w-[30%]" : "w-[5%]"}`}>
-        <AudioRecorder
-          onSend={handleSendMessage}
-          isRecording={isRecording}
-          conversationType={conversationType}
-          setIsRecording={setIsRecording}
-          recipientId={recipientId}
-          conversationId={conversationId}
-        />
-      </div>
+      <ComposerFilePreview
+        previewFile={previewFile}
+        attachmentType={attachmentType}
+        recipientId={recipientId}
+        conversationId={conversationId}
+        conversationType={conversationType}
+        onSend={handleSendMessage}
+        onCancel={() => setPreviewFile(null)}
+      />
+      <ComposerAudioControl
+        isRecording={isRecording}
+        setIsRecording={setIsRecording}
+        onSend={handleSendMessage}
+        conversationType={conversationType}
+        recipientId={recipientId}
+        conversationId={conversationId}
+      />
       {!isRecording && (
-        <input
-          type="text"
-          placeholder="Type a message..."
-          className="w-3/4 rounded-md border border-slate-200 p-3 text-sm focus:outline-none"
-          value={messageContent}
-          onChange={(e) => handleMessageInputChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault()
-              handleSendMessage({
-                conversationId,
-                messageContent,
-                messageType: "text"
-              })
-            }
-          }}
+        <ComposerTextInput
+          messageContent={messageContent}
+          conversationId={conversationId}
+          onChange={handleMessageInputChange}
+          onSend={handleSendMessage}
         />
       )}
       {!isRecording && (
-        <div className="flex w-1/6 gap-x-1">
-          {showAttachmentOptions && (
-            <AttachmentMenu
-              onSelect={(type) => {
-                handleAttachmentSelect(type)
-                setShowAttachmentOptions(false)
-              }}
-              onClose={() => setShowAttachmentOptions(false)}
-            />
-          )}
-          {/* File icon */}
-          <button
-            type="button"
-            onClick={() => setShowAttachmentOptions((prev) => !prev)}
-            className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
-            aria-label="Add attachment"
-          >
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept={getAcceptedTypes(attachmentType)}
-              onChange={handleFileChange}
-            />
-
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
-              />
-            </svg>
-          </button>
-          {/* Emoji icon */}
-          <button
-            type="button"
-            className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
-            aria-label="Open emoji picker"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendMessage({ conversationId, messageContent, messageType: "text" })}
-            className="bg-custom-green rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
-            aria-label="Send message"
-          >
-            <Send className="size-6" strokeWidth={1.8} />
-          </button>
-        </div>
+        <ComposerActions
+          messageContent={messageContent}
+          conversationId={conversationId}
+          attachmentType={attachmentType}
+          showAttachmentOptions={showAttachmentOptions}
+          fileInputRef={fileInputRef}
+          onAttachmentSelect={handleAttachmentSelect}
+          onFileChange={handleFileChange}
+          onSend={handleSendMessage}
+          setShowAttachmentOptions={setShowAttachmentOptions}
+        />
       )}
     </div>
   )
 }
+
+const ComposerFilePreview = ({
+  previewFile,
+  attachmentType,
+  recipientId,
+  conversationId,
+  conversationType,
+  onSend,
+  onCancel
+}: {
+  previewFile: File | null
+  attachmentType: FileType | null
+  recipientId?: string
+  conversationId?: string
+  conversationType: ConversationType
+  onSend: ComposerSendHandler
+  onCancel: () => void
+}) => {
+  if (!previewFile) return null
+
+  return (
+    <FilePreviewModal
+      file={previewFile}
+      type={attachmentType ?? "document"}
+      recipientId={recipientId}
+      conversationId={conversationId}
+      conversationType={conversationType}
+      onSend={onSend}
+      onCancel={onCancel}
+    />
+  )
+}
+
+const ComposerAudioControl = ({
+  isRecording,
+  setIsRecording,
+  onSend,
+  conversationType,
+  recipientId,
+  conversationId
+}: {
+  isRecording: boolean
+  setIsRecording: Dispatch<SetStateAction<boolean>>
+  onSend: ComposerSendHandler
+  conversationType: ConversationType
+  recipientId?: string
+  conversationId?: string
+}) => (
+  <div className={`${isRecording ? "w-[30%]" : "w-[5%]"}`}>
+    <AudioRecorder
+      onSend={onSend}
+      isRecording={isRecording}
+      conversationType={conversationType}
+      setIsRecording={setIsRecording}
+      recipientId={recipientId}
+      conversationId={conversationId}
+    />
+  </div>
+)
+
+const ComposerTextInput = ({
+  messageContent,
+  conversationId,
+  onChange,
+  onSend
+}: {
+  messageContent: string
+  conversationId?: string
+  onChange: (value: string) => void
+  onSend: ComposerSendHandler
+}) => (
+  <input
+    type="text"
+    placeholder="Type a message..."
+    className="w-3/4 rounded-md border border-slate-200 p-3 text-sm focus:outline-none"
+    value={messageContent}
+    onChange={(event) => onChange(event.target.value)}
+    onKeyDown={(event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault()
+        onSend({
+          conversationId,
+          messageContent,
+          messageType: "text"
+        })
+      }
+    }}
+  />
+)
+
+const ComposerActions = ({
+  messageContent,
+  conversationId,
+  attachmentType,
+  showAttachmentOptions,
+  fileInputRef,
+  onAttachmentSelect,
+  onFileChange,
+  onSend,
+  setShowAttachmentOptions
+}: {
+  messageContent: string
+  conversationId?: string
+  attachmentType: FileType | null
+  showAttachmentOptions: boolean
+  fileInputRef: RefObject<HTMLInputElement | null>
+  onAttachmentSelect: (type: FileType) => void
+  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onSend: ComposerSendHandler
+  setShowAttachmentOptions: Dispatch<SetStateAction<boolean>>
+}) => (
+  <div className="flex w-1/6 gap-x-1">
+    {showAttachmentOptions && (
+      <AttachmentMenu
+        onSelect={(type) => {
+          onAttachmentSelect(type)
+          setShowAttachmentOptions(false)
+        }}
+        onClose={() => setShowAttachmentOptions(false)}
+      />
+    )}
+    <button
+      type="button"
+      onClick={() => setShowAttachmentOptions((prev) => !prev)}
+      className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
+      aria-label="Add attachment"
+    >
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept={getAcceptedTypes(attachmentType)}
+        onChange={onFileChange}
+      />
+      <AttachmentIcon />
+    </button>
+    <button
+      type="button"
+      className="hover:text-custom-text rounded-full p-3 text-black/80 transition-all duration-500"
+      aria-label="Open emoji picker"
+    >
+      <EmojiIcon />
+    </button>
+    <button
+      type="button"
+      onClick={() => onSend({ conversationId, messageContent, messageType: "text" })}
+      className="bg-custom-green rounded-full p-3 text-white transition-all duration-500 hover:bg-green-400"
+      aria-label="Send message"
+    >
+      <Send className="size-6" strokeWidth={1.8} />
+    </button>
+  </div>
+)
+
+const AttachmentIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
+    />
+  </svg>
+)
+
+const EmojiIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75"
+    />
+  </svg>
+)
 
 export default SendMessage

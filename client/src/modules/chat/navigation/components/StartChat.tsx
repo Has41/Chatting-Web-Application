@@ -94,14 +94,8 @@ const StartChat = () => {
         className="m-auto w-full max-w-xl overflow-visible bg-transparent p-4 backdrop:bg-black/55 backdrop:backdrop-blur-sm"
         aria-label="Find people"
         onClose={() => setShowSearchModal(false)}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) setShowSearchModal(false)
-        }}
       >
-        <div
-          className="w-full overflow-hidden rounded-lg bg-white shadow-2xl"
-          onClick={(event) => event.stopPropagation()}
-        >
+        <div className="w-full overflow-hidden rounded-lg bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div>
               <h2 className="text-base font-semibold text-slate-900">Find people</h2>

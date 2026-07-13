@@ -7,6 +7,8 @@ const ICE_SERVERS: RTCConfiguration = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 }
 
+const createManagedPeerConnection = () => new RTCPeerConnection(ICE_SERVERS)
+
 type CallStatus = "idle" | "calling" | "ringing" | "active"
 type CallType = "audio" | "video"
 type FinalCallStatus = "missed" | "declined" | "ended" | "unavailable" | "failed"
@@ -50,9 +52,19 @@ export const useCallSocket = (userId: string | undefined) => {
     return () => window.clearTimeout(timeoutId)
   }, [error])
 
-  const resetCall = useCallback(() => {
-    peerConnectionRef.current?.close()
+  const closePeerConnection = useCallback(() => {
+    const peerConnection = peerConnectionRef.current
+    if (!peerConnection) return
+
+    peerConnection.onicecandidate = null
+    peerConnection.ontrack = null
+    peerConnection.onconnectionstatechange = null
+    peerConnection.close()
     peerConnectionRef.current = null
+  }, [])
+
+  const resetCall = useCallback(() => {
+    closePeerConnection()
     localStreamRef.current?.getTracks().forEach((track) => track.stop())
     localStreamRef.current = null
     activePeerIdRef.current = null
@@ -67,7 +79,7 @@ export const useCallSocket = (userId: string | undefined) => {
     setIsMuted(false)
     setIsCameraOff(false)
     setStatus("idle")
-  }, [])
+  }, [closePeerConnection])
 
   const rememberCallLog = useCallback(
     (callLog: Awaited<ReturnType<typeof createCallLog>>) => {
@@ -110,7 +122,8 @@ export const useCallSocket = (userId: string | undefined) => {
 
   const createPeerConnection = useCallback(
     (peerId: string) => {
-      const peerConnection = new RTCPeerConnection(ICE_SERVERS)
+      closePeerConnection()
+      const peerConnection = createManagedPeerConnection()
 
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
@@ -137,8 +150,14 @@ export const useCallSocket = (userId: string | undefined) => {
 
       return peerConnection
     },
-    [finishActiveCallLog, resetCall, sendIceCandidate]
+    [closePeerConnection, finishActiveCallLog, resetCall, sendIceCandidate]
   )
+
+  useEffect(() => {
+    return () => {
+      closePeerConnection()
+    }
+  }, [closePeerConnection])
 
   const addPendingCandidates = useCallback(async () => {
     const peerConnection = peerConnectionRef.current
@@ -267,12 +286,13 @@ export const useCallSocket = (userId: string | undefined) => {
   useEffect(() => {
     if (!userId) return
 
-    socketRef.current = io(SOCKET_URL, {
+    const socket = io(SOCKET_URL, {
       query: { userId },
       transports: ["websocket"]
     })
+    socketRef.current = socket
 
-    socketRef.current.on("incoming-call", async (call: IncomingCall) => {
+    const handleIncomingCall = async (call: IncomingCall) => {
       if (!["audio", "video"].includes(call.type)) return
       if (activePeerIdRef.current || statusRef.current !== "idle") {
         socketRef.current?.emit("reject-call", { from: userId, to: call.from })
@@ -287,9 +307,9 @@ export const useCallSocket = (userId: string | undefined) => {
       setIncomingCall(call)
       setStatus("ringing")
       createCallLog({ ownerId: userId, peerId: call.from, direction: "incoming", type: call.type, status: "missed" }).then(rememberCallLog)
-    })
+    }
 
-    socketRef.current.on("call-accepted", async ({ from, answer }: { from: string; answer: RTCSessionDescriptionInit }) => {
+    const handleCallAccepted = async ({ from, answer }: { from: string; answer: RTCSessionDescriptionInit }) => {
       if (from !== activePeerIdRef.current || !peerConnectionRef.current) return
 
       await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer))
@@ -297,21 +317,21 @@ export const useCallSocket = (userId: string | undefined) => {
       pendingFinalCallStatusRef.current = null
       updateCallLog(userId, activeCallLogIdRef.current, { status: "answered" })
       setStatus("active")
-    })
+    }
 
-    socketRef.current.on("call-rejected", () => {
+    const handleCallRejected = () => {
       setError("Call declined.")
       finishActiveCallLog("declined")
       resetCall()
-    })
+    }
 
-    socketRef.current.on("call-unavailable", () => {
+    const handleCallUnavailable = () => {
       setError("User is not available.")
       finishActiveCallLog("unavailable")
       resetCall()
-    })
+    }
 
-    socketRef.current.on("ice-candidate", async ({ from, candidate }: { from: string; candidate: RTCIceCandidateInit }) => {
+    const handleIceCandidate = async ({ from, candidate }: { from: string; candidate: RTCIceCandidateInit }) => {
       if (from !== activePeerIdRef.current || !candidate) return
 
       if (!peerConnectionRef.current?.remoteDescription) {
@@ -322,16 +342,31 @@ export const useCallSocket = (userId: string | undefined) => {
       await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch((candidateError) => {
         console.error("Failed to add ICE candidate:", candidateError)
       })
-    })
+    }
 
-    socketRef.current.on("end-call", () => {
+    const handleEndCall = () => {
       finishActiveCallLog(statusRef.current === "ringing" ? "missed" : "ended")
       resetCall()
-    })
+    }
+
+    socket.on("incoming-call", handleIncomingCall)
+    socket.on("call-accepted", handleCallAccepted)
+    socket.on("call-rejected", handleCallRejected)
+    socket.on("call-unavailable", handleCallUnavailable)
+    socket.on("ice-candidate", handleIceCandidate)
+    socket.on("end-call", handleEndCall)
 
     return () => {
-      socketRef.current?.disconnect()
-      socketRef.current = null
+      socket.off("incoming-call", handleIncomingCall)
+      socket.off("call-accepted", handleCallAccepted)
+      socket.off("call-rejected", handleCallRejected)
+      socket.off("call-unavailable", handleCallUnavailable)
+      socket.off("ice-candidate", handleIceCandidate)
+      socket.off("end-call", handleEndCall)
+      if (socketRef.current === socket) {
+        socket.disconnect()
+        socketRef.current = null
+      }
       resetCall()
     }
   }, [addPendingCandidates, finishActiveCallLog, rememberCallLog, resetCall, userId])

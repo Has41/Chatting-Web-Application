@@ -57,14 +57,8 @@ const MediaViewerModal = ({ items, currentIndex, onCurrentIndexChange, onClose }
       className="m-auto w-full max-w-5xl bg-transparent p-4 text-white backdrop:bg-black/80 backdrop:backdrop-blur-sm"
       aria-label={currentItem.title || "Media viewer"}
       onClose={onClose}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
     >
-      <div
-        className="relative flex h-[86vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-zinc-950 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <div className="relative flex h-[86vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-zinc-950 shadow-2xl">
         <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-white/10 px-4">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{currentItem.title || "Media"}</p>
