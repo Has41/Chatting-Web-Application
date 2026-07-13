@@ -127,7 +127,9 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
           />
         )
       case 2:
-        return <InputField register={register} error={errors} field={BIO_FIELD} trigger={trigger} clearErrors={clearErrors} />
+        return (
+          <InputField register={register} error={errors} field={BIO_FIELD} trigger={trigger} clearErrors={clearErrors} />
+        )
       default:
         return null
     }
@@ -144,7 +146,7 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
       <div className="min-h-[80%] w-full rounded-lg bg-white px-6 py-6 tracking-wide shadow-lg">
         <div className="flex justify-between">
           <div className="ml-8 flex flex-col gap-y-4 py-6">
-            <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
+            <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-12 after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
               Additional Information
             </h2>
             <p className="font-poppins text-gray-600">Sign up your details</p>

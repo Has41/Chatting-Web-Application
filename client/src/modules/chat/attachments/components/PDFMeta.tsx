@@ -8,7 +8,7 @@ const PDFMeta = ({ mediaUrl, fileName }: { mediaUrl: string; fileName?: string }
 
   return (
     <div className="flex items-center gap-x-4 rounded-lg bg-green-400 p-2 shadow">
-      <img src={pdfIcon} alt="PDF icon" className="size-8 flex-shrink-0" />
+      <img src={pdfIcon} alt="PDF icon" className="size-8 shrink-0" />
       <div className="flex flex-col gap-y-2">
         <span className="max-w-xs truncate text-sm font-medium text-white">{truncateText(displayFileName, 20, 20)}</span>
         {numPages != null ? (

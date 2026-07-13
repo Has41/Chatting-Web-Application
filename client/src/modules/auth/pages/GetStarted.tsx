@@ -193,7 +193,7 @@ const GetStarted = () => {
               className="bg-dusty-grass absolute bottom-0 left-0 size-[150%] rounded-tl-full shadow-lg"
             />
           </div>
-          <div ref={formContainerRef} className="ml-[10%] w-full max-w-[430px]">
+          <div ref={formContainerRef} className="ml-[10%] w-full max-w-107.5">
             <Login onButtonClick={handleFormSwitch} />
           </div>
         </>
@@ -214,7 +214,7 @@ const GetStarted = () => {
               className="bg-dusty-grass absolute bottom-0 left-0 size-[150%] rounded-br-full shadow-lg"
             />
           </div>
-          <div ref={formContainerRef} className="ml-[55%] w-full max-w-[430px]">
+          <div ref={formContainerRef} className="ml-[55%] w-full max-w-107.5">
             {currentForm === "Register" && <Register onButtonClick={handleFormSwitch} />}
             {currentForm === "OtpPage" && <OtpAuthPage onButtonClick={handleFormSwitch} />}
             {currentForm === "InfoForm" && <InfoForm onButtonClick={handleFormSwitch} />}

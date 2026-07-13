@@ -12,7 +12,7 @@ const DarkModeSwitch = () => {
       <h1>Dark Mode: </h1>
       <button
         type="button"
-        className={`relative flex h-10 w-[4.5rem] cursor-pointer items-center rounded-full border-2 border-gray-300 transition-colors duration-300 ${
+        className={`relative flex h-10 w-18 cursor-pointer items-center rounded-full border-2 border-gray-300 transition-colors duration-300 ${
           isDark ? "bg-black/85" : "bg-custom-white"
         }`}
         onClick={toggleDarkMode}

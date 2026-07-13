@@ -85,7 +85,7 @@ const MessageReactions = ({
             type="button"
             disabled={disabled}
             onClick={() => onReact(emoji)}
-            className={`inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-1 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
+            className={`inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
               reaction.mine
                 ? "border-[#8bdc96] bg-[#e9faec] text-[#1f5f2b]"
                 : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -102,7 +102,7 @@ const MessageReactions = ({
           <div
             id={`reaction-${emoji.codePointAt(0)}-people`}
             role="tooltip"
-            className={`pointer-events-none absolute bottom-9 z-40 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-xl shadow-slate-900/10 group-hover/reaction-chip:block group-focus-within/reaction-chip:block ${
+            className={`pointer-events-none absolute bottom-9 z-40 hidden w-56 rounded-xl border border-slate-200 bg-white p-2 text-left shadow-xl shadow-slate-900/10 group-focus-within/reaction-chip:block group-hover/reaction-chip:block ${
               align === "right" ? "right-0" : "left-0"
             }`}
           >
@@ -138,13 +138,13 @@ const MessageReactions = ({
         <div className="group/reactions relative">
           <button
             type="button"
-            className="grid h-7 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-1"
+            className="grid h-7 w-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-1 focus:outline-none"
             aria-label="Add reaction"
           >
             <SmilePlus size={15} />
           </button>
           <div
-            className={`absolute bottom-9 z-50 hidden w-max max-w-[17rem] rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10 group-hover/reactions:block group-focus-within/reactions:block ${
+            className={`absolute bottom-9 z-50 hidden w-max max-w-68 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10 group-focus-within/reactions:block group-hover/reactions:block ${
               align === "right" ? "right-0" : "left-0"
             }`}
           >
@@ -157,7 +157,7 @@ const MessageReactions = ({
                     onReact(emoji)
                     setShowMoreEmojis(false)
                   }}
-                  className="grid h-8 w-8 place-items-center rounded-full text-base transition hover:bg-[#e9faec] focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+                  className="grid h-8 w-8 place-items-center rounded-full text-base transition hover:bg-[#e9faec] focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
                   aria-label={`React with ${emoji}`}
                 >
                   {emoji}
@@ -166,7 +166,7 @@ const MessageReactions = ({
               <button
                 type="button"
                 onClick={() => setShowMoreEmojis((value) => !value)}
-                className={`ml-1 grid h-8 w-8 place-items-center rounded-full border text-slate-600 transition focus:outline-none focus:ring-2 focus:ring-[#96e6a1] ${
+                className={`ml-1 grid h-8 w-8 place-items-center rounded-full border text-slate-600 transition focus:ring-2 focus:ring-[#96e6a1] focus:outline-none ${
                   showMoreEmojis
                     ? "border-[#8bdc96] bg-[#e9faec] text-[#1f5f2b]"
                     : "border-slate-200 bg-slate-50 hover:bg-slate-100"
@@ -188,7 +188,7 @@ const MessageReactions = ({
                       onReact(emoji)
                       setShowMoreEmojis(false)
                     }}
-                    className="grid h-8 w-8 place-items-center rounded-full text-base transition hover:bg-[#e9faec] focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+                    className="grid h-8 w-8 place-items-center rounded-full text-base transition hover:bg-[#e9faec] focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
                     aria-label={`React with ${emoji}`}
                   >
                     {emoji}

@@ -67,7 +67,7 @@ const StoryViewerModal = ({ stories, initialStoryId, currentUserId, onClose }: S
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 text-white backdrop-blur-sm">
       <div className="relative flex h-[86vh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-zinc-950 shadow-2xl">
-        <div className="absolute top-0 right-0 left-0 z-20 space-y-3 bg-gradient-to-b from-black/70 to-transparent p-4">
+        <div className="absolute top-0 right-0 left-0 z-20 space-y-3 bg-linear-to-b from-black/70 to-transparent p-4">
           <div className="flex gap-1">
             {stories.map((story, index) => (
               <div key={story._id} className="h-1 flex-1 overflow-hidden rounded-full bg-white/30">
@@ -130,7 +130,13 @@ const StoryViewerModal = ({ stories, initialStoryId, currentUserId, onClose }: S
           {currentStory.media.mediaType === "image" ? (
             <img src={currentStory.media.mediaUrl} alt="" className="h-full w-full object-contain" />
           ) : (
-            <video key={currentStory._id} src={currentStory.media.mediaUrl} className="max-h-full max-w-full" controls autoPlay />
+            <video
+              key={currentStory._id}
+              src={currentStory.media.mediaUrl}
+              className="max-h-full max-w-full"
+              controls
+              autoPlay
+            />
           )}
 
           {hasMultipleStories && (
@@ -146,7 +152,7 @@ const StoryViewerModal = ({ stories, initialStoryId, currentUserId, onClose }: S
         </div>
 
         {currentStory.media.caption && (
-          <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4 pt-16">
+          <div className="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black/80 to-transparent p-4 pt-16">
             <p className="text-center text-sm font-medium">{currentStory.media.caption}</p>
           </div>
         )}

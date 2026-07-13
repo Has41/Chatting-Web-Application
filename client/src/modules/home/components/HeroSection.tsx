@@ -8,14 +8,17 @@ const HeroComponent = () => {
         <h1 className="font-mont text-[48px] font-medium">
           Empower Connections With <span className="font-semibold text-green-400">ChitChat</span>
         </h1>
-        <p className="mt-4 max-w-[700px] break-all">
+        <p className="mt-4 max-w-175 break-all">
           Lorem ipsum dolor, sit amet consectetur adipisicing elit. Est ut pariatur odit expedita reprehenderit aliquam
           asperiores harum eligendi ab quae.
         </p>
         <div className="mt-10 flex gap-x-6">
-          <button type="button" className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/90 px-2 py-1 text-white">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/90 px-2 py-1 text-white"
+          >
             <div className="pl-1">Try Out</div>
-            <div className="rounded-full bg-white p-[9px]">
+            <div className="rounded-full bg-white p-2.25">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -28,9 +31,12 @@ const HeroComponent = () => {
               </svg>
             </div>
           </button>
-          <button type="button" className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-3 py-1 font-semibold">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-3 py-1 font-semibold"
+          >
             <div>Learn More</div>
-            <div className="rounded-full bg-white p-[9px]">
+            <div className="rounded-full bg-white p-2.25">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

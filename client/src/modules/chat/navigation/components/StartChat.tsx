@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Search, X } from "lucide-react"
 import ChatLogo from "@shared/components/ChatLogo"
-import UserSearch from "@chat/conversations/components/Messages/UserSearch"
+import UserSearch from "@/modules/chat/conversations/components/messages/UserSearch"
 
 const SUGGESTIONS = [
   {
@@ -35,7 +35,7 @@ const StartChat = () => {
 
   return (
     <section className="font-poppins relative flex h-screen flex-1 overflow-hidden bg-[#f7f8fb]" aria-label="Start chat">
-      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-r from-emerald-100 via-sky-100 to-violet-100" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-r from-emerald-100 via-sky-100 to-violet-100" />
       <div className="absolute top-16 right-14 h-36 w-36 rounded-full border border-white/80 bg-white/40 blur-2xl" />
       <div className="absolute bottom-16 left-16 h-28 w-28 rounded-full border border-white/80 bg-emerald-100/60 blur-2xl" />
 

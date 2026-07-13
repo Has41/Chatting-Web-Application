@@ -98,13 +98,13 @@ const IntroSection = () => {
   return (
     <section className="font-poppins m-auto mb-8 flex h-[80vh] w-full flex-col items-center justify-center bg-slate-50">
       <div ref={introRef}>
-        <h3 className="max-w-[700px] text-2xl">
+        <h3 className="max-w-175 text-2xl">
           Stay connected <span className="rounded-xl bg-green-200 px-1">with friends and family</span>
           anytime, anywhere. Chat, share, and express yourself effortlessly
         </h3>
       </div>
       <div ref={textRef}>
-        <p className="max-w-[800px] text-xl tracking-wide">
+        <p className="max-w-200 text-xl tracking-wide">
           ChatConnect is designed to make communication seamless and fun. Whether you're catching up with old friends or
           making new ones, our app provides a{" "}
           <span className="rounded-xl bg-green-200 px-1">secure and user-friendly platform</span> to stay connected!

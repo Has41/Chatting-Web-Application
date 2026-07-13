@@ -33,19 +33,16 @@ const ConnectSection = () => {
   })
 
   return (
-    <section className="font-poppins mx-auto mt-20 flex h-[900px] w-[95%] flex-col justify-center gap-y-36 overflow-y-hidden rounded-xl bg-slate-50 px-4 shadow-sm">
+    <section className="font-poppins mx-auto mt-20 flex h-225 w-[95%] flex-col justify-center gap-y-36 overflow-y-hidden rounded-xl bg-slate-50 px-4 shadow-sm">
       <div className="flex justify-center gap-x-8">
         <div className="">
-          <h1 className="max-w-[700px] text-[45px] leading-tight text-black/90">
+          <h1 className="max-w-175 text-[45px] leading-tight text-black/90">
             Connect Instantly, Communicate Effortlessly - <span className="rounded-3xl bg-green-200 px-3">ChitChat</span>
           </h1>
           <div className="mt-6 flex justify-center gap-x-4">
             {connectIcons.map((icon) => {
               return (
-                <div
-                  key={icon.path}
-                  className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white shadow-md"
-                >
+                <div key={icon.path} className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -62,14 +59,17 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="flex flex-col gap-y-4">
-          <p className="max-w-[450px] tracking-wide">
+          <p className="max-w-112.5 tracking-wide">
             Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet tenetur error quasi. Eum illo qui illum voluptatum
             quibusdam nulla vel?
           </p>
           <div>
-            <button type="button" className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/80 px-2 py-1 text-white">
+            <button
+              type="button"
+              className="flex items-center justify-center gap-x-2 rounded-3xl bg-black/80 px-2 py-1 text-white"
+            >
               <div className="pl-1">Get Started</div>
-              <div className="rounded-full bg-white p-[9px]">
+              <div className="rounded-full bg-white p-2.25">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -87,7 +87,7 @@ const ConnectSection = () => {
       </div>
       <div className="flex flex-wrap items-center justify-center gap-x-4">
         <div className="pb-20">
-          <div className="aspect-square max-w-[300px]">
+          <div className="aspect-square max-w-75">
             <img
               className="rounded-lg object-cover"
               loading="lazy"
@@ -98,7 +98,7 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="pt-20">
-          <div className="aspect-square max-w-[300px]">
+          <div className="aspect-square max-w-75">
             <img
               className="rounded-lg object-cover"
               loading="lazy"
@@ -109,7 +109,7 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="pb-20">
-          <div className="aspect-square max-w-[300px]">
+          <div className="aspect-square max-w-75">
             <img
               className="rounded-lg object-cover"
               loading="lazy"
@@ -120,7 +120,7 @@ const ConnectSection = () => {
           </div>
         </div>
         <div className="pt-20">
-          <div className="aspect-square max-w-[300px]">
+          <div className="aspect-square max-w-75">
             <img
               className="rounded-lg object-cover"
               loading="lazy"

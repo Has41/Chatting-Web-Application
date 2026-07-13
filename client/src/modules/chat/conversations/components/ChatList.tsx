@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import useAuth from "@auth/hooks/useAuth"
 import dayjs from "dayjs"
 import GroupModal from "./GroupModal"
-import ChatSearch from "./Messages/ChatSearch"
+import ChatSearch from "./messages/ChatSearch"
 import { getChatConversationRoute, getGroupConversationRoute } from "@shared/constants/routePaths"
 import useChatList from "@chat/conversations/hooks/useChatList"
 import useFriendPresence from "@chat/conversations/hooks/useFriendPresence"
@@ -47,7 +47,7 @@ const ChatList = () => {
             <button
               type="button"
               onClick={toggleDropdown}
-              className="inline-flex size-8 items-center justify-center rounded-full text-black/80 transition hover:bg-slate-100 focus:ring-2 focus:ring-custom-green focus:outline-none"
+              className="focus:ring-custom-green inline-flex size-8 items-center justify-center rounded-full text-black/80 transition hover:bg-slate-100 focus:ring-2 focus:outline-none"
               aria-label="Open chat list menu"
               aria-expanded={showDropdown}
             >

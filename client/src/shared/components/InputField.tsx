@@ -180,7 +180,7 @@ const InputField = ({
       <div
         key={field.id}
         className={`${
-          error[field.id] ? "border-b-[1px] border-red-300" : "border-b-[1px] border-gray-300"
+          error[field.id] ? "border-b border-red-300" : "border-b border-gray-300"
         } focus-within:border-custom-border flex items-center pb-2`}
       >
         <div className="relative w-full">

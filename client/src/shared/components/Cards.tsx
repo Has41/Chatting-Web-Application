@@ -27,7 +27,7 @@ interface SlidingCardProps {
 }
 
 const IntroCard = ({ cardRef, icon, title, description }: IntroCardProps) => (
-  <div ref={cardRef} className="flex w-full max-w-[400px] flex-col gap-y-4 rounded-lg bg-white p-6 shadow-md">
+  <div ref={cardRef} className="flex w-full max-w-100 flex-col gap-y-4 rounded-lg bg-white p-6 shadow-md">
     <div className="flex items-center gap-x-3">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +57,7 @@ const CustomerCard = ({
 }: CustomerCardProps) => (
   <div
     ref={tempRef}
-    className="absolute top-0 left-0 z-20 mx-auto flex h-[400px] w-full items-center justify-center gap-x-10 gap-y-4 rounded-2xl bg-white px-4 py-2 shadow-lg"
+    className="absolute top-0 left-0 z-20 mx-auto flex h-100 w-full items-center justify-center gap-x-10 gap-y-4 rounded-2xl bg-white px-4 py-2 shadow-lg"
   >
     <div>
       <img className="rounded-2xl" src={tempImg} width={500} alt="" />
@@ -67,7 +67,7 @@ const CustomerCard = ({
         <h1 className="font-poppins text-lg font-semibold text-black/80">{tempTopic}</h1>
       </div>
       <div ref={tempDetailRef || null}>
-        <p className="font-mont max-w-[500px]">
+        <p className="font-mont max-w-125">
           We use Freshservice for everything, and that just makes it really easy—regardless of what you need as an
           employee—to know that you can always just go to this tool and you're going to get whatever you need.
         </p>
@@ -93,7 +93,7 @@ const SlidingCard = ({
   tileDetail,
   tileQuote
 }: SlidingCardProps) => (
-  <div ref={tileRef} className="mx-auto flex h-[250px] max-w-[90%] items-center gap-x-4 rounded-3xl bg-white shadow-lg">
+  <div ref={tileRef} className="mx-auto flex h-62.5 max-w-[90%] items-center gap-x-4 rounded-3xl bg-white shadow-lg">
     <div ref={subTileSectionRef} className="flex w-[40%] items-center justify-center gap-x-10 opacity-0">
       <div className="ml-7 rounded-full bg-black/80 p-4 text-white shadow-md">
         <svg

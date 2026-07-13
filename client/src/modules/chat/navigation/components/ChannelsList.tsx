@@ -27,7 +27,7 @@ const ChannelsList = () => {
   const joinChannel = useJoinChannel()
 
   const visibleChannels = useMemo<Channel[]>(
-    () => (activeTab === "my" ? myChannels.data ?? EMPTY_CHANNELS : publicChannels.data ?? EMPTY_CHANNELS),
+    () => (activeTab === "my" ? (myChannels.data ?? EMPTY_CHANNELS) : (publicChannels.data ?? EMPTY_CHANNELS)),
     [activeTab, myChannels.data, publicChannels.data]
   )
   const isLoading = activeTab === "my" ? myChannels.isLoading : publicChannels.isLoading
@@ -48,17 +48,17 @@ const ChannelsList = () => {
   }
 
   return (
-    <section className="relative flex h-screen w-1/4 min-w-[320px] max-w-[420px] shrink-0 flex-col border-r border-black/5 bg-[#f7fbf8] font-poppins">
-      <header className="border-b border-black/5 px-5 pb-4 pt-5">
+    <section className="font-poppins relative flex h-screen w-1/4 max-w-105 min-w-[320px] shrink-0 flex-col border-r border-black/5 bg-[#f7fbf8]">
+      <header className="border-b border-black/5 px-5 pt-5 pb-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f8f59]">Channels</p>
+            <p className="text-xs font-semibold tracking-[0.18em] text-[#4f8f59] uppercase">Channels</p>
             <h2 className="mt-1 text-2xl font-semibold text-[#18251b]">Spaces</h2>
           </div>
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="grid h-10 w-10 place-items-center rounded-full bg-[#96e6a1] text-[#102315] shadow-sm transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-2"
+            className="grid h-10 w-10 place-items-center rounded-full bg-[#96e6a1] text-[#102315] shadow-sm transition hover:scale-105 focus:ring-2 focus:ring-[#96e6a1] focus:ring-offset-2 focus:outline-none"
             aria-label="Create channel"
           >
             <Plus size={20} />
@@ -172,7 +172,7 @@ const ChannelListItem = ({ channel, userId, joining, onJoin }: ChannelListItemPr
     return (
       <Link
         to={getChannelConversationRoute(channel._id)}
-        className="flex items-center gap-3 rounded-[18px] bg-white p-3 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+        className="flex items-center gap-3 rounded-[18px] bg-white p-3 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
       >
         {content}
       </Link>
@@ -183,7 +183,7 @@ const ChannelListItem = ({ channel, userId, joining, onJoin }: ChannelListItemPr
     <div className="flex items-center gap-3 rounded-[18px] bg-white p-3 shadow-sm ring-1 ring-black/5">
       <Link
         to={getChannelConversationRoute(channel._id)}
-        className="min-w-0 flex-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+        className="min-w-0 flex-1 rounded-lg focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
       >
         {content}
       </Link>
@@ -222,10 +222,7 @@ const CreateChannelModal = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="absolute inset-0 z-30 flex items-end bg-black/20 p-4 backdrop-blur-sm sm:items-center sm:justify-center">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full rounded-[24px] bg-white p-5 shadow-2xl ring-1 ring-black/10 sm:max-w-md"
-      >
+      <form onSubmit={handleSubmit} className="w-full rounded-3xl bg-white p-5 shadow-2xl ring-1 ring-black/10 sm:max-w-md">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold text-[#18251b]">Create channel</h3>
@@ -234,7 +231,7 @@ const CreateChannelModal = ({ onClose }: { onClose: () => void }) => {
           <button
             type="button"
             onClick={onClose}
-            className="grid h-9 w-9 place-items-center rounded-full text-[#6e7f72] transition hover:bg-[#f0f4f1] focus:outline-none focus:ring-2 focus:ring-[#96e6a1]"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#6e7f72] transition hover:bg-[#f0f4f1] focus:ring-2 focus:ring-[#96e6a1] focus:outline-none"
             aria-label="Close"
           >
             <X size={19} />
@@ -243,24 +240,24 @@ const CreateChannelModal = ({ onClose }: { onClose: () => void }) => {
 
         <div className="mt-5 space-y-4">
           <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6b806f]">Name</span>
+            <span className="text-xs font-semibold tracking-[0.14em] text-[#6b806f] uppercase">Name</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
               maxLength={40}
-              className="mt-2 h-11 w-full rounded-2xl border border-black/10 px-4 text-sm outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40"
+              className="mt-2 h-11 w-full rounded-2xl border border-black/10 px-4 text-sm transition outline-none focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40"
               placeholder="design-club"
             />
           </label>
 
           <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6b806f]">Description</span>
+            <span className="text-xs font-semibold tracking-[0.14em] text-[#6b806f] uppercase">Description</span>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={3}
               maxLength={180}
-              className="mt-2 w-full resize-none rounded-2xl border border-black/10 px-4 py-3 text-sm outline-none transition focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40"
+              className="mt-2 w-full resize-none rounded-2xl border border-black/10 px-4 py-3 text-sm transition outline-none focus:border-[#96e6a1] focus:ring-2 focus:ring-[#96e6a1]/40"
               placeholder="What is this channel about?"
             />
           </label>

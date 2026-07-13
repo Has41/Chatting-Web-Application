@@ -182,7 +182,7 @@ const VideoCallPanel = ({
             <track kind="captions" label="Live captions unavailable" />
           </video>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center bg-[linear-gradient(145deg,_#0f172a,_#020617)] px-6 text-center">
+          <div className="flex h-full flex-col items-center justify-center bg-[linear-gradient(145deg,#0f172a,#020617)] px-6 text-center">
             <AvatarPulse peer={peer} peerName={peerName} isCallLive={isCallLive} size="large" />
             <h3 className="mt-5 max-w-full truncate text-xl font-semibold">{peerName}</h3>
             <p className="mt-2 text-sm text-white/70">{isCallLive ? callDuration : statusText}</p>
@@ -253,13 +253,13 @@ const AudioOnlyCallPanel = ({
   }, [remoteStream])
 
   return (
-    <div className="absolute top-20 left-1/2 z-40 w-[21rem] max-w-[calc(100%-2rem)] -translate-x-1/2 overflow-hidden rounded-xl bg-slate-950 text-white shadow-xl">
+    <div className="absolute top-20 left-1/2 z-40 w-84 max-w-[calc(100%-2rem)] -translate-x-1/2 overflow-hidden rounded-xl bg-slate-950 text-white shadow-xl">
       <audio ref={audioRef} autoPlay>
         <track kind="captions" label="Live captions unavailable" />
       </audio>
 
       <div className="relative px-5 pt-6 pb-4">
-        <div className="absolute inset-0 bg-[linear-gradient(145deg,_rgba(15,23,42,0.98),_rgba(2,6,23,1))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(15,23,42,0.98),rgba(2,6,23,1))]" />
         <div className="relative flex flex-col items-center text-center">
           <AvatarPulse peer={peer} peerName={peerName} isCallLive={isCallLive} size="normal" />
 
@@ -271,11 +271,11 @@ const AudioOnlyCallPanel = ({
 
           {isCallLive && (
             <div className="mt-4 flex h-6 items-end justify-center gap-1.5" aria-hidden="true">
-              <span className="h-3 w-1 rounded-full bg-emerald-300/80 animate-pulse motion-reduce:animate-none" />
-              <span className="h-5 w-1 rounded-full bg-emerald-300/90 animate-pulse [animation-delay:120ms] motion-reduce:animate-none" />
-              <span className="h-4 w-1 rounded-full bg-emerald-300/80 animate-pulse [animation-delay:240ms] motion-reduce:animate-none" />
-              <span className="h-6 w-1 rounded-full bg-emerald-300/90 animate-pulse [animation-delay:360ms] motion-reduce:animate-none" />
-              <span className="h-3 w-1 rounded-full bg-emerald-300/80 animate-pulse [animation-delay:480ms] motion-reduce:animate-none" />
+              <span className="h-3 w-1 animate-pulse rounded-full bg-emerald-300/80 motion-reduce:animate-none" />
+              <span className="h-5 w-1 animate-pulse rounded-full bg-emerald-300/90 [animation-delay:120ms] motion-reduce:animate-none" />
+              <span className="h-4 w-1 animate-pulse rounded-full bg-emerald-300/80 [animation-delay:240ms] motion-reduce:animate-none" />
+              <span className="h-6 w-1 animate-pulse rounded-full bg-emerald-300/90 [animation-delay:360ms] motion-reduce:animate-none" />
+              <span className="h-3 w-1 animate-pulse rounded-full bg-emerald-300/80 [animation-delay:480ms] motion-reduce:animate-none" />
             </div>
           )}
         </div>
@@ -403,7 +403,12 @@ const MuteCallButton = ({
   const muted = muteState === "muted"
 
   return (
-    <CallButton tone={muted ? "light" : "ghost"} onClick={onClick} label={muted ? "Unmute microphone" : "Mute microphone"} pressed={muted}>
+    <CallButton
+      tone={muted ? "light" : "ghost"}
+      onClick={onClick}
+      label={muted ? "Unmute microphone" : "Mute microphone"}
+      pressed={muted}
+    >
       {muted ? <MicOff className={iconSize} /> : <Mic className={iconSize} />}
     </CallButton>
   )
@@ -452,7 +457,9 @@ const AvatarPulse = ({
           className={`relative ${avatarSize} rounded-full border-4 border-white/15 object-cover shadow-xl`}
         />
       ) : (
-        <div className={`relative flex ${avatarSize} items-center justify-center rounded-full border-4 border-white/15 bg-slate-700 font-semibold text-white shadow-xl`}>
+        <div
+          className={`relative flex ${avatarSize} items-center justify-center rounded-full border-4 border-white/15 bg-slate-700 font-semibold text-white shadow-xl`}
+        >
           {peerName.charAt(0).toUpperCase()}
         </div>
       )}

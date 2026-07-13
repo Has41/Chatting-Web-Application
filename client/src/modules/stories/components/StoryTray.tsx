@@ -48,16 +48,20 @@ const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
           <button
             type="button"
             onClick={() => (ownStories.length > 0 ? openStoryViewer(ownStories) : setShowUploadModal(true))}
-            className={`relative mb-2 rounded-full p-[2px] ${
+            className={`relative mb-2 rounded-full p-0.5 ${
               ownStories.length > 0
-                ? "bg-gradient-to-br from-blue-500 via-fuchsia-500 to-amber-400"
-                : "bg-gradient-to-br from-slate-200 via-white to-slate-300"
+                ? "bg-linear-to-br from-blue-500 via-fuchsia-500 to-amber-400"
+                : "bg-linear-to-br from-slate-200 via-white to-slate-300"
             }`}
             title={ownStories.length > 0 ? "View your story" : "Add story"}
             aria-label={ownStories.length > 0 ? "View your story" : "Add story"}
           >
             {user?.profilePicture?.url ? (
-              <img src={user.profilePicture.url} alt="" className="size-14 rounded-full border-2 border-gray-50 object-cover" />
+              <img
+                src={user.profilePicture.url}
+                alt=""
+                className="size-14 rounded-full border-2 border-gray-50 object-cover"
+              />
             ) : (
               <div className="flex size-14 items-center justify-center rounded-full border-2 border-gray-50 bg-slate-100 text-slate-500">
                 <UserRound className="size-6" />
@@ -90,7 +94,7 @@ const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
                   className="flex w-20 shrink-0 flex-col items-center rounded-lg px-1 py-2 text-center transition hover:bg-gray-100"
                   title={ownerName}
                 >
-                  <div className="relative mb-2 rounded-full bg-gradient-to-br from-blue-500 via-fuchsia-500 to-amber-400 p-[2px]">
+                  <div className="relative mb-2 rounded-full bg-linear-to-br from-blue-500 via-fuchsia-500 to-amber-400 p-0.5">
                     {story.owner.profilePicture?.url ? (
                       <img
                         src={story.owner.profilePicture.url}

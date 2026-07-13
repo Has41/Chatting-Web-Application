@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import UserSearch from "./Messages/UserSearch"
+import UserSearch from "./messages/UserSearch"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import { USER_PATHS } from "@shared/constants/apiPaths"

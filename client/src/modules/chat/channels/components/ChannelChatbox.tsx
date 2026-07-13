@@ -1,4 +1,14 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react"
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type RefObject,
+  type SetStateAction
+} from "react"
 import { AlertCircle, Hash, Loader2, Lock, MoreVertical, Paperclip, Pencil, Send, Trash2, Users } from "lucide-react"
 import dayjs from "dayjs"
 import { useParams } from "react-router-dom"
@@ -17,7 +27,7 @@ import FileMessagePreview from "@chat/attachments/components/FileMessagePreview"
 import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
 import ChannelInfoSidebar from "./ChannelInfoSidebar"
 import EditMessageModal from "@chat/messages/components/EditMessageModal"
-import TypingIndicator from "@chat/conversations/components/Messages/TypingIndicator"
+import TypingIndicator from "@/modules/chat/conversations/components/messages/TypingIndicator"
 import MessageReactions from "@chat/messages/components/MessageReactions"
 
 type ChannelMessage = Message & {
@@ -516,7 +526,7 @@ const ChannelHeader = ({
   onOpenInfo: () => void
   onJoin: () => void
 }) => (
-  <header className="flex min-h-[78px] items-center justify-between border-b border-black/5 bg-white px-5 shadow-sm">
+  <header className="flex min-h-19.5 items-center justify-between border-b border-black/5 bg-white px-5 shadow-sm">
     <button
       type="button"
       onClick={onOpenInfo}
@@ -524,7 +534,11 @@ const ChannelHeader = ({
       aria-label="Open channel info"
     >
       <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#e5f8e8] text-[#2f733c]">
-        {channel.avatar?.url ? <img src={channel.avatar.url} alt="" className="h-full w-full object-cover" /> : <VisibilityIcon size={22} />}
+        {channel.avatar?.url ? (
+          <img src={channel.avatar.url} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <VisibilityIcon size={22} />
+        )}
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
@@ -713,7 +727,7 @@ const ChannelComposerFooter = ({
               accept={getAcceptedTypes(attachmentType)}
               onChange={onFileChange}
             />
-            <div className="flex min-h-12 flex-1 items-center rounded-[24px] bg-[#f1f6f2] px-4 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-[#96e6a1]">
+            <div className="flex min-h-12 flex-1 items-center rounded-3xl bg-[#f1f6f2] px-4 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-[#96e6a1]">
               <textarea
                 value={messageText}
                 onChange={(event) => onMessageChange(event.target.value)}
@@ -881,7 +895,7 @@ const ChannelMessageBubble = ({
         const nextReaction = reaction.users?.includes(currentUserId)
           ? { ...reaction, users: reaction.users.filter((reactionUserId) => reactionUserId !== currentUserId) }
           : reaction
-          const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
+        const reactionUserId = typeof reaction.user === "string" ? reaction.user : reaction.user?._id
         const hasGroupedUsers = !nextReaction.users || nextReaction.users.length > 0
 
         if (reactionUserId !== currentUserId && hasGroupedUsers) {
@@ -929,7 +943,7 @@ const ChannelMessageBubble = ({
                 mediaGalleryIndex={mediaGalleryIndex}
               />
             ) : (
-              <p className="text-sm leading-6 break-words whitespace-pre-wrap">{message.content || message.text}</p>
+              <p className="text-sm leading-6 wrap-break-word whitespace-pre-wrap">{message.content || message.text}</p>
             )}
             <div
               className={`flex items-center gap-2 text-[11px] ${isFileMessage ? "mt-4 px-2 pb-1" : "mt-2"} ${

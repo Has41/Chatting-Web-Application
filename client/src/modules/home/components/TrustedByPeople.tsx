@@ -110,11 +110,11 @@ const TrustedByPeople = () => {
 
   return (
     <section className="mx-auto mt-36 flex min-h-screen flex-col items-center justify-center bg-gray-50 py-20">
-      <h1 className="relative text-center text-5xl tracking-wide text-black/80 after:absolute after:bottom-[-18px] after:left-1/2 after:mt-2 after:block after:h-1 after:w-[50%] after:-translate-x-1/2 after:transform after:rounded-md after:bg-green-300">
+      <h1 className="relative text-center text-5xl tracking-wide text-black/80 after:absolute after:-bottom-4.5 after:left-1/2 after:mt-2 after:block after:h-1 after:w-[50%] after:-translate-x-1/2 after:transform after:rounded-md after:bg-green-300">
         Trusted By People
       </h1>
 
-      <div className="relative mx-auto mt-20 flex h-[400px] w-4/5 flex-col gap-y-4">
+      <div className="relative mx-auto mt-20 flex h-100 w-4/5 flex-col gap-y-4">
         <CustomerCard tempRef={temp1Ref} tempImg={tempImg} tempTopic={"Customer Stories"} tempName={"Elaira Steele"} />
         <CustomerCard
           tempRef={temp2Ref}

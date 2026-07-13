@@ -56,9 +56,9 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <div className="min-h-[480px] w-full rounded-lg bg-white px-4 py-6 tracking-wide shadow-lg">
+      <div className="min-h-120 w-full rounded-lg bg-white px-4 py-6 tracking-wide shadow-lg">
         <div className="ml-8 flex flex-col gap-y-4">
-          <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-[3rem] after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
+          <h2 className="font-poppins after:bg-dusty-grass relative text-[1.7rem] font-bold text-black/80 after:absolute after:-bottom-1 after:left-6 after:block after:h-1 after:w-12 after:-translate-x-1/2 after:transform after:rounded-xl after:content-['']">
             Login
           </h2>
           {errorMessage && <p className="font-poppins text-red-600">{errorMessage}</p>}

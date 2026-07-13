@@ -20,7 +20,7 @@ const Navbar = () => {
           className="flex items-center justify-center gap-x-2 rounded-3xl bg-slate-100 px-2 py-1 font-medium"
         >
           <div className="pl-1">Get Started</div>
-          <div className="rounded-full bg-green-300 p-[9px]">
+          <div className="rounded-full bg-green-300 p-2.25">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
