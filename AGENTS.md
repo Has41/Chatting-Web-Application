@@ -342,6 +342,52 @@ client/tests/
 - Use React Testing Library for component behavior, Vitest for units/mocks, and MSW or small typed fakes for network/socket boundaries when needed.
 - Add client scripts such as `test`, `test:watch`, and `test:coverage` only when Vitest is actually introduced.
 
+## Frontend Docs Plan
+
+Add frontend documentation under `client/docs/` when a feature, architecture decision, or integration is complex enough that future work would otherwise require rediscovery.
+
+Use this structure:
+
+```txt
+client/docs/
+  README.md
+  architecture/
+    frontend-structure.md
+    routing-and-providers.md
+    api-and-query-boundaries.md
+  modules/
+    auth.md
+    chat/
+      conversations.md
+      messages.md
+      composer.md
+      attachments.md
+      channels.md
+    calls.md
+    stories.md
+    profile.md
+  integrations/
+    sockets.md
+    react-call.md
+    react-doctor.md
+    cloudinary.md
+  testing/
+    vitest-plan.md
+    smoke-checks.md
+```
+
+Docs rules:
+
+- Keep `client/docs/README.md` as the entry point with links to the most useful docs.
+- Prefer short, decision-focused docs over long tutorials. Document ownership, data flow, commands, gotchas, and extension points.
+- Mirror feature ownership from `client/src/modules/`. For example, call log docs belong in `client/docs/modules/calls.md`, while message reaction docs belong in `client/docs/modules/chat/messages.md`.
+- Put cross-cutting integration docs in `client/docs/integrations/`, such as Socket.IO contracts, React Doctor cleanup workflow, `react-call` Callable patterns, Cloudinary upload behavior, and future LiveKit/WebRTC notes.
+- When changing architecture, socket payloads, cache keys, or reusable workflows, update the matching doc in the same pass.
+- Do not document implementation details that are obvious from a small component. Add docs when the code has hidden constraints, multi-file flows, or behavior that would be risky to infer.
+- Keep docs behavior-preserving and aligned with `AGENTS.md`, `PRODUCT.md`, and `DESIGN.md`. If a doc conflicts with those files, update the stale file instead of creating competing guidance.
+- Use plain Markdown. Mermaid diagrams are allowed for flows such as message sending, call signaling, query invalidation, or provider hierarchy.
+- Do not add a docs build system unless the user explicitly asks for a rendered docs site.
+
 ## Backend Structure Goal
 
 Move toward this NestJS structure gradually:
