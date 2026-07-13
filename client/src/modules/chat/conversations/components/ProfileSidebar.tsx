@@ -25,6 +25,13 @@ interface ProfileSidebarProps {
   setData?: Dispatch<SetStateAction<Conversation | null>>
 }
 
+type GroupManagementAction = "remove" | "transfer" | "promote" | "demote"
+
+type GroupManagementVariables = {
+  action: GroupManagementAction
+  target: User
+}
+
 const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () => {} }: ProfileSidebarProps) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -103,7 +110,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
       if (action === "promote") return groupManagementApi.promoteAdmin(conversationId, target._id)
       return groupManagementApi.demoteAdmin(conversationId, target._id)
     },
-    onSuccess: (_result, { action, target }) => {
+    onSuccess: (_result: unknown, { action, target }: GroupManagementVariables) => {
       setData((prev: Conversation | null) => {
         if (!prev) return prev
 
@@ -146,7 +153,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
 
       queryClient.invalidateQueries({ queryKey: ["groupConversation", conversationId] })
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Group management action failed:", error)
     },
     onSettled: () => {
@@ -424,7 +431,7 @@ const GroupMembersPanel = ({
   currentUserIsAdmin: boolean
   pendingAction: string | null
   onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void
-  onMemberAction: (action: "remove" | "transfer" | "promote" | "demote", member: User) => void
+  onMemberAction: (action: GroupManagementAction, member: User) => void
 }) => {
   if (!enabled) return null
 
@@ -535,7 +542,7 @@ interface GroupMemberRowProps {
   currentUserIsOwner: boolean
   currentUserIsAdmin: boolean
   pendingAction: string | null
-  onAction: (action: "remove" | "transfer" | "promote" | "demote") => void
+  onAction: (action: GroupManagementAction) => void
 }
 
 const GroupMemberRow = ({

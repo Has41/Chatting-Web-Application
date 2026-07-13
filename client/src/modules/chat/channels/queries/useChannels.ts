@@ -53,7 +53,7 @@ export const useJoinChannel = () => {
 
   return useMutation({
     mutationFn: (channelId: string) => channelsApi.joinChannel(channelId),
-    onSuccess: (_data, channelId) => {
+    onSuccess: (_data: { message: string }, channelId: string) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
       queryClient.invalidateQueries({ queryKey: ["channels", "public"] })
@@ -66,7 +66,7 @@ export const useLeaveChannel = () => {
 
   return useMutation({
     mutationFn: (channelId: string) => channelsApi.leaveChannel(channelId),
-    onSuccess: (_data, channelId) => {
+    onSuccess: (_data: { message: string }, channelId: string) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
       queryClient.invalidateQueries({ queryKey: ["channels", "public"] })
@@ -80,7 +80,7 @@ export const useUpdateChannel = () => {
   return useMutation({
     mutationFn: ({ channelId, payload }: { channelId: string; payload: UpdateChannelPayload }) =>
       channelsApi.updateChannel(channelId, payload),
-    onSuccess: (_data, { channelId }) => {
+    onSuccess: (_data: Awaited<ReturnType<typeof channelsApi.updateChannel>>, { channelId }: { channelId: string; payload: UpdateChannelPayload }) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
       queryClient.invalidateQueries({ queryKey: ["channels", "public"] })
@@ -106,7 +106,7 @@ export const useAddChannelMembers = () => {
   return useMutation({
     mutationFn: ({ channelId, members }: { channelId: string; members: string[] }) =>
       channelsApi.addChannelMembers(channelId, members),
-    onSuccess: (_data, { channelId }) => {
+    onSuccess: (_data: Awaited<ReturnType<typeof channelsApi.addChannelMembers>>, { channelId }: { channelId: string; members: string[] }) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
     }
@@ -119,7 +119,7 @@ export const useRemoveChannelMembers = () => {
   return useMutation({
     mutationFn: ({ channelId, members }: { channelId: string; members: string[] }) =>
       channelsApi.removeChannelMembers(channelId, members),
-    onSuccess: (_data, { channelId }) => {
+    onSuccess: (_data: Awaited<ReturnType<typeof channelsApi.removeChannelMembers>>, { channelId }: { channelId: string; members: string[] }) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
     }
@@ -132,7 +132,7 @@ export const useTransferChannelOwnership = () => {
   return useMutation({
     mutationFn: ({ channelId, newOwnerId }: { channelId: string; newOwnerId: string }) =>
       channelsApi.transferChannelOwnership(channelId, newOwnerId),
-    onSuccess: (_data, { channelId }) => {
+    onSuccess: (_data: Awaited<ReturnType<typeof channelsApi.transferChannelOwnership>>, { channelId }: { channelId: string; newOwnerId: string }) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
     }
@@ -145,7 +145,7 @@ export const usePromoteChannelAdmin = () => {
   return useMutation({
     mutationFn: ({ channelId, targetUserId }: { channelId: string; targetUserId: string }) =>
       channelsApi.promoteChannelAdmin(channelId, targetUserId),
-    onSuccess: (_data, { channelId }) => {
+    onSuccess: (_data: Awaited<ReturnType<typeof channelsApi.promoteChannelAdmin>>, { channelId }: { channelId: string; targetUserId: string }) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
     }
   })
@@ -157,7 +157,7 @@ export const useDemoteChannelAdmin = () => {
   return useMutation({
     mutationFn: ({ channelId, targetUserId }: { channelId: string; targetUserId: string }) =>
       channelsApi.demoteChannelAdmin(channelId, targetUserId),
-    onSuccess: (_data, { channelId }) => {
+    onSuccess: (_data: Awaited<ReturnType<typeof channelsApi.demoteChannelAdmin>>, { channelId }: { channelId: string; targetUserId: string }) => {
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
     }
   })

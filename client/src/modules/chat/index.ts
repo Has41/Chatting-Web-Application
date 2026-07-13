@@ -1,6 +1,5 @@
 export * from "./conversations/hooks/useChatList"
 export * from "./socket/useChatSocket"
-export * from "./conversations/types/chat"
 export * from "./conversations/api/chatApi"
 export * from "./conversations/queries/chatQueries"
 export * from "./conversations/state/chatBoxState"

@@ -16,7 +16,7 @@ export interface MessageFileMeta {
 export interface SendMessagePayload {
   messageType: "text" | "file"
   conversationId?: string
-  fileMeta?: MessageFileMeta
+  fileMeta?: MessageFileMeta | null
   content?: string
   messageContent?: string
   clientTempId?: string

@@ -8,7 +8,7 @@ interface AuthContextType {
   setUser: (user: User | null) => void
   isAuthenticated: boolean
   setIsAuthenticated: (isAuthenticated: boolean) => void
-  refetch: () => void
+  refetch: ReturnType<typeof useCurrentUserQuery>["refetch"]
   isLoading: boolean
 }
 

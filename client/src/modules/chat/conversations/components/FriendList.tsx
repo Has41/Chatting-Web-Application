@@ -40,8 +40,9 @@ const FriendList = () => {
     }
   })
 
-  const friendList = friendsData?.friends || []
-  const friendRequests = friendsData?.friendRequests || []
+  const friendList: User[] = friendsData?.friends || []
+  const friendRequests: FriendRequest[] = friendsData?.friendRequests || []
+  const friendConversations: FriendConversation[] = friendConversationData?.conversations || []
 
   useEffect(() => {
     if (!friendsError) return
@@ -49,7 +50,7 @@ const FriendList = () => {
   }, [friendsError])
 
   const getFriendChatRoute = (friendId: string) => {
-    const existingConversation = friendConversationData?.conversations?.find((conversation) =>
+    const existingConversation = friendConversations.find((conversation) =>
       conversation.participants?.some((participant) => participant?._id === friendId)
     )
 

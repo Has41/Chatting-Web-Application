@@ -26,13 +26,13 @@ const ChannelsList = () => {
   const publicChannels = usePublicChannels(query.trim())
   const joinChannel = useJoinChannel()
 
-  const visibleChannels = useMemo(
+  const visibleChannels = useMemo<Channel[]>(
     () => (activeTab === "my" ? myChannels.data ?? EMPTY_CHANNELS : publicChannels.data ?? EMPTY_CHANNELS),
     [activeTab, myChannels.data, publicChannels.data]
   )
   const isLoading = activeTab === "my" ? myChannels.isLoading : publicChannels.isLoading
 
-  const filteredMyChannels = useMemo(() => {
+  const filteredMyChannels = useMemo<Channel[]>(() => {
     if (activeTab !== "my" || !query.trim()) return visibleChannels
     const normalizedQuery = query.trim().toLowerCase()
     return visibleChannels.filter((channel) =>

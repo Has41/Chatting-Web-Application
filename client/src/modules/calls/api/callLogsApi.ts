@@ -10,7 +10,7 @@ const emitCallLogEvent = (userId?: string) => {
   window.dispatchEvent(new CustomEvent(CALL_LOG_EVENT, { detail: { userId } }))
 }
 
-export const getCallLogs = async () => {
+export const getCallLogs = async (): Promise<CallLogEntry[]> => {
   const response = await axiosInstance.get<{ callLogs: CallLogEntry[] }>(CALL_PATHS.BASE)
   return response.data.callLogs
 }

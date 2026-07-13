@@ -24,7 +24,7 @@ export const useChatSocket = (config?: any) => {
   const conversationIdRef = useRef(conversationId)
   const typeRef = useRef(type)
   const setMessagesRef = useRef(setMessages)
-  const typingTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const typingTimeoutsRef = useRef<Record<string, number>>({})
 
   const mergeIncomingMessage = useCallback((incomingMessage: any) => {
     setMessagesRef.current?.((prev: any[]) => {

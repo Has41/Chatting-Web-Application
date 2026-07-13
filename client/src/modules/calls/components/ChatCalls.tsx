@@ -60,7 +60,8 @@ const ChatCalls = () => {
   const callSocket = useCallSocket(user?._id)
   const [openCallMenuId, setOpenCallMenuId] = useState<string | null>(null)
   const [activeCallPeer, setActiveCallPeer] = useState<User | null>(null)
-  const { data: logs = [] } = useCallLogsQuery(user?._id)
+  const { data: callLogs } = useCallLogsQuery(user?._id)
+  const logs: CallLogEntry[] = callLogs ?? []
 
   const openConversation = (peerId: string) => {
     if (isChatListLoading) return

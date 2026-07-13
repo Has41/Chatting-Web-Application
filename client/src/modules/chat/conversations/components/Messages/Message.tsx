@@ -54,6 +54,16 @@ interface MessageProps {
   mediaGalleryIndex?: number
 }
 
+type EditMessageVariables = {
+  messageId: string
+  content: string
+  field?: "content" | "caption"
+}
+
+type MessageMutationContext = {
+  previousMessages?: unknown
+}
+
 const Message = ({
   isSender,
   message,
@@ -189,14 +199,14 @@ const Message = ({
         [field === "caption" ? "caption" : "content"]: content
       })
     },
-    onMutate: async ({ messageId, content, field = "content" }) => {
+    onMutate: async ({ messageId, content, field = "content" }: EditMessageVariables): Promise<MessageMutationContext> => {
       await queryClient.cancelQueries({ queryKey: ["getUserMessages", conversationId] })
       const previousMessages = queryClient.getQueryData(["getUserMessages", conversationId])
       updateMessageInState(messageId, content, field)
       setShowDropdown(false)
       return { previousMessages }
     },
-    onError: (error: unknown, _variables, context) => {
+    onError: (error: unknown, _variables: EditMessageVariables, context: MessageMutationContext | undefined) => {
       if (context?.previousMessages) {
         queryClient.setQueryData(["getUserMessages", conversationId], context.previousMessages)
       }
@@ -218,14 +228,14 @@ const Message = ({
     mutationFn: async (messageId: string) => {
       return await axiosInstance.delete(`${MESSAGE_PATHS.DELETE_MESSAGE}/${messageId}`)
     },
-    onMutate: async (messageId) => {
+    onMutate: async (messageId: string): Promise<MessageMutationContext> => {
       await queryClient.cancelQueries({ queryKey: ["getUserMessages", conversationId] })
       const previousMessages = queryClient.getQueryData(["getUserMessages", conversationId])
       removeMessageFromState(messageId)
       setShowDropdown(false)
       return { previousMessages }
     },
-    onError: (error: unknown, _messageId, context) => {
+    onError: (error: unknown, _messageId: string, context: MessageMutationContext | undefined) => {
       if (context?.previousMessages) {
         queryClient.setQueryData(["getUserMessages", conversationId], context.previousMessages)
       }

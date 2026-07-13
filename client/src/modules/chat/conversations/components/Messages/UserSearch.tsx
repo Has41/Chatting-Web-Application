@@ -39,7 +39,7 @@ const UserSearch = ({
     enabled: searchQuery.trim().length >= 3
   })
 
-  const userResults = searchData ?? []
+  const userResults: UserSearchResult[] = searchData ?? []
 
   useEffect(() => {
     if (!searchError) return
@@ -59,14 +59,18 @@ const UserSearch = ({
     mutationFn: async (userId: string) => {
       return axiosInstance.post(`${USER_PATHS.SEND_FRIEND_REQUEST}/${userId}`)
     },
-    onSuccess: (_data, userId) => {
-      queryClient.setQueriesData<UserSearchResult[]>({ queryKey: ["userSearch"] }, (results) =>
-        results?.map((result) => (result._id === userId ? { ...result, isRequestSent: true } : result))
+    onSuccess: (_data: unknown, userId: string) => {
+      queryClient.setQueriesData({ queryKey: ["userSearch"] }, (results: unknown) =>
+        Array.isArray(results)
+          ? results.map((result: UserSearchResult) =>
+              result._id === userId ? { ...result, isRequestSent: true } : result
+            )
+          : results
       )
       queryClient.invalidateQueries({ queryKey: ["userSearch"] })
       queryClient.invalidateQueries({ queryKey: ["friendList&Requests"] })
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error sending friend request:", error)
     }
   })

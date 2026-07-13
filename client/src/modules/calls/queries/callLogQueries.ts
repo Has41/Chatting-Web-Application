@@ -1,7 +1,6 @@
 import { useEffect } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getCallLogs, subscribeToCallLogs } from "@calls/api/callLogsApi"
-import type { CallLogEntry } from "@calls/types/callLogs"
 
 export const callLogKeys = {
   all: ["callLogs"] as const,
@@ -11,7 +10,7 @@ export const callLogKeys = {
 export const useCallLogsQuery = (userId?: string) => {
   const queryClient = useQueryClient()
 
-  const query = useQuery<CallLogEntry[]>({
+  const query = useQuery({
     queryKey: callLogKeys.byUser(userId),
     queryFn: getCallLogs,
     enabled: Boolean(userId)

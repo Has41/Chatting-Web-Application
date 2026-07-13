@@ -6,10 +6,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
 import { channelKeys, useChannel, useJoinChannel } from "../queries/useChannels"
 import { useChannelMessages } from "../queries/useChannelMessages"
-import { useChannelSocket } from "../hooks/useChannelSocket"
+import { useChannelSocket, type ChannelTypingUser } from "../hooks/useChannelSocket"
 import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
-import type { Message, User } from "@shared/types"
+import type { Channel, Message, User } from "@shared/types"
 import type { FileType, SendMessagePayload } from "@chat/attachments/types/attachments"
 import AttachmentMenu from "@chat/composer/components/AttachmentMenu"
 import FilePreviewModal from "@chat/attachments/components/FilePreviewModal"
@@ -24,6 +24,12 @@ type ChannelMessage = Message & {
   channel?: string
   clientTempId?: string
   localStatus?: "sending" | "failed"
+}
+
+type EditChannelMessageVariables = {
+  messageId: string
+  content: string
+  field?: "content" | "caption"
 }
 
 const getSender = (sender: string | User): User | null => (typeof sender === "string" ? null : sender)
@@ -62,7 +68,7 @@ const ChannelChatbox = () => {
   const channelQuery = useChannel(channelId)
   const messagesQuery = useChannelMessages(channelId)
   const joinChannel = useJoinChannel()
-  const channel = channelQuery.data
+  const channel = channelQuery.data as Channel | undefined
   const isChannelMember = Boolean(
     channel && user?._id && channel.members.some((member) => getChannelUserId(member) === user._id)
   )
@@ -82,7 +88,7 @@ const ChannelChatbox = () => {
   })
 
   const fetchedMessages = useMemo<ChannelMessage[]>(
-    () => messagesQuery.data?.pages.flatMap((page) => page.messages as ChannelMessage[]) ?? [],
+    () => messagesQuery.data?.pages.flatMap((page: { messages: Message[] }) => page.messages as ChannelMessage[]) ?? [],
     [messagesQuery.data]
   )
 
@@ -112,31 +118,28 @@ const ChannelChatbox = () => {
   const mediaGallery = useMemo<MediaViewerItem[]>(
     () =>
       messages.reduce<MediaViewerItem[]>((items, message) => {
-        if (
-          message.messageType !== "file" ||
-          !message.media?.mediaUrl ||
-          !["image", "video"].includes(message.media.mediaType || "")
-        ) {
+        const mediaType = message.media?.mediaType
+        if (message.messageType !== "file" || !message.media?.mediaUrl || (mediaType !== "image" && mediaType !== "video")) {
           return items
         }
 
         items.push({
           mediaUrl: message.media.mediaUrl,
-          mediaType: message.media.mediaType ?? "",
-          title: message.media.caption || message.media.fileName || channelQuery.data?.name
+          mediaType,
+          title: message.media.caption || message.media.fileName || channel?.name
         })
         return items
       }, []),
-    [channelQuery.data?.name, messages]
+    [channel?.name, messages]
   )
   const typingMember = useMemo(() => {
     const typingUserId = typingUsers[0]?.userId
-    if (!typingUserId || !channelQuery.data) return null
-    const member = channelQuery.data.members.find(
+    if (!typingUserId || !channel) return null
+    const member = channel.members.find(
       (channelMember) => typeof channelMember !== "string" && channelMember._id === typingUserId
     )
-    return typeof member === "string" ? null : member
-  }, [channelQuery.data, typingUsers])
+    return typeof member === "string" ? null : (member ?? null)
+  }, [channel, typingUsers])
   const composer = useChannelComposer({
     channelId,
     user,
@@ -506,7 +509,7 @@ const ChannelHeader = ({
   onOpenInfo,
   onJoin
 }: {
-  channel: NonNullable<ReturnType<typeof useChannel>["data"]>
+  channel: Channel
   VisibilityIcon: typeof Hash
   isPublicPreview: boolean
   isJoining: boolean
@@ -561,7 +564,7 @@ const ChannelMessagesPanel = ({
 }: {
   isLoading: boolean
   messages: ChannelMessage[]
-  typingUsers: Array<{ userId?: string; username?: string }>
+  typingUsers: ChannelTypingUser[]
   typingMember: User | null
   currentUserId?: string
   channelId: string
@@ -830,7 +833,7 @@ const ChannelMessageBubble = ({
         [field === "caption" ? "caption" : "content"]: content
       })
     },
-    onMutate: ({ messageId, content, field = "content" }) => {
+    onMutate: ({ messageId, content, field = "content" }: EditChannelMessageVariables) => {
       onUpdateMessage(messageId, (currentMessage) => ({
         ...currentMessage,
         content: field === "content" ? content : currentMessage.content,
@@ -842,7 +845,7 @@ const ChannelMessageBubble = ({
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: channelKeys.messages(channelId) })
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error editing channel message:", error)
     }
   })
@@ -851,7 +854,7 @@ const ChannelMessageBubble = ({
     mutationFn: async (messageId: string) => {
       return axiosInstance.delete(`${MESSAGE_PATHS.DELETE_MESSAGE}/${messageId}`)
     },
-    onMutate: (messageId) => {
+    onMutate: (messageId: string) => {
       onRemoveMessage(messageId)
       setShowActions(false)
     },
@@ -860,7 +863,7 @@ const ChannelMessageBubble = ({
       queryClient.invalidateQueries({ queryKey: channelKeys.detail(channelId) })
       queryClient.invalidateQueries({ queryKey: channelKeys.my })
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error deleting channel message:", error)
     }
   })

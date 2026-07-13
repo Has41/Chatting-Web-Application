@@ -4,7 +4,7 @@ import { ROOT_FOLDER } from "@shared/constants/constantValues"
 import useAuth from "@auth/hooks/useAuth"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import PDFPreview from "@chat/attachments/components/PDFPreview"
-import type { FilePreviewModalProps } from "@chat/attachments/types/attachments"
+import type { FilePreviewModalProps, FileType } from "@chat/attachments/types/attachments"
 import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
 
 const createTempMessageId = () => `temp-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`
@@ -30,7 +30,7 @@ const FilePreviewModal = ({
         fileName: file.name
       })
     : "other"
-  const actualAttachmentType =
+  const actualAttachmentType: FileType =
     resolvedFileType === "image" || resolvedFileType === "video" || resolvedFileType === "audio" ? resolvedFileType : "document"
 
   useEffect(() => {

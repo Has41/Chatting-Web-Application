@@ -30,6 +30,7 @@ export interface Message {
   content?: string
   messageType?: string
   media?: {
+    publicId?: string
     mediaUrl?: string
     fileName?: string
     thumbnailUrl?: string

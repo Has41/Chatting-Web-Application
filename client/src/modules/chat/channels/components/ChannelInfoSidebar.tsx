@@ -726,7 +726,7 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
   )
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds])
 
-  const { data = [], isFetching, error } = useQuery({
+  const { data, isFetching, error } = useQuery({
     queryKey: ["channelMemberSearch", query],
     queryFn: async () => {
       const response = await axiosInstance.get<UserSearchResult[]>(USER_PATHS.SEARCH_FRIENDS_USERS, {
@@ -736,6 +736,7 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
     },
     enabled: query.trim().length >= 3
   })
+  const searchResults: UserSearchResult[] = data ?? []
 
   useEffect(() => {
     if (!error) return
@@ -743,8 +744,8 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
   }, [error])
 
   const candidates = useMemo(
-    () => data.filter((candidate) => !memberIds.has(candidate._id)),
-    [data, memberIds]
+    () => searchResults.filter((candidate) => !memberIds.has(candidate._id)),
+    [searchResults, memberIds]
   )
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {

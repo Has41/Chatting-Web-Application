@@ -23,7 +23,7 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
   const [typingUsers, setTypingUsers] = useState<ChannelTypingUser[]>([])
   const channelIdRef = useRef(channelId)
   const setMessagesRef = useRef(setMessages)
-  const typingTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const typingTimeoutsRef = useRef<Record<string, number>>({})
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -149,8 +149,9 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
     }
 
     const handleReactionUpdated = (data: { message?: Message }) => {
-      if (data?.message?.channel?.toString() !== channelIdRef.current?.toString()) return
-      mergeReactionUpdate(data.message)
+      const updatedMessage = data?.message
+      if (!updatedMessage || updatedMessage.channel?.toString() !== channelIdRef.current?.toString()) return
+      mergeReactionUpdate(updatedMessage)
     }
 
     socket.on("connect", handleConnect)

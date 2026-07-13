@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
 import { useChannelFiles } from "../queries/useChannels"
+import type { ChannelFilesResponse } from "../api/channelsApi"
 
 interface ChannelInfoFilesProps {
   channelId: string
@@ -48,11 +49,12 @@ const getFileBadge = (fileType: string) => {
 const ChannelInfoFiles = ({ channelId }: ChannelInfoFilesProps) => {
   const [activeFilter, setActiveFilter] = useState<FileFilter>("all")
   const { data, isLoading } = useChannelFiles(channelId)
+  const channelFilesData = data as ChannelFilesResponse | undefined
 
   const files = useMemo<ChannelFile[]>(() => {
-    if (!Array.isArray(data?.files)) return []
-    return data.files.map((file) => ({ _id: file._id, ...file.media, createdAt: file.createdAt }))
-  }, [data])
+    if (!Array.isArray(channelFilesData?.files)) return []
+    return channelFilesData.files.map((file) => ({ _id: file._id, ...file.media, createdAt: file.createdAt }))
+  }, [channelFilesData])
 
   const resolvedFiles = useMemo<ResolvedChannelFile[]>(() => {
     return files.map((file) => {
