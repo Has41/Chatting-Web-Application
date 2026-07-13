@@ -1,8 +1,8 @@
 import { createPortal } from "react-dom"
-import GroupModalHeader from "./group-modal/GroupModalHeader"
-import GroupModalSearch from "./group-modal/GroupModalSearch"
-import GroupModalMemberSections from "./group-modal/GroupModalMemberSections"
-import CreateGroupButton from "./group-modal/CreateGroupButton"
+import GroupModalHeader from "./GroupModalHeader"
+import GroupModalSearch from "./GroupModalSearch"
+import GroupModalMemberSections from "./GroupModalMemberSections"
+import CreateGroupButton from "./CreateGroupButton"
 import { useGroupModal } from "@chat/conversations/hooks/useGroupModal"
 
 interface GroupModalProps {

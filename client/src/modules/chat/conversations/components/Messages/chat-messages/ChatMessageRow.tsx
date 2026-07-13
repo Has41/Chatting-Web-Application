@@ -1,4 +1,4 @@
-import Message from "./Message"
+import Message from "../Message"
 import { getMessageSenderId } from "@chat/conversations/utils/chatMessages"
 import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
 import type {
