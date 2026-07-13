@@ -1,8 +1,5 @@
 import { useState } from "react"
-import { useMutation } from "@tanstack/react-query"
-import { USER_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/api/api-client"
-import useAuth from "@auth/hooks/useAuth"
+import { useAddInterestMutation, useRemoveInterestMutation } from "@profile/queries/profileQueries"
 
 interface UpdateInterestsProps {
   currentInterests?: string[]
@@ -11,32 +8,10 @@ interface UpdateInterestsProps {
 const EMPTY_INTERESTS: string[] = []
 
 const UpdateInterests = ({ currentInterests = EMPTY_INTERESTS }: UpdateInterestsProps) => {
-  const { refetch } = useAuth()
   const [input, setInput] = useState("")
 
-  const { mutate: insertInterest } = useMutation({
-    mutationFn: async (data: { newInterest: string }) => {
-      return await axiosInstance.post(USER_PATHS.ADD_INTEREST, data)
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
-
-  const { mutate: removeInterest } = useMutation({
-    mutationFn: async (data: { interestToRemove: string }) => {
-      return await axiosInstance.delete(USER_PATHS.REMOVE_INTEREST, { data })
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
+  const { mutate: insertInterest } = useAddInterestMutation()
+  const { mutate: removeInterest } = useRemoveInterestMutation()
 
   const addUserInterest = () => {
     const newInterest = input.trim()

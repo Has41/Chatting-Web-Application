@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { getCurrentUser, saveProfilePicture } from "@auth/api/authApi"
+import { getCurrentUser, logout, saveProfilePicture } from "@auth/api/authApi"
 import { USER_PATHS } from "@shared/constants/apiPaths"
 
 export const useCurrentUserQuery = () => {
@@ -19,6 +19,17 @@ export const useSaveProfilePictureMutation = () => {
     mutationFn: saveProfilePicture,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [USER_PATHS.GET_INFO] })
+    }
+  })
+}
+
+export const useLogoutMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      queryClient.clear()
     }
   })
 }

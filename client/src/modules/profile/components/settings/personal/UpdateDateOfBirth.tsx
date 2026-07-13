@@ -2,10 +2,7 @@ import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
-import { USER_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/api/api-client"
-import useAuth from "@auth/hooks/useAuth"
+import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
 
 const dateOfBirthSchema = z.object({
   day: z.string().nonempty("Day is required"),
@@ -38,7 +35,6 @@ const CURRENT_YEAR = new Date().getFullYear()
 const YEARS = Array.from({ length: 121 }, (_, i) => CURRENT_YEAR - i)
 
 const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
-  const { refetch } = useAuth()
   const currentFormattedDate = currentDateOfBirth?.split("T")[0] ?? ""
   const defaultValues = useMemo(() => {
     const [year = "", month = "", day = ""] = currentFormattedDate.split("-")
@@ -66,17 +62,11 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
   const isSameDate = newDateString === currentFormattedDate
   const disableButton = isIncomplete || isSameDate
 
-  const { mutate } = useMutation({
-    mutationFn: async (data: { dateOfBirth: string }) => {
-      return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
+  const { mutate } = useUpdateProfileMutation()
+
+  const saveDateOfBirth = (dateOfBirth: string) => {
+    mutate({ dateOfBirth })
+  }
 
   const onSubmit = (data: DateOfBirthFormData) => {
     const dateString = `${data.year}-${data.month}-${data.day}`
@@ -86,7 +76,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
       return
     }
 
-    mutate({ dateOfBirth: dateString })
+    saveDateOfBirth(dateString)
   }
 
   return (

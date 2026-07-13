@@ -12,3 +12,8 @@ export const saveProfilePicture = async (payload: SaveProfilePicturePayload): Pr
   const { data } = await axiosInstance.post<SaveProfilePictureResponse>(AUTH_PATHS.SAVE_PROFILE_PIC, payload)
   return data
 }
+
+export const logout = async () => {
+  const { data } = await axiosInstance.post(AUTH_PATHS.LOG_OUT)
+  return data
+}

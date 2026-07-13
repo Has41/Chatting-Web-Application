@@ -1,11 +1,8 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
 import { bioSchema } from "@shared/utils/zodSchema"
-import { USER_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/api/api-client"
-import useAuth from "@auth/hooks/useAuth"
+import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
 
 interface UpdateBioProps {
   currentBio?: string
@@ -16,7 +13,6 @@ interface BioFormData {
 }
 
 const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
-  const { refetch } = useAuth()
   const {
     watch,
     register,
@@ -35,17 +31,7 @@ const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
   const bio = watch("bio")
   const disableButton = !bio || bio === currentBio
 
-  const { mutate } = useMutation({
-    mutationFn: async (data: BioFormData) => {
-      return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
+  const { mutate } = useUpdateProfileMutation()
 
   const onSubmit = (data: BioFormData) => {
     mutate(data)

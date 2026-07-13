@@ -1,11 +1,8 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
 import { displayNameSchema } from "@shared/utils/zodSchema"
-import axiosInstance from "@shared/api/api-client"
-import { USER_PATHS } from "@shared/constants/apiPaths"
-import useAuth from "@auth/hooks/useAuth"
+import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
 
 interface UpdateDisplayNameProps {
   currentDisplayName?: string
@@ -16,7 +13,6 @@ interface DisplayNameFormData {
 }
 
 const UpdateDisplayName = ({ currentDisplayName = "" }: UpdateDisplayNameProps) => {
-  const { refetch } = useAuth()
   const {
     register,
     reset,
@@ -31,17 +27,7 @@ const UpdateDisplayName = ({ currentDisplayName = "" }: UpdateDisplayNameProps) 
     reset({ displayName: currentDisplayName })
   }, [currentDisplayName, reset])
 
-  const { mutate } = useMutation({
-    mutationFn: async (data: DisplayNameFormData) => {
-      return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
+  const { mutate } = useUpdateProfileMutation()
 
   const onSubmit = (data: DisplayNameFormData) => {
     mutate(data)

@@ -1,12 +1,9 @@
 import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
 import countryList from "react-select-country-list"
 import { locationSchema } from "@shared/utils/zodSchema"
-import axiosInstance from "@shared/api/api-client"
-import { USER_PATHS } from "@shared/constants/apiPaths"
-import useAuth from "@auth/hooks/useAuth"
+import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
 
 interface UpdateLocationProps {
   currentLocation?: string
@@ -22,7 +19,6 @@ interface CountryOption {
 }
 
 const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
-  const { refetch } = useAuth()
   const options = useMemo(() => countryList().getData(), [])
   const currentCountry = useMemo(() => {
     const found = options.find((option: CountryOption) => option.label === currentLocation || option.value === currentLocation)
@@ -47,17 +43,7 @@ const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
   const location = watch("location")
   const disableButton = !location || location === currentCountry
 
-  const { mutate } = useMutation({
-    mutationFn: async (data: LocationFormData) => {
-      return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
+  const { mutate } = useUpdateProfileMutation()
 
   const onSubmit = (data: LocationFormData) => {
     mutate(data)

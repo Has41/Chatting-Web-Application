@@ -1,18 +1,16 @@
 import { useEffect } from "react"
-import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { genderSchema } from "@shared/utils/zodSchema"
-import { USER_PATHS } from "@shared/constants/apiPaths"
-import axiosInstance from "@shared/api/api-client"
-import useAuth from "@auth/hooks/useAuth"
+import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
+import type { ProfileGender } from "@profile/types/profile"
 
 interface UpdateGenderProps {
   currentGender?: string
 }
 
 interface GenderFormData {
-  gender: "Male" | "Female" | "Prefer not to say"
+  gender: ProfileGender
 }
 
 const GENDERS = [
@@ -22,7 +20,6 @@ const GENDERS = [
 ] as const
 
 const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
-  const { refetch } = useAuth()
   const normalizedGender = ["Male", "Female", "Prefer not to say"].includes(currentGender)
     ? (currentGender as GenderFormData["gender"])
     : "Prefer not to say"
@@ -45,17 +42,7 @@ const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
   const selectedGender = watch("gender")
   const disableButton = selectedGender === normalizedGender
 
-  const { mutate } = useMutation({
-    mutationFn: async (data: GenderFormData) => {
-      return await axiosInstance.patch(USER_PATHS.EDIT_PROFILE, data)
-    },
-    onSuccess: () => {
-      refetch()
-    },
-    onError: (error: unknown) => {
-      console.error(error)
-    }
-  })
+  const { mutate } = useUpdateProfileMutation()
 
   const onSubmit = (data: GenderFormData) => {
     mutate(data)
