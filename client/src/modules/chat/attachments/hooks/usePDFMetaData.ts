@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 interface PDFMeta {
   numPages: number
@@ -15,7 +15,7 @@ export const usePDFMetaData = (mediaUrl?: string, _width?: number) => {
   const [error, setError] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
-  const extractMeta = useCallback(async (file: File): Promise<PDFMeta | null> => {
+  const extractMeta = async (file: File): Promise<PDFMeta | null> => {
     setLoading(true)
     setError(null)
 
@@ -48,13 +48,13 @@ export const usePDFMetaData = (mediaUrl?: string, _width?: number) => {
       setLoading(false)
       return null
     }
-  }, [])
+  }
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setMeta(null)
     setLoading(false)
     setError(null)
-  }, [])
+  }
 
   return {
     meta,

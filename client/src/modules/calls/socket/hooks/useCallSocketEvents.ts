@@ -104,10 +104,8 @@ export const useCallSocketEvents = ({
       socket.off("call-unavailable", handleCallUnavailable)
       socket.off("ice-candidate", handleIceCandidate)
       socket.off("end-call", handleEndCall)
-      if (refs.socketRef.current === socket) {
-        socket.disconnect()
-        refs.clearSocket(socket)
-      }
+      socket.disconnect()
+      refs.clearSocket(socket)
       resetCall()
     }
   }, [addPendingCandidates, dispatch, finishActiveCallLog, refs, rememberCallLog, resetCall, userId])

@@ -147,7 +147,16 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
 
   const handleMemberAction = (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
     if (action === "promote" || action === "demote") {
-      void executeMemberAction(action, target)
+      setConfirmation({
+        title: action === "promote" ? "Make admin?" : "Remove admin?",
+        description:
+          action === "promote"
+            ? `${getUserLabel(target)} will be able to manage ${channel.name}.`
+            : `${getUserLabel(target)} will lose admin tools for ${channel.name}.`,
+        confirmLabel: action === "promote" ? "Make admin" : "Remove admin",
+        tone: "warning",
+        action: { type: "member", memberAction: action, target }
+      })
       return
     }
 

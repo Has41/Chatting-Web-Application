@@ -1,9 +1,9 @@
-import { useForm } from "react-hook-form"
+import { useForm, type SubmitHandler } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { loginFields } from "@shared/utils/dynamicData"
 import InputField from "@shared/components/InputField"
 import axiosInstance from "@shared/api/api-client"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { AUTH_PATHS, CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import { loginSchema } from "@shared/utils/zodSchema"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
@@ -15,6 +15,7 @@ import type { AxiosError } from "axios"
 
 const Login = ({ onButtonClick }: AuthSwitchProps) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const { setIsAuthenticated, setUser, refetch } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -24,15 +25,14 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
     handleSubmit,
     trigger,
     formState: { errors }
-  } = useForm({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema)
   })
 
-  const { mutate, isPending: isLoading } = useMutation({
-    mutationFn: async (credentials: LoginFormData) => {
-      return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
-    },
-    onSuccess: async () => {
+  const handleLoginSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    setIsLoading(true)
+    try {
+      await axiosInstance.post(AUTH_PATHS.LOGIN, data)
       setErrorMessage(null)
       const currentUser = await refetch()
       if (currentUser.data) {
@@ -44,15 +44,17 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
         queryClient.invalidateQueries({ queryKey: ["friendConversations"] })
       ])
       navigate("/chat")
-    },
-    onError: (error: AxiosError<{ message?: string }>) => {
-      setErrorMessage(error?.response?.data?.message ?? "An unexpected error occurred")
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>
+      setErrorMessage(axiosError.response?.data?.message ?? "An unexpected error occurred")
       setIsAuthenticated(false)
       setUser(null)
       if (import.meta.env.PROD) return
-      console.error(error)
+      console.error(axiosError)
+    } finally {
+      setIsLoading(false)
     }
-  })
+  }
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -64,7 +66,7 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
           {errorMessage && <p className="font-poppins text-red-600">{errorMessage}</p>}
         </div>
         <div className="mx-auto flex w-[90%] flex-col items-center">
-          <form onSubmit={handleSubmit((data) => mutate(data))} className="font-poppins w-full py-8">
+          <form onSubmit={handleSubmit(handleLoginSubmit)} className="font-poppins w-full py-8">
             {loginFields.map((field) => {
               return (
                 <InputField

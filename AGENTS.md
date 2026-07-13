@@ -230,6 +230,35 @@ Refactors should make the code easier to own without changing user-facing behavi
 - After each meaningful frontend refactor batch, run `cd client; npm run type-check`, `cd client; npm run lint`, and `cd client; npm run build`. React Doctor cleanup passes should also run `cd client; npx react-doctor@latest --verbose`.
 - If lint-staged/pre-commit tooling is changed, verify the command from `client/` and keep the hook using local package commands, not global tools.
 
+## Frontend Test Pattern
+
+When adding frontend tests later, use Vitest from the client root and keep tests module-based.
+
+- Put Vitest config at `client/vitest.config.ts` unless the existing Vite config is intentionally extended.
+- Keep test files under `client/tests/`, grouped by feature ownership:
+
+```txt
+client/tests/
+  modules/
+    auth/
+    chat/
+      conversations/
+      messages/
+      composer/
+      attachments/
+    calls/
+    stories/
+    profile/
+  shared/
+```
+
+- Mirror source ownership in tests. For example, tests for `client/src/modules/calls/hooks/useCallLogActions.ts` belong under `client/tests/modules/calls/`.
+- Prefer user-facing behavior tests for components and focused unit tests for pure helpers, reducers, query key builders, and socket payload utilities.
+- Keep test fixtures/builders beside the test feature when they are feature-specific. Move them to `client/tests/shared/` only when multiple top-level modules reuse them.
+- Do not put tests beside production files unless the repo deliberately changes to colocated tests later.
+- Use React Testing Library for component behavior, Vitest for units/mocks, and MSW or small typed fakes for network/socket boundaries when needed.
+- Add client scripts such as `test`, `test:watch`, and `test:coverage` only when Vitest is actually introduced.
+
 ## Backend Structure Goal
 
 Move toward this NestJS structure gradually:
