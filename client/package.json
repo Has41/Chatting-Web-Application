@@ -25,6 +25,7 @@
     "lucide-react": "^1.24.0",
     "pdfjs-dist": "^5.5.207",
     "react": "^19.2.4",
+    "react-call": "^2.0.2",
     "react-dom": "^19.2.4",
     "react-hook-form": "^7.71.2",
     "react-image-crop": "^11.0.10",
@@ -35,13 +36,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
-    "@typescript-eslint/parser": "^8.56.1",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@typescript-eslint/eslint-plugin": "^8.64.0",
+    "@typescript-eslint/parser": "^8.64.0",
+    "@vitejs/plugin-react": "^6.0.3",
     "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -53,8 +54,8 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "react-doctor": "^0.7.4",
     "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "typescript": "^6.0.3",
+    "vite": "^8.1.4"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

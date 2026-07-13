@@ -218,6 +218,9 @@ Refactors should make the code easier to own without changing user-facing behavi
 - Keep public entry points stable when a move would create churn. Use thin compatibility wrappers temporarily, then delete wrappers only after `rg` and tooling confirm they are unreachable.
 - Preserve current UI, copy, socket payloads, cache keys, route behavior, and optimistic message/file/audio flows during architecture refactors.
 - When splitting a large component, move pure display logic into child components, reusable orchestration into feature-local `hooks/`, render state into `state/` reducers when it reduces scattered state, and shared pure helpers into feature-local `utils/`.
+- Keep feature container components thin. A container should mostly assemble hooks, derived props, and child components; if it grows past roughly 120-150 lines, look for action hooks, permission/derived-data hooks, and child component splits before adding more JSX or handlers.
+- Put user-triggered orchestration in feature-local action hooks when it combines confirmation/picker UI, mutations, route navigation, modal open state, and pending flags. Keep the component responsible for wiring the returned state and handlers to child components.
+- Split derived permission/display state into focused hooks when it is reused across several child props, such as owner/admin/member checks, sorted member lists, selected IDs, visibility icons, or route/display helpers.
 - Keep refs and non-render objects as refs, not reducer state. Do not store `File`, `Socket`, `MediaStream`, DOM nodes, or `RTCPeerConnection` objects in reducers.
 - For reducer refactors, place initial state, action types, and reducer logic in the feature `state/` folder when they are reused or large enough to distract from the hook/component.
 - Keep raw HTTP functions in `api/`. Move TanStack Query hooks, query keys, invalidation helpers, and cache update helpers to `queries/`.
@@ -253,6 +256,7 @@ Stage 2: Shared Confirmation Callable
 - Keep per-call data in `ConfirmAction.call({ ... })` props: title, description, confirm label, danger/neutral tone, and optional icon intent.
 - Keep app-wide styling/root configuration in Root props only when it truly applies to every call.
 - Use native semantic dialog behavior where possible and preserve visible focus states, close buttons, and escape/backdrop behavior.
+- Keep Callable files focused on the UI that returns a Response. Do not let feature containers grow because of `react-call`; put Call construction, accepted/cancelled branching, mutations, and route effects in a feature-local action hook.
 
 Stage 3: First Migration Candidates
 
@@ -271,6 +275,7 @@ if (!accepted) return
 ```
 
 - Keep the existing backend mutations, query invalidation, route behavior, and visible copy unless the user asks for UX changes.
+- After moving to `ConfirmAction.call(...)`, slim the original component: move action orchestration to a hook such as `useChannelInfoActions`, move permission/derived data to a hook such as `useChannelInfoPermissions`, and keep extracted display sections under a feature-owned component subfolder.
 - After the first migration, search for other local confirmation flows with `rg "ConfirmationModal|window.confirm|confirmLabel|role=\"dialog\"" client/src`.
 
 Stage 4: Calls Module Pickers
