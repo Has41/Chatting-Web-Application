@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useReducer } from "react"
 import DarkModeSwitch from "@shared/components/DarkModeSwitch"
 
 const THEME_COLORS = [
@@ -11,13 +11,10 @@ const THEME_COLORS = [
 ]
 
 const ThemeSettings = () => {
-  const [selectedColor, setSelectedColor] = useState(THEME_COLORS[0])
+  const [selectedColor, selectColor] = useReducer((_current: string, color: string) => color, THEME_COLORS[0])
 
-  // Handle when a user selects a theme color
   const handleColorChange = (color: string) => {
-    setSelectedColor(color)
-    // Optionally update a context or global CSS variable here
-    // document.documentElement.style.setProperty('--theme-color', color)
+    selectColor(color)
   }
 
   return (

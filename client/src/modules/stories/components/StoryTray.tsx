@@ -14,8 +14,10 @@ interface StoryTrayProps {
 const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
   const { user } = useAuth()
   const [showUploadModal, setShowUploadModal] = useState(false)
-  const [viewerStoryId, setViewerStoryId] = useState<string | null>(null)
-  const [viewerStories, setViewerStories] = useState<Story[]>([])
+  const [viewerState, setViewerState] = useState<{ storyId: string | null; stories: Story[] }>({
+    storyId: null,
+    stories: []
+  })
 
   const ownStories = useMemo(() => stories.filter((story) => story.owner._id === user?._id), [stories, user?._id])
   const friendStories = useMemo(() => stories.filter((story) => story.owner._id !== user?._id), [stories, user?._id])
@@ -32,8 +34,7 @@ const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
   const openStoryViewer = (ownerStories: Story[], initialStoryId = ownerStories[0]?._id) => {
     if (!ownerStories.length || !initialStoryId) return
 
-    setViewerStories(ownerStories)
-    setViewerStoryId(initialStoryId)
+    setViewerState({ stories: ownerStories, storyId: initialStoryId })
   }
 
   return (
@@ -125,14 +126,13 @@ const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
       </div>
 
       {showUploadModal && <StoryUploadModal onClose={() => setShowUploadModal(false)} />}
-      {viewerStoryId && (
+      {viewerState.storyId && (
         <StoryViewerModal
-          stories={viewerStories}
-          initialStoryId={viewerStoryId}
+          stories={viewerState.stories}
+          initialStoryId={viewerState.storyId}
           currentUserId={user?._id}
           onClose={() => {
-            setViewerStoryId(null)
-            setViewerStories([])
+            setViewerState({ stories: [], storyId: null })
           }}
         />
       )}

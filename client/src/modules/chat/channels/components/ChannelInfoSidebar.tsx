@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react"
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react"
 import {
   Check,
   Crown,
@@ -49,6 +49,8 @@ const getChannelDraft = (channel: Channel) => ({
   sendPermissions: channel.sendPermissions || "admins"
 })
 
+const EMPTY_SEARCH_RESULTS: UserSearchResult[] = []
+
 interface ChannelInfoSidebarProps {
   isOpen: boolean
   onClose: () => void
@@ -62,6 +64,7 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [showAddMembers, setShowAddMembers] = useState(false)
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null)
+  const [immediateMemberAction, setImmediateMemberAction] = useState<ImmediateMemberAction | null>(null)
 
   const updateChannel = useUpdateChannel()
   const addMembers = useAddChannelMembers()
@@ -111,7 +114,7 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
     })
   }
 
-  const executeMemberAction = async (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
+  const executeMemberAction = useCallback(async (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
     const actionKey = `${action}:${target._id}`
     setPendingAction(actionKey)
 
@@ -128,16 +131,29 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
     } finally {
       setPendingAction(null)
     }
-  }
+  }, [channel._id, demoteAdmin, promoteAdmin, removeMember, transferOwnership])
+
+  useEffect(() => {
+    if (!immediateMemberAction) return
+
+    void executeMemberAction(immediateMemberAction.action, immediateMemberAction.target).finally(() => {
+      setImmediateMemberAction(null)
+    })
+  }, [executeMemberAction, immediateMemberAction])
 
   const handleMemberAction = (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
+    if (action === "promote" || action === "demote") {
+      setImmediateMemberAction({ action, target })
+      return
+    }
+
     if (action === "remove") {
       setConfirmation({
         title: "Remove member?",
         description: `${getUserLabel(target)} will lose access to ${channel.name} unless an admin adds them again.`,
         confirmLabel: "Remove",
         tone: "danger",
-        onConfirm: () => executeMemberAction(action, target)
+        action: { type: "member", memberAction: action, target }
       })
       return
     }
@@ -148,12 +164,10 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
         description: `${getUserLabel(target)} will become the owner of ${channel.name}. You will remain a member unless they remove you later.`,
         confirmLabel: "Transfer",
         tone: "warning",
-        onConfirm: () => executeMemberAction(action, target)
+        action: { type: "member", memberAction: action, target }
       })
       return
     }
-
-    void executeMemberAction(action, target)
   }
 
   const handleLeave = async () => {
@@ -162,11 +176,7 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
       description: `You will leave ${channel.name} and lose access unless someone adds you again.`,
       confirmLabel: "Leave",
       tone: "warning",
-      onConfirm: async () => {
-        await leaveChannel.mutateAsync(channel._id)
-        onClose()
-        navigate(CHAT_PAGE)
-      }
+      action: { type: "leave" }
     })
   }
 
@@ -176,12 +186,26 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
       description: `${channel.name} and its messages will be deleted. This cannot be undone.`,
       confirmLabel: "Delete",
       tone: "danger",
-      onConfirm: async () => {
-        await deleteChannel.mutateAsync(channel._id)
-        onClose()
-        navigate(CHAT_PAGE)
-      }
+      action: { type: "delete" }
     })
+  }
+
+  const handleConfirmAction = async (nextConfirmation: ConfirmationState) => {
+    if (nextConfirmation.action.type === "member") {
+      await executeMemberAction(nextConfirmation.action.memberAction, nextConfirmation.action.target)
+      return
+    }
+
+    if (nextConfirmation.action.type === "leave") {
+      await leaveChannel.mutateAsync(channel._id)
+      onClose()
+      navigate(CHAT_PAGE)
+      return
+    }
+
+    await deleteChannel.mutateAsync(channel._id)
+    onClose()
+    navigate(CHAT_PAGE)
   }
 
   return (
@@ -247,7 +271,13 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
             }}
           />
         )}
-        {confirmation && <ConfirmationModal confirmation={confirmation} onClose={() => setConfirmation(null)} />}
+        {confirmation && (
+          <ConfirmationModal
+            confirmation={confirmation}
+            onClose={() => setConfirmation(null)}
+            onConfirm={handleConfirmAction}
+          />
+        )}
       </aside>
     </>
   )
@@ -522,15 +552,33 @@ const ChannelDangerFooter = ({
   </footer>
 )
 
+type ConfirmationAction =
+  | { type: "member"; memberAction: "remove" | "transfer" | "promote" | "demote"; target: User }
+  | { type: "leave" }
+  | { type: "delete" }
+
+interface ImmediateMemberAction {
+  action: "promote" | "demote"
+  target: User
+}
+
 interface ConfirmationState {
   title: string
   description: string
   confirmLabel: string
   tone: "warning" | "danger"
-  onConfirm: () => Promise<void>
+  action: ConfirmationAction
 }
 
-const ConfirmationModal = ({ confirmation, onClose }: { confirmation: ConfirmationState; onClose: () => void }) => {
+const ConfirmationModal = ({
+  confirmation,
+  onClose,
+  onConfirm
+}: {
+  confirmation: ConfirmationState
+  onClose: () => void
+  onConfirm: (confirmation: ConfirmationState) => Promise<void>
+}) => {
   const dialogRef = useRef<HTMLDialogElement | null>(null)
   const [isWorking, setIsWorking] = useState(false)
 
@@ -542,7 +590,7 @@ const ConfirmationModal = ({ confirmation, onClose }: { confirmation: Confirmati
   const handleConfirm = async () => {
     setIsWorking(true)
     try {
-      await confirmation.onConfirm()
+      await onConfirm(confirmation)
       onClose()
     } finally {
       setIsWorking(false)
@@ -717,7 +765,7 @@ const AddChannelMembersModal = ({ channel, isAdding, onClose, onAdd }: AddChanne
     },
     enabled: query.trim().length >= 3
   })
-  const searchResults: UserSearchResult[] = data ?? []
+  const searchResults: UserSearchResult[] = data ?? EMPTY_SEARCH_RESULTS
 
   useEffect(() => {
     if (!error) return

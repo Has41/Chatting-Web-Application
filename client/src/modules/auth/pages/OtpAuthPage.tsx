@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent, type ClipboardEvent } from "react"
+import { useEffect, useReducer, useRef, type ChangeEvent, type KeyboardEvent, type ClipboardEvent } from "react"
 import ChatLogo from "@shared/components/ChatLogo"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
@@ -6,9 +6,55 @@ import { AUTH_PATHS, USER_PATHS } from "@shared/constants/apiPaths"
 import LoadingSpinner from "@shared/components/LoadingSpinner"
 import type { AuthSwitchProps } from "@auth/types/forms"
 
+interface OtpState {
+  values: string[]
+  focusIndex: number | null
+}
+
+type OtpAction =
+  | { type: "input"; index: number; value: string }
+  | { type: "backspace"; index: number }
+  | { type: "paste"; index: number; value: string }
+
+const OTP_LENGTH = 6
+
+const otpReducer = (state: OtpState, action: OtpAction): OtpState => {
+  if (action.type === "input") {
+    const values = [...state.values]
+    values[action.index] = action.value
+
+    return {
+      values,
+      focusIndex: action.value.length === 1 && action.index < OTP_LENGTH - 1 ? action.index + 1 : null
+    }
+  }
+
+  if (action.type === "backspace") {
+    const values = [...state.values]
+    values[action.index] = ""
+
+    return {
+      values,
+      focusIndex: action.index - 1
+    }
+  }
+
+  const values = [...state.values]
+  const newOtp = action.value.split("")
+  values.splice(action.index, newOtp.length, ...newOtp)
+
+  return {
+    values: values.slice(0, OTP_LENGTH),
+    focusIndex: newOtp.length >= OTP_LENGTH ? OTP_LENGTH - 1 : Math.min(action.index + newOtp.length, OTP_LENGTH - 1)
+  }
+}
+
 const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
   const queryClient = useQueryClient()
-  const [otpValues, setOtpValues] = useState(() => Array(6).fill(""))
+  const [{ values: otpValues, focusIndex }, dispatchOtp] = useReducer(otpReducer, {
+    values: Array(OTP_LENGTH).fill(""),
+    focusIndex: 0
+  })
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
   const { mutate, isLoading } = useMutation({
@@ -51,51 +97,26 @@ const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const { value } = e.currentTarget
 
-    const updatedOtp = [...otpValues]
-    updatedOtp[index] = value
-    setOtpValues(updatedOtp)
-    // console.log(updatedOtp)
-
-    if (value.length === 1 && index < inputRefs.current.length - 1) {
-      inputRefs.current[index + 1]?.focus()
-    }
+    dispatchOtp({ type: "input", index, value })
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     const { value } = e.currentTarget
     if (e.key === "Backspace" && !value && index > 0) {
-      inputRefs.current[index - 1]?.focus()
-      const updatedOtp = [...otpValues]
-      updatedOtp[index] = ""
-      setOtpValues(updatedOtp)
-      // console.log(updatedOtp)
+      dispatchOtp({ type: "backspace", index })
     }
   }
 
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>, index: number) => {
-    const pastedValue = e.clipboardData.getData("Text").slice(0, 6)
-    const updatedOtp = [...otpValues]
-    const newOtp = pastedValue.split("")
-
-    updatedOtp.splice(index, newOtp.length, ...newOtp)
-    setOtpValues(updatedOtp)
-
-    if (newOtp.length === 6) {
-      inputRefs.current[5]?.focus()
-    } else {
-      let nextIndex = index + newOtp.length
-      if (nextIndex < inputRefs.current.length) {
-        inputRefs.current[nextIndex]?.focus()
-      }
-    }
     e.preventDefault()
+    const pastedValue = e.clipboardData.getData("Text").slice(0, 6)
+    dispatchOtp({ type: "paste", index, value: pastedValue })
   }
 
   useEffect(() => {
-    if (inputRefs.current[0]) {
-      inputRefs.current[0].focus()
-    }
-  }, [])
+    if (focusIndex === null) return
+    inputRefs.current[focusIndex]?.focus()
+  }, [focusIndex])
 
   return (
     <div className="flex flex-col-reverse rounded-lg bg-white shadow-md">

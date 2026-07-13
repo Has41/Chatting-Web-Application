@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type RefObject, type SetStateAction } from "react"
+import { useEffect, useReducer, useRef, useState, type ChangeEvent, type Dispatch, type RefObject, type SetStateAction } from "react"
 import { Send } from "lucide-react"
 import AttachmentMenu from "@chat/composer/components/AttachmentMenu"
 import FilePreviewModal from "@chat/attachments/components/FilePreviewModal"
@@ -22,6 +22,16 @@ const getAcceptedTypes = (type: FileType | null) => {
       return "*"
   }
 }
+
+interface AttachmentPickerState {
+  type: FileType | null
+  requestId: number
+}
+
+const attachmentPickerReducer = (_state: AttachmentPickerState, type: FileType): AttachmentPickerState => ({
+  type,
+  requestId: _state.requestId + 1
+})
 
 interface SendMessageProps {
   setMessageContent: (value: string) => void
@@ -62,8 +72,10 @@ const SendMessage = ({
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [previewFile, setPreviewFile] = useState<File | null>(null)
-  const [attachmentType, setAttachmentType] = useState<FileType | null>(null)
+  const [attachmentPicker, requestAttachmentPicker] = useReducer(attachmentPickerReducer, { type: null, requestId: 0 })
+  const attachmentType = attachmentPicker.type
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const attachmentTypeRef = useRef<FileType | null>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isTypingRef = useRef(false)
   const lastTypingPulseRef = useRef(0)
@@ -74,6 +86,12 @@ const SendMessage = ({
     onTypingStartRef.current = onTypingStart
     onTypingStopRef.current = onTypingStop
   }, [onTypingStart, onTypingStop])
+
+  useEffect(() => {
+    if (!attachmentPicker.type || attachmentPicker.requestId === 0) return
+    fileInputRef.current?.setAttribute("accept", getAcceptedTypes(attachmentPicker.type))
+    fileInputRef.current?.click()
+  }, [attachmentPicker])
 
   useEffect(() => {
     return () => {
@@ -102,17 +120,16 @@ const SendMessage = ({
   }
 
   const handleAttachmentSelect = (type: FileType) => {
-    setAttachmentType(type)
-    fileInputRef.current?.click()
+    attachmentTypeRef.current = type
+    requestAttachmentPicker(type)
   }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setPreviewFile(file)
-    // handleSendFile({ type: attachmentType, file })
     e.target.value = ""
+    setPreviewFile(file)
   }
 
   const handleSendMessage = ({
@@ -167,7 +184,7 @@ const SendMessage = ({
         url: fileMeta.media_url,
         caption: fileMeta.caption || "",
         thumbnailUrl: fileMeta.thumbnailUrl || "",
-        mediaType: fileMeta.mediaType || attachmentType || "",
+        mediaType: fileMeta.mediaType || attachmentTypeRef.current || "",
         mimeType: fileMeta.mimeType || "",
         fileName: fileMeta.fileName || ""
       }
@@ -190,7 +207,7 @@ const SendMessage = ({
               mediaUrl: fileMeta.media_url,
               caption: fileMeta.caption || "",
               thumbnailUrl: fileMeta.thumbnailUrl || "",
-              mediaType: fileMeta.mediaType || attachmentType || "",
+              mediaType: fileMeta.mediaType || attachmentTypeRef.current || "",
               mimeType: fileMeta.mimeType || "",
               fileName: fileMeta.fileName || ""
             }

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react"
+import { useReducer, useRef, useCallback, useEffect } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import Login from "@auth/components/forms/Login"
@@ -9,10 +9,10 @@ import OtpAuthPage from "./OtpAuthPage"
 import type { AuthFormView } from "@auth/types/forms"
 
 const GetStarted = () => {
-  const [currentForm, setCurrentForm] = useState<AuthFormView>(
-    () => (localStorage.getItem("currentForm") as AuthFormView) || "Login"
+  const [currentForm, switchCurrentForm] = useReducer(
+    (_current: AuthFormView, next: AuthFormView) => next,
+    (localStorage.getItem("currentForm") as AuthFormView) || "Login"
   )
-  const shouldAnimateRef = useRef(false)
   const greenSectionRef = useRef(null)
   const greenSectionTextRef = useRef(null)
   const subGreenSectionRef = useRef(null)
@@ -20,10 +20,12 @@ const GetStarted = () => {
   const isFirstRender = useRef(true)
 
   const handleFormSwitch = useCallback((formSwitch: AuthFormView) => {
-    setCurrentForm(formSwitch)
-    localStorage.setItem("currentForm", formSwitch)
-    shouldAnimateRef.current = true
+    switchCurrentForm(formSwitch)
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem("currentForm", currentForm)
+  }, [currentForm])
 
   useGSAP(() => {
     if (isFirstRender.current) {
@@ -36,10 +38,8 @@ const GetStarted = () => {
       !subGreenSectionRef.current ||
       !formContainerRef.current
     ) {
-      shouldAnimateRef.current = false
       return
     }
-    if (!shouldAnimateRef.current) return
 
     const timeLine = gsap.timeline()
 
@@ -168,8 +168,6 @@ const GetStarted = () => {
         .set(formContainerRef.current, { opacity: 1, duration: 2, ease: "power2.inOut" })
         .to(formContainerRef.current, { marginLeft: "55%", duration: 1 }, "-=1")
     }
-
-    shouldAnimateRef.current = false
 
     return () => timeLine.kill()
   }, [currentForm])

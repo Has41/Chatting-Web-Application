@@ -3,6 +3,7 @@ import {
   FormEvent,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
   type Dispatch,
@@ -66,6 +67,16 @@ const getAcceptedTypes = (type: FileType | null) => {
       return "*"
   }
 }
+
+interface AttachmentPickerState {
+  type: FileType | null
+  requestId: number
+}
+
+const attachmentPickerReducer = (_state: AttachmentPickerState, type: FileType): AttachmentPickerState => ({
+  type,
+  requestId: _state.requestId + 1
+})
 
 const ChannelChatbox = () => {
   const { channelId } = useParams()
@@ -307,11 +318,13 @@ const useChannelComposer = ({
   emitTypingStop: (payload: { channelId: string; username?: string }) => void
   setLiveMessages: Dispatch<SetStateAction<ChannelMessage[]>>
 }) => {
-  const [messageText, setMessageText] = useState("")
+  const [messageText, updateMessageText] = useReducer((_current: string, value: string) => value, "")
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
   const [previewFile, setPreviewFile] = useState<File | null>(null)
-  const [attachmentType, setAttachmentType] = useState<FileType | null>(null)
+  const [attachmentPicker, requestAttachmentPicker] = useReducer(attachmentPickerReducer, { type: null, requestId: 0 })
+  const attachmentType = attachmentPicker.type
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const attachmentTypeRef = useRef<FileType | null>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isTypingRef = useRef(false)
   const lastTypingPulseRef = useRef(0)
@@ -340,13 +353,18 @@ const useChannelComposer = ({
     }
   }, [channelId, emitTypingStop, user?.username])
 
+  useEffect(() => {
+    if (!attachmentPicker.type || attachmentPicker.requestId === 0) return
+    fileInputRef.current?.setAttribute("accept", getAcceptedTypes(attachmentPicker.type))
+    fileInputRef.current?.click()
+  }, [attachmentPicker])
+
   const handleMessageInputChange = (value: string) => {
     if (!canSendInChannel) return
 
-    setMessageText(value)
-
     if (!value.trim() || !channelId) {
       stopTyping()
+      updateMessageText(value)
       return
     }
 
@@ -363,6 +381,8 @@ const useChannelComposer = ({
     typingTimeoutRef.current = setTimeout(() => {
       stopTyping()
     }, 2200)
+
+    updateMessageText(value)
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -385,7 +405,7 @@ const useChannelComposer = ({
     }
 
     setLiveMessages((prev) => [...prev, optimisticMessage])
-    setMessageText("")
+    updateMessageText("")
     stopTyping()
     sendChannelMessage({
       channelId,
@@ -399,8 +419,8 @@ const useChannelComposer = ({
   const handleAttachmentSelect = (type: FileType) => {
     if (!canSendInChannel) return
 
-    setAttachmentType(type)
-    fileInputRef.current?.click()
+    attachmentTypeRef.current = type
+    requestAttachmentPicker(type)
   }
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -412,8 +432,8 @@ const useChannelComposer = ({
     const file = event.target.files?.[0]
     if (!file) return
 
-    setPreviewFile(file)
     event.target.value = ""
+    setPreviewFile(file)
   }
 
   const handleSendFile = ({
@@ -451,7 +471,7 @@ const useChannelComposer = ({
         mediaUrl: fileMeta.media_url,
         caption: fileMeta.caption || "",
         thumbnailUrl: fileMeta.thumbnailUrl || "",
-        mediaType: fileMeta.mediaType || attachmentType || "",
+        mediaType: fileMeta.mediaType || attachmentTypeRef.current || "",
         mimeType: fileMeta.mimeType || "",
         fileName: fileMeta.fileName || ""
       },
@@ -487,7 +507,7 @@ const useChannelComposer = ({
         url: fileMeta.media_url,
         caption: fileMeta.caption || "",
         thumbnailUrl: fileMeta.thumbnailUrl || "",
-        mediaType: fileMeta.mediaType || attachmentType || "",
+        mediaType: fileMeta.mediaType || attachmentTypeRef.current || "",
         mimeType: fileMeta.mimeType || "",
         fileName: fileMeta.fileName || ""
       },
