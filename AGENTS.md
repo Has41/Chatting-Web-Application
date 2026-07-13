@@ -227,8 +227,91 @@ Refactors should make the code easier to own without changing user-facing behavi
 - When strict ESLint or React Doctor reports a problem, fix the root cause. Do not disable, suppress, or silence a rule unless the item is verified as a true tool false positive and documented.
 - Follow React Query v5 names and object syntax. Mutation loading state is `isPending`, not legacy `isLoading`.
 - Prefer `useWatch` over broad React Hook Form `watch()` calls in render when strict React compiler rules flag the component.
-- After each meaningful frontend refactor batch, run `cd client; npm run type-check`, `cd client; npm run lint`, and `cd client; npm run build`. React Doctor cleanup passes should also run `cd client; npx react-doctor@latest --verbose`.
+- After each meaningful frontend refactor or cleanup batch, verify with `cd client; npm run type-check`, `cd client; npm run lint`, and a full-codebase React Doctor scan with `cd client; npx react-doctor@latest --verbose`.
+- Run React Doctor in full-codebase mode, not diff-only mode. If `npx react-doctor@latest --verbose` needs npm registry/cache access or previously gets stuck/fails with permissions, request approval and run it escalated rather than leaving the scan hanging.
+- Skip `cd client; npm run build` for routine frontend refactor verification unless the user explicitly asks for a production build, the task changes bundling/build config, or a deployment-ready check is required.
 - If lint-staged/pre-commit tooling is changed, verify the command from `client/` and keep the hook using local package commands, not global tools.
+
+## React Call Implementation Plan
+
+Use the installed `.agents/skills/react-call` guidance when a React task needs UI that returns a value to the caller, such as confirmations, call-type pickers, destructive-action prompts, small form modals, context menus, or retryable async dialogs.
+
+Adopt `react-call` gradually. Do not rewrite working modal flows unless the user asks for this migration or the component is already being refactored.
+
+Stage 1: Dependency And Root Setup
+
+- Add `react-call` to `client/package.json` dependencies with `cd client; npm install react-call`.
+- Create a feature-aware callable location, such as `client/src/shared/components/callables/` only for cross-module callables, or feature-local callable folders such as `client/src/modules/chat/channels/components/callables/` when the UI belongs to one feature.
+- Mount each Callable Root exactly once, high enough that it stays alive while callers use it. Prefer `app/providers/` or the authenticated app shell for cross-module callables.
+- Never mount the same Callable Root in multiple route branches or repeated feature components; `react-call` throws when a Callable has multiple live Roots.
+
+Stage 2: Shared Confirmation Callable
+
+- Build a typed `ConfirmAction` Callable for generic yes/no confirmations that currently use custom local modal state.
+- Keep per-call data in `ConfirmAction.call({ ... })` props: title, description, confirm label, danger/neutral tone, and optional icon intent.
+- Keep app-wide styling/root configuration in Root props only when it truly applies to every call.
+- Use native semantic dialog behavior where possible and preserve visible focus states, close buttons, and escape/backdrop behavior.
+
+Stage 3: First Migration Candidates
+
+- Start with `client/src/modules/chat/channels/components/ChannelInfoSidebar.tsx`, because it already has local confirmation state for member actions, leave, and delete.
+- Replace local confirmation reducer/state with awaited calls:
+
+```ts
+const accepted = await ConfirmAction.call({
+  title: "Delete channel?",
+  description: "This cannot be undone.",
+  confirmLabel: "Delete",
+  tone: "danger"
+})
+
+if (!accepted) return
+```
+
+- Keep the existing backend mutations, query invalidation, route behavior, and visible copy unless the user asks for UX changes.
+- After the first migration, search for other local confirmation flows with `rg "ConfirmationModal|window.confirm|confirmLabel|role=\"dialog\"" client/src`.
+
+Stage 4: Calls Module Pickers
+
+- Use `react-call` for UI that should return a selected call action, especially the call-log action menu where the user chooses audio or video.
+- Keep private call behavior private-chat only. A picker should return `"audio"`, `"video"`, or `null`; the caller should continue to use `useCallSocket` actions.
+- Do not move WebRTC refs, sockets, `MediaStream`, or peer connection objects into Callable props. Pass only serializable/display data and return a small typed response.
+
+Stage 5: Async Mutation Dialogs
+
+- Use `useMutationFlow` from `react-call/mutation-flow` only when a Callable submits async work and should stay open on error so the user can retry.
+- Keep raw HTTP in feature `api/` folders and TanStack Query wrappers/cache invalidation in feature `queries/`; the Callable should orchestrate UI, not own transport boundaries.
+- Use TanStack Query v5 object syntax inside any query/mutation hooks used by a Callable.
+
+Stage 6: Architecture And Naming Rules
+
+- Use the `react-call` vocabulary exactly:
+  - Callable: the `createCallable()` export.
+  - Root: the mounted `<Callable />`.
+  - Call: one `Callable.call(...)` invocation.
+  - Response: the value resolved by a Call.
+  - Stack: active Calls rendered by a Root.
+  - Upsert: singleton-style `Callable.upsert(...)`.
+- Use `call()` for confirmations and pickers where multiple calls may stack.
+- Use `upsert()` for singleton UI such as progress, loading, or toast-like surfaces.
+- Call `Callable.call(...)` only from client event handlers or effects, never during render.
+- Keep Callable prop and response types close to the Callable unless they are reused across modules; then move them to the owning feature `types/`.
+- Do not treat a Callable as a normal component with per-instance props. Props passed to `<Callable />` are Root props, not per-call props.
+
+Stage 7: Verification
+
+- After each `react-call` migration batch, run:
+
+```powershell
+cd client
+npm run type-check
+npm run lint
+npx react-doctor@latest --verbose
+```
+
+- Run React Doctor as a full-codebase scan. If `npx react-doctor@latest --verbose` needs npm registry/cache access or previously gets stuck/fails with permissions, request approval and run it escalated.
+- Skip `npm run build` unless the user explicitly asks for it, build config changed, or deployment verification is needed.
+- Smoke-check the migrated flow manually: open the modal/picker, cancel, confirm, keyboard focus, escape/backdrop behavior, and the original success path.
 
 ## Frontend Test Pattern
 
@@ -331,5 +414,5 @@ queryClient.invalidateQueries({ queryKey: ["key"] })
 6. Move story-specific code out of `modules/chat` into top-level `modules/stories`.
 7. Move chat socket hooks and event contracts into `modules/chat/socket` once message/conversation structure is stable.
 8. Clean aliases and imports after each batch.
-9. Run `cd client; npm run build` after frontend move batches.
+9. Run `cd client; npm run type-check`, `cd client; npm run lint`, and `cd client; npx react-doctor@latest --verbose` after frontend move batches. Skip `npm run build` unless explicitly requested or build behavior changed.
 10. Refactor backend modules only after the frontend feature structure is stable.

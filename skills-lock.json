@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "react-call": {
+      "source": "desko27/react-call",
+      "sourceType": "github",
+      "skillPath": "skills/react-call/SKILL.md",
+      "computedHash": "3fa2cd2d78273f96b1f25ad9d5d76cb1513808f3d08389b24271f3c1b3b6d21c"
+    }
+  }
+}
