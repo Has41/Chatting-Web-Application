@@ -1,5 +1,5 @@
-import dayjs from "dayjs"
 import { getChatConversationRoute, getGroupConversationRoute } from "@shared/constants/routePaths"
+import { formatTime } from "@shared/utils/dateTime"
 import type { Conversation, User } from "@shared/types"
 
 export interface ChatListItemDisplay {
@@ -33,7 +33,7 @@ export const getLastMessagePreview = (conversation: Conversation) => {
 }
 
 export const formatLastMessageTime = (createdAt?: string) => {
-  return createdAt ? dayjs(createdAt).format("h:mm a") : undefined
+  return createdAt ? formatTime(createdAt) : undefined
 }
 
 export const getChatListItemDisplay = ({

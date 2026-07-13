@@ -1,10 +1,7 @@
-import dayjs from "dayjs"
-import calendar from "dayjs/plugin/calendar"
 import { getChatConversationRoute, getNewChatRoute } from "@shared/constants/routePaths"
+import { formatCalendarDay, formatTime } from "@shared/utils/dateTime"
 import type { Conversation, User } from "@shared/types"
 import type { CallLogEntry, CallLogStatus } from "@calls/types/callLogs"
-
-dayjs.extend(calendar)
 
 export const getCallLogUserName = (user?: User) => user?.displayName || user?.username || "Member"
 
@@ -34,15 +31,9 @@ export const formatCallDuration = (seconds?: number) => {
   return `${minutes}m ${remainingSeconds.toString().padStart(2, "0")}s`
 }
 
-export const formatCallStartedTime = (startedAt: string) => dayjs(startedAt).format("h:mm A")
+export const formatCallStartedTime = (startedAt: string) => formatTime(startedAt, "upper")
 
-export const formatCallStartedDay = (startedAt: string) =>
-  dayjs(startedAt).calendar(null, {
-    sameDay: "[Today]",
-    lastDay: "[Yesterday]",
-    lastWeek: "ddd",
-    sameElse: "MMM D"
-  })
+export const formatCallStartedDay = (startedAt: string) => formatCalendarDay(startedAt)
 
 const getParticipantId = (participant: User | string) => (typeof participant === "string" ? participant : participant._id)
 

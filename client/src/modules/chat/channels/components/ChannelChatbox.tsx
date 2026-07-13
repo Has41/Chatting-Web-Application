@@ -11,7 +11,6 @@ import {
   type SetStateAction
 } from "react"
 import { AlertCircle, Hash, Loader2, Lock, MoreVertical, Paperclip, Pencil, Send, Trash2, Users } from "lucide-react"
-import dayjs from "dayjs"
 import { useParams } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
@@ -20,6 +19,7 @@ import { useChannelMessages } from "../queries/useChannelMessages"
 import { useChannelSocket, type ChannelTypingUser, type SendChannelMessagePayload } from "../hooks/useChannelSocket"
 import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
+import { formatTime } from "@shared/utils/dateTime"
 import type { Channel, Message, User } from "@shared/types"
 import type { FileType, SendMessagePayload } from "@chat/attachments/types/attachments"
 import AttachmentMenu from "@chat/composer/components/AttachmentMenu"
@@ -975,7 +975,7 @@ const ChannelMessageBubble = ({
               }`}
             >
               {message.editedAt && <span className="font-medium">Edited</span>}
-              <span>{dayjs(message.createdAt).format("h:mm A")}</span>
+              <span>{formatTime(message.createdAt, "upper")}</span>
               {message.localStatus === "sending" && (
                 <span className="inline-flex items-center gap-1">
                   <Send size={11} />

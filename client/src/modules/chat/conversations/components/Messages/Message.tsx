@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import useIntersectionObserver from "@shared/hooks/useIntersectionObserver"
 import useAuth from "@auth/hooks/useAuth"
 import getSeenText from "@shared/utils/getSeenText"
-import dayjs from "dayjs"
+import { formatTime } from "@shared/utils/dateTime"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
@@ -452,7 +452,7 @@ const MessageTimestamp = ({
         Failed
       </span>
     ) : (
-      dayjs(message.createdAt).format("h:mm a")
+      formatTime(message.createdAt)
     )}
   </>
 )

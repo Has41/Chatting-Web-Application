@@ -222,13 +222,15 @@ Refactors should make the code easier to own without changing user-facing behavi
 - For reducer refactors, place initial state, action types, and reducer logic in the feature `state/` folder when they are reused or large enough to distract from the hook/component.
 - Keep raw HTTP functions in `api/`. Move TanStack Query hooks, query keys, invalidation helpers, and cache update helpers to `queries/`.
 - Use real types at module boundaries. Prefer feature-local request/response/socket/cache types over `any`; use `unknown` only for genuinely opaque values that are narrowed before use.
+- Prefer native `Date` and `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` for date and time formatting. Add or keep a date library only when native APIs would make the code meaningfully harder to read or less correct.
 - For socket hooks, keep payloads object-shaped, type event payloads near the owning socket module, and keep socket refs out of render-time return values when callers only need action functions or refs.
 - For React context providers, export contexts from non-component context value files and keep provider files focused on components. This preserves Fast Refresh rules.
 - When strict ESLint or React Doctor reports a problem, fix the root cause. Do not disable, suppress, or silence a rule unless the item is verified as a true tool false positive and documented.
 - Follow React Query v5 names and object syntax. Mutation loading state is `isPending`, not legacy `isLoading`.
 - Prefer `useWatch` over broad React Hook Form `watch()` calls in render when strict React compiler rules flag the component.
 - After each meaningful frontend refactor or cleanup batch, verify with `cd client; npm run type-check`, `cd client; npm run lint`, and a full-codebase React Doctor scan with `cd client; npx react-doctor@latest --verbose`.
-- Run React Doctor in full-codebase mode, not diff-only mode. If `npx react-doctor@latest --verbose` needs npm registry/cache access or previously gets stuck/fails with permissions, request approval and run it escalated rather than leaving the scan hanging.
+- Always run React Doctor with approval/escalation in this repo. It regularly needs npm registry/cache access and may hang or fail under sandboxed permissions.
+- Run React Doctor in full-codebase mode, not diff-only mode.
 - Skip `cd client; npm run build` for routine frontend refactor verification unless the user explicitly asks for a production build, the task changes bundling/build config, or a deployment-ready check is required.
 - If lint-staged/pre-commit tooling is changed, verify the command from `client/` and keep the hook using local package commands, not global tools.
 
@@ -309,7 +311,7 @@ npm run lint
 npx react-doctor@latest --verbose
 ```
 
-- Run React Doctor as a full-codebase scan. If `npx react-doctor@latest --verbose` needs npm registry/cache access or previously gets stuck/fails with permissions, request approval and run it escalated.
+- Always run React Doctor as an approved/escalated full-codebase scan.
 - Skip `npm run build` unless the user explicitly asks for it, build config changed, or deployment verification is needed.
 - Smoke-check the migrated flow manually: open the modal/picker, cancel, confirm, keyboard focus, escape/backdrop behavior, and the original success path.
 
@@ -460,5 +462,5 @@ queryClient.invalidateQueries({ queryKey: ["key"] })
 6. Move story-specific code out of `modules/chat` into top-level `modules/stories`.
 7. Move chat socket hooks and event contracts into `modules/chat/socket` once message/conversation structure is stable.
 8. Clean aliases and imports after each batch.
-9. Run `cd client; npm run type-check`, `cd client; npm run lint`, and `cd client; npx react-doctor@latest --verbose` after frontend move batches. Skip `npm run build` unless explicitly requested or build behavior changed.
+9. Run `cd client; npm run type-check`, `cd client; npm run lint`, and an approved/escalated full-codebase `cd client; npx react-doctor@latest --verbose` after frontend move batches. Skip `npm run build` unless explicitly requested or build behavior changed.
 10. Refactor backend modules only after the frontend feature structure is stable.

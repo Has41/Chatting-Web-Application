@@ -1,6 +1,6 @@
-import dayjs from "dayjs"
 import { Link } from "react-router-dom"
 import { getNewChatRoute } from "@shared/constants/routePaths"
+import { formatTime } from "@shared/utils/dateTime"
 import type { SearchConversation, SearchFriend } from "@chat/navigation/types/search"
 
 interface SearchDropdownProps {
@@ -48,9 +48,7 @@ const SearchDropdown = ({ friendsData = [], conversationData = [], currentUserId
                   </div>
 
                   {lastMessage && (
-                    <span className="text-xs whitespace-nowrap text-gray-400">
-                      {dayjs(lastMessage.createdAt).format("h:mm a")}
-                    </span>
+                    <span className="text-xs whitespace-nowrap text-gray-400">{formatTime(lastMessage.createdAt)}</span>
                   )}
                 </Link>
               )
