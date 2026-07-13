@@ -33,7 +33,7 @@ export const useCallSocketEvents = ({
       query: { userId },
       transports: ["websocket"]
     })
-    refs.socketRef.current = socket
+    refs.setSocket(socket)
 
     const handleIncomingCall = async (call: IncomingCall) => {
       if (!isSupportedCallType(call.type)) return
@@ -42,11 +42,12 @@ export const useCallSocketEvents = ({
         return
       }
 
-      refs.finalizedCallStatusRef.current = null
-      refs.pendingFinalCallStatusRef.current = null
-      refs.activePeerIdRef.current = call.from
+      refs.clearCallFinalization()
+      refs.setActivePeerId(call.from)
       dispatch({ type: "incomingCallReceived", incomingCall: call })
-      createCallLog({ ownerId: userId, peerId: call.from, direction: "incoming", type: call.type, status: "missed" }).then(rememberCallLog)
+      createCallLog({ ownerId: userId, peerId: call.from, direction: "incoming", type: call.type, status: "missed" }).then(
+        rememberCallLog
+      )
     }
 
     const handleCallAccepted = async ({ from, answer }: CallAcceptedPayload) => {
@@ -54,7 +55,7 @@ export const useCallSocketEvents = ({
 
       await refs.peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer))
       await addPendingCandidates()
-      refs.pendingFinalCallStatusRef.current = null
+      refs.setPendingFinalCallStatus(null)
       updateCallLog(userId, refs.activeCallLogIdRef.current, { status: "answered" })
       dispatch({ type: "callAccepted" })
     }
@@ -75,7 +76,7 @@ export const useCallSocketEvents = ({
       if (from !== refs.activePeerIdRef.current || !candidate) return
 
       if (!refs.peerConnectionRef.current?.remoteDescription) {
-        refs.pendingCandidatesRef.current.push(candidate)
+        refs.addPendingCandidate(candidate)
         return
       }
 
@@ -105,7 +106,7 @@ export const useCallSocketEvents = ({
       socket.off("end-call", handleEndCall)
       if (refs.socketRef.current === socket) {
         socket.disconnect()
-        refs.socketRef.current = null
+        refs.clearSocket(socket)
       }
       resetCall()
     }

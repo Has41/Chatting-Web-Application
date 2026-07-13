@@ -7,6 +7,19 @@ export interface AttachmentPickerState {
   requestId: number
 }
 
+export interface SocketSendMessagePayload {
+  messageData?: {
+    clientTempId?: string
+    conversationId?: string
+    sender?: string
+    content?: string
+    recipient?: string
+    messageType?: "text" | "file"
+    conversationType?: ConversationType
+  }
+  fileData?: Record<string, unknown>
+}
+
 export interface MessageComposerProps {
   setMessageContent: (value: string) => void
   messageContent: string
@@ -14,7 +27,7 @@ export interface MessageComposerProps {
   socketRef: RefObject<unknown>
   conversationType?: ConversationType
   conversationId?: string
-  sendMessage: (payload: unknown) => void
+  sendMessage: (payload: SocketSendMessagePayload) => void
   setMessages: Dispatch<SetStateAction<ChatMessage[]>>
   onTypingStart?: () => void
   onTypingStop?: () => void

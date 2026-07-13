@@ -5,7 +5,7 @@ import ChatMessageRow from "./ChatMessageRow"
 import { useChatMessages } from "@chat/conversations/hooks/useChatMessages"
 import { getConversationRecipients, getTypingProfile } from "@chat/conversations/utils/chatMessages"
 import type { TypingUser } from "@chat/socket/useChatSocket"
-import type { ChatConversationType, ChatMessage } from "@chat/conversations/types/chatMessages"
+import type { ChatConversationType, ChatMessage, ChatSocketEmitter } from "@chat/conversations/types/chatMessages"
 import type { RefObject, Dispatch, SetStateAction } from "react"
 import type { Conversation, User } from "@shared/types"
 
@@ -17,7 +17,7 @@ interface ChatMessagesProps {
   setMessages: Dispatch<SetStateAction<ChatMessage[]>>
   socketMessages: ChatMessage[]
   lastMessage?: ChatMessage
-  socket: RefObject<{ emit: (...args: any[]) => void } | null>
+  socket: RefObject<ChatSocketEmitter | null>
   conversationType?: ChatConversationType
   typingUsers?: TypingUser[]
 }

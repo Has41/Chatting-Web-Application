@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import countryList from "react-select-country-list"
 import { locationSchema } from "@shared/utils/zodSchema"
@@ -21,12 +21,14 @@ interface CountryOption {
 const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
   const options = useMemo(() => countryList().getData(), [])
   const currentCountry = useMemo(() => {
-    const found = options.find((option: CountryOption) => option.label === currentLocation || option.value === currentLocation)
+    const found = options.find(
+      (option: CountryOption) => option.label === currentLocation || option.value === currentLocation
+    )
     return found?.label || currentLocation
   }, [currentLocation, options])
 
   const {
-    watch,
+    control,
     register,
     reset,
     handleSubmit,
@@ -40,7 +42,7 @@ const UpdateLocation = ({ currentLocation = "" }: UpdateLocationProps) => {
     reset({ location: currentCountry })
   }, [currentCountry, reset])
 
-  const location = watch("location")
+  const location = useWatch({ control, name: "location" })
   const disableButton = !location || location === currentCountry
 
   const { mutate } = useUpdateProfileMutation()

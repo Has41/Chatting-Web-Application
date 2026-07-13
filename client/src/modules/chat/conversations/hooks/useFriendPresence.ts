@@ -12,7 +12,6 @@ const useFriendPresence = (friends: User[] = []) => {
 
   useEffect(() => {
     if (!user?._id || friendIds.length === 0) {
-      setOnlineUserIds(new Set())
       return
     }
 
@@ -58,14 +57,19 @@ const useFriendPresence = (friends: User[] = []) => {
     }
   }, [friendIds, user?._id])
 
+  const visibleOnlineUserIds = useMemo(
+    () => (user?._id && friendIds.length > 0 ? onlineUserIds : new Set<string>()),
+    [friendIds.length, onlineUserIds, user?._id]
+  )
+
   const onlineFriends = useMemo(
-    () => friends.filter((friend) => onlineUserIds.has(friend._id)),
-    [friends, onlineUserIds]
+    () => friends.filter((friend) => visibleOnlineUserIds.has(friend._id)),
+    [friends, visibleOnlineUserIds]
   )
 
   return {
     onlineFriends,
-    onlineUserIds
+    onlineUserIds: visibleOnlineUserIds
   }
 }
 

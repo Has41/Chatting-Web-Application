@@ -57,7 +57,7 @@ const OtpAuthPage = ({ onButtonClick }: AuthSwitchProps) => {
   })
   const inputRefs = useRef<Array<HTMLInputElement | null>>([])
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending: isLoading } = useMutation({
     mutationFn: async ({ otp, email }: { otp: string; email: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.VERIFY_OTP, { otp, email })
     },

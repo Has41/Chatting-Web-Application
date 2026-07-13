@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { io, Socket } from "socket.io-client"
 import { useAuth } from "@auth/hooks/useAuth"
 import { useQueryClient } from "@tanstack/react-query"
+import type { ChatConversationType, ChatMessage, ConversationMessagesCache } from "@chat/conversations/types/chatMessages"
+import type { SocketSendMessagePayload } from "@chat/composer/types/messageComposer"
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
 
@@ -11,7 +13,21 @@ export interface TypingUser {
   username?: string
 }
 
-export const useChatSocket = (config?: any) => {
+interface UseChatSocketConfig {
+  userId?: string
+  conversationId?: string
+  type?: ChatConversationType
+  setMessages?: (value: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void
+}
+
+type SocketChatMessage = ChatMessage & {
+  conversation?: string | { _id?: string }
+}
+
+const getConversationIdFromMessage = (message: SocketChatMessage) =>
+  typeof message.conversation === "string" ? message.conversation : message.conversation?._id
+
+export const useChatSocket = (config?: UseChatSocketConfig) => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -26,8 +42,8 @@ export const useChatSocket = (config?: any) => {
   const setMessagesRef = useRef(setMessages)
   const typingTimeoutsRef = useRef<Record<string, number>>({})
 
-  const mergeIncomingMessage = useCallback((incomingMessage: any) => {
-    setMessagesRef.current?.((prev: any[]) => {
+  const mergeIncomingMessage = useCallback((incomingMessage: SocketChatMessage) => {
+    setMessagesRef.current?.((prev) => {
       const existingIndex = prev.findIndex(
         (message) =>
           message._id === incomingMessage._id ||
@@ -43,11 +59,11 @@ export const useChatSocket = (config?: any) => {
   }, [])
 
   const refreshConversationFiles = useCallback(
-    (messageData: any, fallbackConversationId?: string) => {
+    (messageData: SocketChatMessage, fallbackConversationId?: string) => {
       if (messageData?.messageType !== "file") return
 
       const fileConversationId =
-        fallbackConversationId || messageData?.conversation?._id || messageData?.conversation || conversationIdRef.current
+        fallbackConversationId || getConversationIdFromMessage(messageData) || conversationIdRef.current
 
       if (!fileConversationId) return
 
@@ -57,21 +73,21 @@ export const useChatSocket = (config?: any) => {
   )
 
   const mergeReactionUpdate = useCallback(
-    (updatedMessage: any) => {
+    (updatedMessage?: ChatMessage) => {
       if (!updatedMessage?._id) return
 
-      setMessagesRef.current?.((prev: any[]) =>
+      setMessagesRef.current?.((prev) =>
         prev.map((message) => (message._id === updatedMessage._id ? { ...message, ...updatedMessage } : message))
       )
 
-      queryClient.setQueryData(["getUserMessages", conversationIdRef.current], (oldData: any) => {
+      queryClient.setQueryData<ConversationMessagesCache>(["getUserMessages", conversationIdRef.current], (oldData) => {
         if (!oldData?.pages) return oldData
 
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page) => ({
             ...page,
-            messages: page.messages.map((message: any) =>
+            messages: page.messages.map((message) =>
               message._id === updatedMessage._id ? { ...message, ...updatedMessage } : message
             )
           }))
@@ -89,7 +105,17 @@ export const useChatSocket = (config?: any) => {
     if (socketRef.current?.connected && type === "group" && conversationId && userId) {
       socketRef.current.emit("join-group", { conversationId, userId })
     }
-  }, [config?.conversationId, config?.setMessages, config?.type, config?.userId, conversationId, setMessages, type, user?._id, userId])
+  }, [
+    config?.conversationId,
+    config?.setMessages,
+    config?.type,
+    config?.userId,
+    conversationId,
+    setMessages,
+    type,
+    user?._id,
+    userId
+  ])
 
   useEffect(() => {
     if (!userId) return
@@ -113,18 +139,18 @@ export const useChatSocket = (config?: any) => {
       console.log("Socket disconnected")
     }
 
-    const handleReceiveGroupMessages = (messageData: any, convoId: any) => {
+    const handleReceiveGroupMessages = (messageData: SocketChatMessage, convoId: string | { toString: () => string }) => {
       if (typeRef.current === "group" && convoId?.toString() === conversationIdRef.current?.toString()) {
         mergeIncomingMessage(messageData)
         refreshConversationFiles(messageData, convoId?.toString())
       }
     }
 
-    const handleReceiveMessage = (messageData: any) => {
+    const handleReceiveMessage = (messageData: SocketChatMessage) => {
       if (typeRef.current === "group") return
 
       if (!conversationIdRef.current && messageData.conversation) {
-        navigate(`/chat/conversation/${messageData.conversation}`)
+        navigate(`/chat/conversation/${getConversationIdFromMessage(messageData)}`)
       }
 
       mergeIncomingMessage(messageData)
@@ -162,7 +188,7 @@ export const useChatSocket = (config?: any) => {
       setTypingUsers((prev) => prev.filter((typingUser) => typingUser.userId !== typingData.userId))
     }
 
-    const handleReactionUpdated = (data: { message?: any }) => {
+    const handleReactionUpdated = (data: { message?: ChatMessage }) => {
       mergeReactionUpdate(data?.message)
     }
 
@@ -197,17 +223,15 @@ export const useChatSocket = (config?: any) => {
     }
   }, [])
 
-  const sendMessage = useCallback((payload: any) => {
+  const sendMessage = useCallback((payload: SocketSendMessagePayload) => {
     const clientTempId = payload?.messageData?.clientTempId
 
     socketRef.current?.timeout(15000).emit("sendMessage", payload, (error: Error | null) => {
       if (!error || !clientTempId) return
 
-      setMessagesRef.current?.((prev: any[]) =>
+      setMessagesRef.current?.((prev) =>
         prev.map((message) =>
-          message._id === clientTempId && message.localStatus === "sending"
-            ? { ...message, localStatus: "failed" }
-            : message
+          message._id === clientTempId && message.localStatus === "sending" ? { ...message, localStatus: "failed" } : message
         )
       )
     })
@@ -226,7 +250,12 @@ export const useChatSocket = (config?: any) => {
   )
 
   const emitTypingStart = useCallback(
-    (payload: { conversationId?: string; conversationType: "private" | "group"; recipientId?: string; username?: string }) => {
+    (payload: {
+      conversationId?: string
+      conversationType: "private" | "group"
+      recipientId?: string
+      username?: string
+    }) => {
       const activeUserId = config?.userId ?? user?._id
       if (!activeUserId) return
       socketRef.current?.emit("typing:start", {
@@ -238,7 +267,12 @@ export const useChatSocket = (config?: any) => {
   )
 
   const emitTypingStop = useCallback(
-    (payload: { conversationId?: string; conversationType: "private" | "group"; recipientId?: string; username?: string }) => {
+    (payload: {
+      conversationId?: string
+      conversationType: "private" | "group"
+      recipientId?: string
+      username?: string
+    }) => {
       const activeUserId = config?.userId ?? user?._id
       if (!activeUserId) return
       socketRef.current?.emit("typing:stop", {
@@ -250,7 +284,6 @@ export const useChatSocket = (config?: any) => {
   )
 
   return {
-    socket: socketRef.current,
     socketRef,
     sendMessage,
     reactToMessage,

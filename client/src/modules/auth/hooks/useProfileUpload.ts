@@ -109,11 +109,9 @@ export const useProfileUpload = () => {
 
   return {
     state,
-    refs: {
-      fileInputRef,
-      imageRef,
-      previewCanvasRef
-    },
+    fileInputRef,
+    imageRef,
+    previewCanvasRef,
     handlers: {
       clearImage,
       closeModal,

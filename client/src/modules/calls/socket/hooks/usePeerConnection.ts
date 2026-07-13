@@ -14,12 +14,12 @@ interface UsePeerConnectionOptions {
 export const usePeerConnection = ({ refs, dispatch, sendIceCandidate }: UsePeerConnectionOptions) => {
   const closePeerConnection = useCallback(() => {
     closeManagedPeerConnection(refs.peerConnectionRef.current)
-    refs.peerConnectionRef.current = null
+    refs.setPeerConnection(null)
   }, [refs])
 
   const stopLocalStream = useCallback(() => {
     stopMediaStream(refs.localStreamRef.current)
-    refs.localStreamRef.current = null
+    refs.setLocalStream(null)
   }, [refs])
 
   const createPeerConnection = useCallback(
@@ -45,8 +45,8 @@ export const usePeerConnection = ({ refs, dispatch, sendIceCandidate }: UsePeerC
         }
       }
 
-      refs.peerConnectionRef.current = peerConnection
-      refs.activePeerIdRef.current = peerId
+      refs.setPeerConnection(peerConnection)
+      refs.setActivePeerId(peerId)
       dispatch({ type: "peerSet", peerId })
 
       return peerConnection
@@ -58,8 +58,7 @@ export const usePeerConnection = ({ refs, dispatch, sendIceCandidate }: UsePeerC
     const peerConnection = refs.peerConnectionRef.current
     if (!peerConnection?.remoteDescription) return
 
-    const candidates = refs.pendingCandidatesRef.current
-    refs.pendingCandidatesRef.current = []
+    const candidates = refs.takePendingCandidates()
 
     await Promise.all(
       candidates.map((candidate) =>
@@ -75,7 +74,7 @@ export const usePeerConnection = ({ refs, dispatch, sendIceCandidate }: UsePeerC
       if (refs.localStreamRef.current) return refs.localStreamRef.current
 
       const stream = await navigator.mediaDevices.getUserMedia(createLocalMediaConstraints(type))
-      refs.localStreamRef.current = stream
+      refs.setLocalStream(stream)
       dispatch({ type: "localStreamSet", stream })
       return stream
     },

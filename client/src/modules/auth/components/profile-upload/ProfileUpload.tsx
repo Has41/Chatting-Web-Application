@@ -4,33 +4,31 @@ import ProfileCropDialog from "./ProfileCropDialog"
 import ProfileUploadCard from "./ProfileUploadCard"
 
 const ProfileUpload = () => {
-  const profileUpload = useProfileUpload()
+  const { state, fileInputRef, imageRef, previewCanvasRef, handlers } = useProfileUpload()
 
   return (
     <div>
       <ProfileUploadCard
-        fileInputRef={profileUpload.refs.fileInputRef}
-        isLoading={profileUpload.state.isLoading}
-        profilePreview={profileUpload.state.profilePreview}
-        onClearImage={profileUpload.handlers.clearImage}
-        onConfirmUpload={profileUpload.handlers.confirmUpload}
-        onSelectFile={profileUpload.handlers.onSelectFile}
+        fileInputRef={fileInputRef}
+        isLoading={state.isLoading}
+        profilePreview={state.profilePreview}
+        onClearImage={handlers.clearImage}
+        onConfirmUpload={handlers.confirmUpload}
+        onSelectFile={handlers.onSelectFile}
       />
 
-      {profileUpload.state.modalOpen && (
+      {state.modalOpen && (
         <ProfileCropDialog
-          crop={profileUpload.state.crop}
-          imageRef={profileUpload.refs.imageRef}
-          imageSource={profileUpload.state.upImg}
-          onChangeCrop={profileUpload.handlers.setCrop}
-          onClose={profileUpload.handlers.closeModal}
-          onConfirmCrop={profileUpload.handlers.confirmCrop}
-          onImageLoaded={profileUpload.handlers.onImageLoaded}
+          crop={state.crop}
+          imageRef={imageRef}
+          imageSource={state.upImg}
+          onChangeCrop={handlers.setCrop}
+          onClose={handlers.closeModal}
+          onConfirmCrop={handlers.confirmCrop}
+          onImageLoaded={handlers.onImageLoaded}
         />
       )}
-      {profileUpload.state.crop && (
-        <canvas ref={profileUpload.refs.previewCanvasRef} className="hidden size-40 object-contain" />
-      )}
+      {state.crop && <canvas ref={previewCanvasRef} className="hidden size-40 object-contain" />}
     </div>
   )
 }

@@ -1,18 +1,8 @@
-import { createContext, ReactNode, useEffect, useMemo, useReducer } from "react"
+import { ReactNode, useEffect, useMemo, useReducer } from "react"
 import type { User } from "@shared/types"
 import { authReducer, initialAuthState } from "@auth/states/authState"
 import { useCurrentUserQuery } from "@auth/queries/authQueries"
-
-interface AuthContextType {
-  user: User | null
-  setUser: (user: User | null) => void
-  isAuthenticated: boolean
-  setIsAuthenticated: (isAuthenticated: boolean) => void
-  refetch: ReturnType<typeof useCurrentUserQuery>["refetch"]
-  isLoading: boolean
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined)
+import { AuthContext } from "./authContextValue"
 
 interface AuthProviderProps {
   children: ReactNode
@@ -46,11 +36,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [isLoading, refetch, state.isAuthenticated, state.user]
   )
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export default AuthProvider

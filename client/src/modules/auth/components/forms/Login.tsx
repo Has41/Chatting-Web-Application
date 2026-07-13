@@ -28,7 +28,7 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
     resolver: zodResolver(loginSchema)
   })
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending: isLoading } = useMutation({
     mutationFn: async (credentials: LoginFormData) => {
       return await axiosInstance.post(AUTH_PATHS.LOGIN, credentials)
     },
@@ -64,7 +64,7 @@ const Login = ({ onButtonClick }: AuthSwitchProps) => {
           {errorMessage && <p className="font-poppins text-red-600">{errorMessage}</p>}
         </div>
         <div className="mx-auto flex w-[90%] flex-col items-center">
-          <form onSubmit={handleSubmit(mutate)} className="font-poppins w-full py-8">
+          <form onSubmit={handleSubmit((data) => mutate(data))} className="font-poppins w-full py-8">
             {loginFields.map((field) => {
               return (
                 <InputField

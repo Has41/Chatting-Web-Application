@@ -22,7 +22,7 @@ const Register = ({ onButtonClick }: AuthSwitchProps) => {
     resolver: zodResolver(registerSchema)
   })
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending: isLoading } = useMutation({
     mutationFn: async (formData: RegisterFormData) => {
       return await axiosInstance.post(AUTH_PATHS.REGISTER, formData)
     },

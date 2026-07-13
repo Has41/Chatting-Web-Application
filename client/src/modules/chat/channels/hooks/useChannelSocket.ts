@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { io, Socket } from "socket.io-client"
 import { useQueryClient } from "@tanstack/react-query"
 import type { Message } from "@shared/types"
+import type { FileType } from "@chat/attachments/types/attachments"
 import { channelKeys } from "../queries/useChannels"
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
@@ -16,6 +17,34 @@ interface UseChannelSocketConfig {
 export interface ChannelTypingUser {
   userId: string
   username?: string
+}
+
+type ChannelSocketMessage = Message & {
+  clientTempId?: string
+  localStatus?: "sending" | "failed"
+}
+
+interface ChannelMessagesCache {
+  pages: Array<{ messages: Message[] }>
+}
+
+interface ChannelFileSocketData {
+  publicId?: string
+  url: string
+  caption?: string
+  thumbnailUrl?: string
+  mediaType?: FileType
+  mimeType?: string
+  fileName?: string
+}
+
+export interface SendChannelMessagePayload {
+  channelId: string
+  sender: string
+  content?: string
+  messageType: "text" | "file"
+  fileData?: ChannelFileSocketData | null
+  clientTempId?: string
 }
 
 export const useChannelSocket = ({ channelId, userId, enabled = true, setMessages }: UseChannelSocketConfig) => {
@@ -38,7 +67,7 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
   const mergeIncomingMessage = useCallback((incomingMessage: Message & { clientTempId?: string }) => {
     setMessagesRef.current((prev) => {
       const existingIndex = prev.findIndex(
-        (message: any) =>
+        (message: ChannelSocketMessage) =>
           message._id === incomingMessage._id ||
           (incomingMessage.clientTempId && message.clientTempId === incomingMessage.clientTempId)
       )
@@ -66,17 +95,15 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
       }
 
       setMessagesRef.current((prev) =>
-        prev.map((message: any) =>
-          message._id === updatedMessage._id ? mergeMessage(message) : message
-        )
+        prev.map((message) => (message._id === updatedMessage._id ? mergeMessage(message) : message))
       )
 
-      queryClient.setQueryData(channelKeys.messages(channelIdRef.current), (oldData: any) => {
+      queryClient.setQueryData<ChannelMessagesCache>(channelKeys.messages(channelIdRef.current), (oldData) => {
         if (!oldData?.pages) return oldData
 
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page) => ({
             ...page,
             messages: page.messages.map((message: Message) =>
               message._id === updatedMessage._id ? mergeMessage(message) : message
@@ -142,7 +169,7 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
 
     const handleChannelMessageError = () => {
       setMessagesRef.current((prev) =>
-        prev.map((message: any) =>
+        prev.map((message: ChannelSocketMessage) =>
           message.localStatus === "sending" ? { ...message, localStatus: "failed" } : message
         )
       )
@@ -180,19 +207,9 @@ export const useChannelSocket = ({ channelId, userId, enabled = true, setMessage
     }
   }, [enabled, mergeIncomingMessage, mergeReactionUpdate, queryClient, userId])
 
-  const sendChannelMessage = useCallback(
-    (payload: {
-      channelId: string
-      sender: string
-      content?: string
-      messageType: "text" | "file"
-      fileData?: any
-      clientTempId?: string
-    }) => {
-      socketRef.current?.emit("send-channel-message", payload)
-    },
-    []
-  )
+  const sendChannelMessage = useCallback((payload: SendChannelMessagePayload) => {
+    socketRef.current?.emit("send-channel-message", payload)
+  }, [])
 
   const reactToMessage = useCallback(
     (payload: { messageId: string; emoji: string }) => {

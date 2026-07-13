@@ -17,7 +17,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import useAuth from "@auth/hooks/useAuth"
 import { channelKeys, useChannel, useJoinChannel } from "../queries/useChannels"
 import { useChannelMessages } from "../queries/useChannelMessages"
-import { useChannelSocket, type ChannelTypingUser } from "../hooks/useChannelSocket"
+import { useChannelSocket, type ChannelTypingUser, type SendChannelMessagePayload } from "../hooks/useChannelSocket"
 import axiosInstance from "@shared/api/api-client"
 import { MESSAGE_PATHS } from "@shared/constants/apiPaths"
 import type { Channel, Message, User } from "@shared/types"
@@ -35,6 +35,10 @@ type ChannelMessage = Message & {
   channel?: string
   clientTempId?: string
   localStatus?: "sending" | "failed"
+}
+
+interface ChannelMessagesCache {
+  pages: Array<{ messages: ChannelMessage[] }>
 }
 
 type EditChannelMessageVariables = {
@@ -172,12 +176,12 @@ const ChannelChatbox = () => {
   })
 
   const updateMessageInCache = (messageId: string, updater: (message: ChannelMessage) => ChannelMessage) => {
-    queryClient.setQueryData(channelKeys.messages(channelId), (oldData: any) => {
+    queryClient.setQueryData<ChannelMessagesCache>(channelKeys.messages(channelId), (oldData) => {
       if (!oldData?.pages) return oldData
 
       return {
         ...oldData,
-        pages: oldData.pages.map((page: any) => ({
+        pages: oldData.pages.map((page) => ({
           ...page,
           messages: page.messages.map((message: ChannelMessage) => (message._id === messageId ? updater(message) : message))
         }))
@@ -188,12 +192,12 @@ const ChannelChatbox = () => {
   }
 
   const removeMessageFromCache = (messageId: string) => {
-    queryClient.setQueryData(channelKeys.messages(channelId), (oldData: any) => {
+    queryClient.setQueryData<ChannelMessagesCache>(channelKeys.messages(channelId), (oldData) => {
       if (!oldData?.pages) return oldData
 
       return {
         ...oldData,
-        pages: oldData.pages.map((page: any) => ({
+        pages: oldData.pages.map((page) => ({
           ...page,
           messages: page.messages.filter((message: ChannelMessage) => message._id !== messageId)
         }))
@@ -313,7 +317,7 @@ const useChannelComposer = ({
   channelId?: string
   user?: User | null
   canSendInChannel: boolean
-  sendChannelMessage: (payload: any) => void
+  sendChannelMessage: (payload: SendChannelMessagePayload) => void
   emitTypingStart: (payload: { channelId: string; username?: string }) => void
   emitTypingStop: (payload: { channelId: string; username?: string }) => void
   setLiveMessages: Dispatch<SetStateAction<ChannelMessage[]>>
@@ -471,7 +475,7 @@ const useChannelComposer = ({
         mediaUrl: fileMeta.media_url,
         caption: fileMeta.caption || "",
         thumbnailUrl: fileMeta.thumbnailUrl || "",
-        mediaType: fileMeta.mediaType || attachmentTypeRef.current || "",
+        mediaType: fileMeta.mediaType || attachmentTypeRef.current || undefined,
         mimeType: fileMeta.mimeType || "",
         fileName: fileMeta.fileName || ""
       },
@@ -507,7 +511,7 @@ const useChannelComposer = ({
         url: fileMeta.media_url,
         caption: fileMeta.caption || "",
         thumbnailUrl: fileMeta.thumbnailUrl || "",
-        mediaType: fileMeta.mediaType || attachmentTypeRef.current || "",
+        mediaType: fileMeta.mediaType || attachmentTypeRef.current || undefined,
         mimeType: fileMeta.mimeType || "",
         fileName: fileMeta.fileName || ""
       },

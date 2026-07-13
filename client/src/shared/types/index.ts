@@ -75,7 +75,7 @@ export interface Conversation {
   groupName?: string
   groupInfo?: string
   groupPicture?: { url?: string }
-  groupOwner?: any
+  groupOwner?: User | string
   participants: (User | string)[]
   admins?: (User | string)[]
   lastMessage?: Message

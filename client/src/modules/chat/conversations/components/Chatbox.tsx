@@ -13,13 +13,15 @@ import ProfileSidebar from "./ProfileSidebar"
 import useChatSocket from "@chat/socket/useChatSocket"
 import { chatBoxReducer, initialChatBoxState } from "@chat/conversations/state/chatBoxState"
 import type { User } from "@shared/types"
+import type { ChatMessage } from "@chat/conversations/types/chatMessages"
 
 const Chatbox = () => {
   const { user } = useAuth()
   const { conversationId, userId } = useParams()
   const [state, dispatch] = useReducer(chatBoxReducer, initialChatBoxState)
 
-  const setMessages = (payload: any[] | ((prev: any[]) => any[])) => dispatch({ type: "SET_MESSAGES", payload })
+  const setMessages = (payload: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) =>
+    dispatch({ type: "SET_MESSAGES", payload })
 
   const { socketRef, sendMessage, typingUsers, emitTypingStart, emitTypingStop } = useChatSocket({
     userId: user?._id,

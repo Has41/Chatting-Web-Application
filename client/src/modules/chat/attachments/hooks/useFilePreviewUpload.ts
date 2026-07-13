@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import useAuth from "@auth/hooks/useAuth"
 import useCloudinaryUpload from "@shared/hooks/useCloudinaryUpload"
 import resolveFilePreviewType from "@shared/utils/resolveFilePreviewType"
@@ -15,10 +15,10 @@ export const useFilePreviewUpload = ({
 }: FilePreviewModalProps) => {
   const { user } = useAuth()
   const { uploadFile } = useCloudinaryUpload()
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(Boolean(file))
   const [caption, setCaption] = useState("")
   const [isSending, setIsSending] = useState(false)
-  const [url, setUrl] = useState<string | null>(null)
+  const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
   const resolvedFileType = file
     ? resolveFilePreviewType({
         mimeType: file.type,
@@ -28,14 +28,10 @@ export const useFilePreviewUpload = ({
   const actualAttachmentType = file ? resolveAttachmentType(file) : "document"
 
   useEffect(() => {
-    if (!file) return
-
-    const objectUrl = URL.createObjectURL(file)
-    setUrl(objectUrl)
-    setIsVisible(true)
-
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [file])
+    return () => {
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [url])
 
   const handleClose = () => {
     setIsVisible(false)

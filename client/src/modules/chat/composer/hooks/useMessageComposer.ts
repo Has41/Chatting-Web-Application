@@ -2,18 +2,12 @@ import { useEffect, useReducer, useRef, useState, type ChangeEvent } from "react
 import useAuth from "@auth/hooks/useAuth"
 import { createTempMessageId } from "@chat/attachments/utils/filePreview"
 import { attachmentPickerReducer, initialAttachmentPickerState } from "@chat/composer/state/messageComposerState"
-import {
-  createFileSocketData,
-  createOptimisticMessage,
-  getAcceptedTypes
-} from "@chat/composer/utils/messageComposer"
+import { createFileSocketData, createOptimisticMessage, getAcceptedTypes } from "@chat/composer/utils/messageComposer"
 import type { FileType, SendMessagePayload } from "@chat/attachments/types/attachments"
 import type { MessageComposerProps } from "@chat/composer/types/messageComposer"
 
 export const useMessageComposer = ({
-  conversationId,
   conversationType,
-  messageContent,
   onTypingStart,
   onTypingStop,
   recipientId,
@@ -26,10 +20,7 @@ export const useMessageComposer = ({
   const [showAttachmentOptions, setShowAttachmentOptions] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [previewFile, setPreviewFile] = useState<File | null>(null)
-  const [attachmentPicker, requestAttachmentPicker] = useReducer(
-    attachmentPickerReducer,
-    initialAttachmentPickerState
-  )
+  const [attachmentPicker, requestAttachmentPicker] = useReducer(attachmentPickerReducer, initialAttachmentPickerState)
 
   const attachmentType = attachmentPicker.type
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -102,9 +93,7 @@ export const useMessageComposer = ({
     if (markFailed && clientTempId) {
       setMessages((prev) =>
         prev.map((message) =>
-          message._id === clientTempId && message.localStatus === "sending"
-            ? { ...message, localStatus: "failed" }
-            : message
+          message._id === clientTempId && message.localStatus === "sending" ? { ...message, localStatus: "failed" } : message
         )
       )
       return
@@ -158,9 +147,7 @@ export const useMessageComposer = ({
       sendMessage({ messageData, fileData })
     } else {
       setMessages((prev) =>
-        prev.map((message) =>
-          message._id === resolvedClientTempId ? { ...message, localStatus: "failed" } : message
-        )
+        prev.map((message) => (message._id === resolvedClientTempId ? { ...message, localStatus: "failed" } : message))
       )
     }
 

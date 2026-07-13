@@ -57,7 +57,7 @@ const InfoForm = ({ onButtonClick }: AuthSwitchProps) => {
     resolver: zodResolver(otherDetailSchema)
   })
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending: isLoading } = useMutation({
     mutationFn: async (formData: InfoFormData & { dateOfBirth: Date; userId: string | null }) => {
       return await axiosInstance.post(AUTH_PATHS.OTHER_DETAIL, formData)
     },

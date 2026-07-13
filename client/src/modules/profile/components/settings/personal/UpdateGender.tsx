@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { genderSchema } from "@shared/utils/zodSchema"
 import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
@@ -26,9 +26,9 @@ const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
 
   const {
     setValue,
+    control,
     reset,
     handleSubmit,
-    watch,
     formState: { errors }
   } = useForm<GenderFormData>({
     resolver: zodResolver(genderSchema),
@@ -39,7 +39,7 @@ const UpdateGender = ({ currentGender = "" }: UpdateGenderProps) => {
     reset({ gender: normalizedGender })
   }, [normalizedGender, reset])
 
-  const selectedGender = watch("gender")
+  const selectedGender = useWatch({ control, name: "gender" })
   const disableButton = selectedGender === normalizedGender
 
   const { mutate } = useUpdateProfileMutation()

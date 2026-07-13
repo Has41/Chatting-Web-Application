@@ -2,7 +2,7 @@ import ChatMessages from "../messages/ChatMessages"
 import type { Dispatch, RefObject, SetStateAction } from "react"
 import type { Conversation } from "@shared/types"
 import type { TypingUser } from "@chat/socket/useChatSocket"
-import type { ChatMessage } from "@chat/conversations/types/chatMessages"
+import type { ChatMessage, ChatSocketEmitter } from "@chat/conversations/types/chatMessages"
 
 const GroupChatMessages = ({
   lastMessage,
@@ -18,7 +18,7 @@ const GroupChatMessages = ({
   conversationId?: string
   groupData: Conversation | null
   socketMessages: ChatMessage[]
-  socketRef: RefObject<{ emit: (...args: any[]) => void } | null>
+  socketRef: RefObject<ChatSocketEmitter | null>
   typingUsers: TypingUser[]
 }) => (
   <ChatMessages

@@ -1,15 +1,8 @@
-import { createContext, ReactNode, useCallback, useEffect, useMemo, useReducer, type Dispatch, type SetStateAction } from "react"
+import { ReactNode, useCallback, useEffect, useMemo, useReducer, type SetStateAction } from "react"
 import type { Conversation } from "@shared/types"
 import { useChatListQuery } from "@chat/conversations/queries/chatQueries"
 import useAuth from "@auth/hooks/useAuth"
-
-interface ChatContextType {
-  chatList: Conversation[]
-  setChatList: Dispatch<SetStateAction<Conversation[]>>
-  isLoading: boolean
-}
-
-export const ChatContext = createContext<ChatContextType | undefined>(undefined)
+import { ChatContext } from "./chatContextValue"
 
 interface ChatProviderProps {
   children: ReactNode
@@ -74,11 +67,7 @@ const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     [isLoading, setChatList, state.chatList]
   )
 
-  return (
-    <ChatContext.Provider value={value}>
-      {children}
-    </ChatContext.Provider>
-  )
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
 }
 
 export default ChatProvider

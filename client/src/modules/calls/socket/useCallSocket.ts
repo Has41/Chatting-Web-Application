@@ -15,7 +15,7 @@ export const useCallSocket = (userId: string | undefined) => {
   const { status, incomingCall, remoteStream, localStream, callPeerId, callType, error, isMuted, isCameraOff } = state
 
   useEffect(() => {
-    refs.statusRef.current = status
+    refs.setStatus(status)
   }, [refs, status])
 
   useEffect(() => {
@@ -34,19 +34,17 @@ export const useCallSocket = (userId: string | undefined) => {
     [refs, userId]
   )
 
-  const { closePeerConnection, stopLocalStream, createPeerConnection, addPendingCandidates, getLocalMediaStream } = usePeerConnection({
-    refs,
-    dispatch,
-    sendIceCandidate
-  })
+  const { closePeerConnection, stopLocalStream, createPeerConnection, addPendingCandidates, getLocalMediaStream } =
+    usePeerConnection({
+      refs,
+      dispatch,
+      sendIceCandidate
+    })
 
   const resetCall = useCallback(() => {
     closePeerConnection()
     stopLocalStream()
-    refs.activePeerIdRef.current = null
-    refs.activeCallLogIdRef.current = null
-    refs.activeCallStartedAtRef.current = null
-    refs.pendingCandidatesRef.current = []
+    refs.resetCallRefs()
     dispatch({ type: "callReset" })
   }, [closePeerConnection, refs, stopLocalStream])
 
@@ -66,8 +64,7 @@ export const useCallSocket = (userId: string | undefined) => {
       if (!userId || !to || status !== "idle") return
 
       try {
-        refs.pendingFinalCallStatusRef.current = null
-        refs.finalizedCallStatusRef.current = null
+        refs.clearCallFinalization()
         dispatch({ type: "errorCleared" })
         dispatch({ type: "callTypeSet", callType: type })
         const stream = await getLocalMediaStream(type)
@@ -82,7 +79,10 @@ export const useCallSocket = (userId: string | undefined) => {
         createCallLog({ ownerId: userId, peerId: to, direction: "outgoing", type }).then(rememberCallLog)
       } catch (callError) {
         console.error(`Unable to start ${type} call:`, callError)
-        dispatch({ type: "errorSet", error: type === "video" ? "Camera or microphone access failed." : "Microphone access failed." })
+        dispatch({
+          type: "errorSet",
+          error: type === "video" ? "Camera or microphone access failed." : "Microphone access failed."
+        })
         resetCall()
       }
     },
@@ -109,7 +109,7 @@ export const useCallSocket = (userId: string | undefined) => {
       await peerConnection.setLocalDescription(answer)
 
       refs.socketRef.current?.emit("answer-call", { from: userId, to: incomingCall.from, answer })
-      refs.pendingFinalCallStatusRef.current = null
+      refs.setPendingFinalCallStatus(null)
       updateCallLog(userId, refs.activeCallLogIdRef.current, { status: "answered" })
       dispatch({ type: "callAccepted" })
     } catch (callError) {
@@ -118,7 +118,16 @@ export const useCallSocket = (userId: string | undefined) => {
       refs.socketRef.current?.emit("reject-call", { from: userId, to: incomingCall.from })
       resetCall()
     }
-  }, [addPendingCandidates, createPeerConnection, getLocalMediaStream, handleConnectionFailure, incomingCall, refs, resetCall, userId])
+  }, [
+    addPendingCandidates,
+    createPeerConnection,
+    getLocalMediaStream,
+    handleConnectionFailure,
+    incomingCall,
+    refs,
+    resetCall,
+    userId
+  ])
 
   const rejectCall = useCallback(() => {
     if (!userId || !incomingCall) return

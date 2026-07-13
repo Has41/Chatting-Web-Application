@@ -1,6 +1,7 @@
 import axiosInstance from "@shared/api/api-client"
 import { CHANNEL_PATHS } from "@shared/constants/apiPaths"
 import type { Channel, Message } from "@shared/types"
+import type { MessageFileMeta } from "@chat/attachments/types/attachments"
 
 export interface CreateChannelPayload {
   name: string
@@ -20,7 +21,7 @@ export interface UpdateChannelPayload {
 export interface CreateChannelMessagePayload {
   content?: string
   messageType: "text" | "file"
-  fileData?: any
+  fileData?: MessageFileMeta
   clientTempId?: string
 }
 
@@ -65,7 +66,10 @@ export const channelsApi = {
     return response.data
   },
 
-  updateChannel: async (channelId: string, payload: UpdateChannelPayload): Promise<{ channel: Channel; message: string }> => {
+  updateChannel: async (
+    channelId: string,
+    payload: UpdateChannelPayload
+  ): Promise<{ channel: Channel; message: string }> => {
     const response = await axiosInstance.patch<{ channel: Channel; message: string }>(
       CHANNEL_PATHS.DETAIL(channelId),
       payload
@@ -92,7 +96,10 @@ export const channelsApi = {
     return response.data
   },
 
-  transferChannelOwnership: async (channelId: string, newOwnerId: string): Promise<{ channel: Channel; message: string }> => {
+  transferChannelOwnership: async (
+    channelId: string,
+    newOwnerId: string
+  ): Promise<{ channel: Channel; message: string }> => {
     const response = await axiosInstance.patch<{ channel: Channel; message: string }>(
       CHANNEL_PATHS.TRANSFER_OWNERSHIP(channelId, newOwnerId)
     )

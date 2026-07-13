@@ -12,7 +12,12 @@ import MessageReactions from "@chat/messages/components/MessageReactions"
 import { AlertCircle, Send } from "lucide-react"
 import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
 import type { Dispatch, RefObject, SetStateAction } from "react"
-import type { ChatMessage, SeenUser } from "@chat/conversations/types/chatMessages"
+import type {
+  ChatMessage,
+  ChatSocketEmitter,
+  ConversationMessagesCache,
+  SeenUser
+} from "@chat/conversations/types/chatMessages"
 
 interface MessageProps {
   isSender: boolean
@@ -22,7 +27,7 @@ interface MessageProps {
   recipientData?: Array<{ _id: string; username?: string }>
   conversationId?: string
   conversationType?: "private" | "group"
-  socket: RefObject<{ emit: (...args: any[]) => void } | null>
+  socket: RefObject<ChatSocketEmitter | null>
   mediaGallery?: MediaViewerItem[]
   mediaGalleryIndex?: number
 }
@@ -82,12 +87,12 @@ const Message = ({
   }, [])
 
   const updateCachedMessages = (updater: (messages: ChatMessage[]) => ChatMessage[]) => {
-    queryClient.setQueryData(["getUserMessages", conversationId], (oldData: any) => {
+    queryClient.setQueryData<ConversationMessagesCache>(["getUserMessages", conversationId], (oldData) => {
       if (!oldData?.pages) return oldData
 
       return {
         ...oldData,
-        pages: oldData.pages.map((page: any) => ({
+        pages: oldData.pages.map((page) => ({
           ...page,
           messages: updater(page.messages)
         }))
@@ -584,7 +589,11 @@ const MessageSeenStatus = ({
   showSeenUsernames: boolean
   setShowSeenUsernames: Dispatch<SetStateAction<boolean>>
 }) => {
-  if (message?._id !== lastMessage?._id || lastMessage?.sender !== currentUserId || (lastMessage?.seenBy?.length ?? 0) === 0) {
+  if (
+    message?._id !== lastMessage?._id ||
+    lastMessage?.sender !== currentUserId ||
+    (lastMessage?.seenBy?.length ?? 0) === 0
+  ) {
     return null
   }
 
@@ -647,7 +656,14 @@ const GroupSeenStatus = ({
 )
 
 const MoreIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="size-5"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -657,7 +673,14 @@ const MoreIcon = () => (
 )
 
 const EditIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="size-5"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -667,7 +690,14 @@ const EditIcon = () => (
 )
 
 const DeleteIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="size-5"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"

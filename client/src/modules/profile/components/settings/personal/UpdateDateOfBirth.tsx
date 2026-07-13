@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
@@ -42,7 +42,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
   }, [currentFormattedDate])
 
   const {
-    watch,
+    control,
     register,
     reset,
     handleSubmit,
@@ -56,7 +56,7 @@ const UpdateDateOfBirth = ({ currentDateOfBirth }: UpdateDateOfBirthProps) => {
     reset(defaultValues)
   }, [defaultValues, reset])
 
-  const { day, month, year } = watch()
+  const { day, month, year } = useWatch({ control })
   const isIncomplete = !day || !month || !year
   const newDateString = day && month && year ? `${year}-${month}-${day}` : ""
   const isSameDate = newDateString === currentFormattedDate

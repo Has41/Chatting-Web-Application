@@ -1,4 +1,14 @@
-import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react"
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction
+} from "react"
 import {
   Check,
   Crown,
@@ -64,7 +74,6 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
   const [pendingAction, setPendingAction] = useState<string | null>(null)
   const [showAddMembers, setShowAddMembers] = useState(false)
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null)
-  const [immediateMemberAction, setImmediateMemberAction] = useState<ImmediateMemberAction | null>(null)
 
   const updateChannel = useUpdateChannel()
   const addMembers = useAddChannelMembers()
@@ -114,36 +123,31 @@ const ChannelInfoSidebar = ({ isOpen, onClose, channel }: ChannelInfoSidebarProp
     })
   }
 
-  const executeMemberAction = useCallback(async (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
-    const actionKey = `${action}:${target._id}`
-    setPendingAction(actionKey)
+  const executeMemberAction = useCallback(
+    async (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
+      const actionKey = `${action}:${target._id}`
+      setPendingAction(actionKey)
 
-    try {
-      if (action === "remove") {
-        await removeMember.mutateAsync({ channelId: channel._id, members: [target._id] })
-      } else if (action === "transfer") {
-        await transferOwnership.mutateAsync({ channelId: channel._id, newOwnerId: target._id })
-      } else if (action === "promote") {
-        await promoteAdmin.mutateAsync({ channelId: channel._id, targetUserId: target._id })
-      } else {
-        await demoteAdmin.mutateAsync({ channelId: channel._id, targetUserId: target._id })
+      try {
+        if (action === "remove") {
+          await removeMember.mutateAsync({ channelId: channel._id, members: [target._id] })
+        } else if (action === "transfer") {
+          await transferOwnership.mutateAsync({ channelId: channel._id, newOwnerId: target._id })
+        } else if (action === "promote") {
+          await promoteAdmin.mutateAsync({ channelId: channel._id, targetUserId: target._id })
+        } else {
+          await demoteAdmin.mutateAsync({ channelId: channel._id, targetUserId: target._id })
+        }
+      } finally {
+        setPendingAction(null)
       }
-    } finally {
-      setPendingAction(null)
-    }
-  }, [channel._id, demoteAdmin, promoteAdmin, removeMember, transferOwnership])
-
-  useEffect(() => {
-    if (!immediateMemberAction) return
-
-    void executeMemberAction(immediateMemberAction.action, immediateMemberAction.target).finally(() => {
-      setImmediateMemberAction(null)
-    })
-  }, [executeMemberAction, immediateMemberAction])
+    },
+    [channel._id, demoteAdmin, promoteAdmin, removeMember, transferOwnership]
+  )
 
   const handleMemberAction = (action: "remove" | "transfer" | "promote" | "demote", target: User) => {
     if (action === "promote" || action === "demote") {
-      setImmediateMemberAction({ action, target })
+      void executeMemberAction(action, target)
       return
     }
 
@@ -556,11 +560,6 @@ type ConfirmationAction =
   | { type: "member"; memberAction: "remove" | "transfer" | "promote" | "demote"; target: User }
   | { type: "leave" }
   | { type: "delete" }
-
-interface ImmediateMemberAction {
-  action: "promote" | "demote"
-  target: User
-}
 
 interface ConfirmationState {
   title: string

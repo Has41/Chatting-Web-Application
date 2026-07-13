@@ -48,7 +48,7 @@ export const usePDFMetaData = (mediaUrl?: string, _width?: number) => {
       setLoading(false)
       return null
     }
-  }, [meta])
+  }, [])
 
   const reset = useCallback(() => {
     setMeta(null)

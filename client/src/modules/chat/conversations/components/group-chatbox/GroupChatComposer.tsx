@@ -1,6 +1,7 @@
 import SendMessage from "../messages/SendMessage"
 import type { Dispatch, RefObject, SetStateAction } from "react"
-import type { ChatMessage } from "@chat/conversations/types/chatMessages"
+import type { ChatMessage, ChatSocketEmitter } from "@chat/conversations/types/chatMessages"
+import type { SocketSendMessagePayload } from "@chat/composer/types/messageComposer"
 
 const GroupChatComposer = ({
   sendMessage,
@@ -12,10 +13,10 @@ const GroupChatComposer = ({
   onTypingStart,
   onTypingStop
 }: {
-  sendMessage: (...args: any[]) => void
+  sendMessage: (payload: SocketSendMessagePayload) => void
   setMessages: Dispatch<SetStateAction<ChatMessage[]>>
   conversationId?: string
-  socketRef: RefObject<{ emit: (...args: any[]) => void } | null>
+  socketRef: RefObject<ChatSocketEmitter | null>
   messageContent: string
   setMessageContent: (value: string) => void
   onTypingStart: () => void

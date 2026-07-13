@@ -4,7 +4,8 @@ import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerMo
 import type {
   ChatConversationType,
   ChatMessage,
-  ChatParticipant
+  ChatParticipant,
+  ChatSocketEmitter
 } from "@chat/conversations/types/chatMessages"
 import type { RefObject, Dispatch, SetStateAction } from "react"
 
@@ -17,7 +18,7 @@ interface ChatMessageRowProps {
   lastMessage?: ChatMessage
   setMessages: Dispatch<SetStateAction<ChatMessage[]>>
   conversationId?: string
-  socket: RefObject<{ emit: (...args: any[]) => void } | null>
+  socket: RefObject<ChatSocketEmitter | null>
   mediaGallery: MediaViewerItem[]
   mediaGalleryIndex?: number
 }
@@ -48,7 +49,7 @@ const ChatMessageRow = ({
           <img
             src={sender.profilePicture?.url || FALLBACK_AVATAR_URL}
             alt={sender.username}
-            className={`${conversationType === "group" ? "mb-1 " : ""}h-8 w-8 rounded-full object-cover`}
+            className={`${conversationType === "group" ? "mb-1" : ""}h-8 w-8 rounded-full object-cover`}
           />
         </div>
       )}

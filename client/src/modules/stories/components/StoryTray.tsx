@@ -11,7 +11,7 @@ interface StoryTrayProps {
   onlineUserIds: Set<string>
 }
 
-const StoryTray = ({ stories, friends, onlineUserIds }: StoryTrayProps) => {
+const StoryTray = ({ stories, onlineUserIds }: StoryTrayProps) => {
   const { user } = useAuth()
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [viewerState, setViewerState] = useState<{ storyId: string | null; stories: Story[] }>({

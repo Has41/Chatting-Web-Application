@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { bioSchema } from "@shared/utils/zodSchema"
 import { useUpdateProfileMutation } from "@profile/queries/profileQueries"
@@ -14,7 +14,7 @@ interface BioFormData {
 
 const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
   const {
-    watch,
+    control,
     register,
     reset,
     handleSubmit,
@@ -28,7 +28,7 @@ const UpdateBio = ({ currentBio = "" }: UpdateBioProps) => {
     reset({ bio: currentBio })
   }, [currentBio, reset])
 
-  const bio = watch("bio")
+  const bio = useWatch({ control, name: "bio" })
   const disableButton = !bio || bio === currentBio
 
   const { mutate } = useUpdateProfileMutation()

@@ -1,18 +1,19 @@
 import type { ChatMessage } from "@chat/conversations/types/chatMessages"
+import type { User } from "@shared/types"
 
 export interface ChatBoxState {
-  userData: any
+  userData: User | null
   lastMessage?: ChatMessage
   messageContent: string
-  messages: any[]
+  messages: ChatMessage[]
   isSidebarOpen: boolean
 }
 
 export type ChatBoxAction =
-  | { type: "SET_USER_DATA"; payload: any }
+  | { type: "SET_USER_DATA"; payload: User | null }
   | { type: "SET_LAST_MESSAGE"; payload?: ChatMessage }
   | { type: "SET_MESSAGE_CONTENT"; payload: string }
-  | { type: "SET_MESSAGES"; payload: any[] | ((prev: any[]) => any[]) }
+  | { type: "SET_MESSAGES"; payload: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[]) }
   | { type: "TOGGLE_SIDEBAR" }
   | { type: "SET_SIDEBAR"; payload: boolean }
 

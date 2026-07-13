@@ -9,11 +9,10 @@ export const useCallLogLifecycle = (userId: string | undefined, refs: CallRefs) 
       if (!callLog) return
 
       const pendingFinalStatus = refs.pendingFinalCallStatusRef.current
-      refs.activeCallLogIdRef.current = callLog.id
-      refs.activeCallStartedAtRef.current = callLog.startedAt
+      refs.setActiveCallLog(callLog.id, callLog.startedAt)
 
       if (pendingFinalStatus) {
-        refs.pendingFinalCallStatusRef.current = null
+        refs.setPendingFinalCallStatus(null)
         finishCallLog(userId, callLog.id, pendingFinalStatus, callLog.startedAt)
       }
     },
@@ -24,14 +23,14 @@ export const useCallLogLifecycle = (userId: string | undefined, refs: CallRefs) 
     (status: FinalCallStatus) => {
       if (refs.finalizedCallStatusRef.current) return
 
-      refs.finalizedCallStatusRef.current = status
+      refs.setFinalizedCallStatus(status)
 
       if (refs.activeCallLogIdRef.current) {
         finishCallLog(userId, refs.activeCallLogIdRef.current, status, refs.activeCallStartedAtRef.current)
         return
       }
 
-      refs.pendingFinalCallStatusRef.current = status
+      refs.setPendingFinalCallStatus(status)
     },
     [refs, userId]
   )

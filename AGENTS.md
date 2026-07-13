@@ -209,6 +209,27 @@ Frontend placement rules:
 - Add `index.ts` barrels only when they make imports clearer and do not hide ownership boundaries.
 - Move files in small batches and update imports immediately. Do not do a giant structure rewrite in one pass.
 
+## Frontend Refactor Playbook
+
+Refactors should make the code easier to own without changing user-facing behavior unless the user explicitly asks for behavior changes.
+
+- Refactor in small, buildable batches. Prefer one feature, component family, or root-cause class per pass.
+- Before moving code, read the component/hook, its imports, its callers, and nearby feature patterns with `rg`.
+- Keep public entry points stable when a move would create churn. Use thin compatibility wrappers temporarily, then delete wrappers only after `rg` and tooling confirm they are unreachable.
+- Preserve current UI, copy, socket payloads, cache keys, route behavior, and optimistic message/file/audio flows during architecture refactors.
+- When splitting a large component, move pure display logic into child components, reusable orchestration into feature-local `hooks/`, render state into `state/` reducers when it reduces scattered state, and shared pure helpers into feature-local `utils/`.
+- Keep refs and non-render objects as refs, not reducer state. Do not store `File`, `Socket`, `MediaStream`, DOM nodes, or `RTCPeerConnection` objects in reducers.
+- For reducer refactors, place initial state, action types, and reducer logic in the feature `state/` folder when they are reused or large enough to distract from the hook/component.
+- Keep raw HTTP functions in `api/`. Move TanStack Query hooks, query keys, invalidation helpers, and cache update helpers to `queries/`.
+- Use real types at module boundaries. Prefer feature-local request/response/socket/cache types over `any`; use `unknown` only for genuinely opaque values that are narrowed before use.
+- For socket hooks, keep payloads object-shaped, type event payloads near the owning socket module, and keep socket refs out of render-time return values when callers only need action functions or refs.
+- For React context providers, export contexts from non-component context value files and keep provider files focused on components. This preserves Fast Refresh rules.
+- When strict ESLint or React Doctor reports a problem, fix the root cause. Do not disable, suppress, or silence a rule unless the item is verified as a true tool false positive and documented.
+- Follow React Query v5 names and object syntax. Mutation loading state is `isPending`, not legacy `isLoading`.
+- Prefer `useWatch` over broad React Hook Form `watch()` calls in render when strict React compiler rules flag the component.
+- After each meaningful frontend refactor batch, run `cd client; npm run type-check`, `cd client; npm run lint`, and `cd client; npm run build`. React Doctor cleanup passes should also run `cd client; npx react-doctor@latest --verbose`.
+- If lint-staged/pre-commit tooling is changed, verify the command from `client/` and keep the hook using local package commands, not global tools.
+
 ## Backend Structure Goal
 
 Move toward this NestJS structure gradually:

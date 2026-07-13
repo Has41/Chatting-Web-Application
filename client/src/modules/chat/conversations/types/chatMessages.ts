@@ -32,6 +32,14 @@ export interface ConversationMessagesPage {
   messages: ChatMessage[]
 }
 
+export interface ConversationMessagesCache {
+  pages: ConversationMessagesPage[]
+}
+
 export type ChatConversationType = "private" | "group"
 
 export type ChatParticipant = Pick<User, "_id" | "username" | "profilePicture">
+
+export interface ChatSocketEmitter {
+  emit: (event: string, ...args: unknown[]) => void
+}

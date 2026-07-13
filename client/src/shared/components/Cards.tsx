@@ -1,25 +1,27 @@
+import type { Ref } from "react"
+
 interface IntroCardProps {
-  cardRef?: any
+  cardRef?: Ref<HTMLDivElement>
   icon?: string
   title?: string
   description?: string
 }
 
 interface CustomerCardProps {
-  tempRef?: any
-  tempTitleRef?: any
-  tempDetailRef?: any
-  tempNameRef?: any
-  tempPostRef?: any
+  tempRef?: Ref<HTMLDivElement>
+  tempTitleRef?: Ref<HTMLDivElement>
+  tempDetailRef?: Ref<HTMLDivElement>
+  tempNameRef?: Ref<HTMLDivElement>
+  tempPostRef?: Ref<HTMLDivElement>
   tempImg?: string
   tempTopic?: string
   tempName?: string
 }
 
 interface SlidingCardProps {
-  tileRef?: any
-  subTileSectionRef?: any
-  subTileLogoRef?: any
+  tileRef?: Ref<HTMLDivElement>
+  subTileSectionRef?: Ref<HTMLDivElement>
+  subTileLogoRef?: Ref<HTMLDivElement>
   iconPath?: string
   tileName?: string
   tileDetail?: string

@@ -40,6 +40,7 @@ export default [
     },
     settings: { react: { version: "detect" } },
     rules: {
+      ...tsPlugin.configs.recommended.rules,
       ...reactPlugin.configs.recommended.rules,
       ...reactPlugin.configs["jsx-runtime"].rules,
       ...reactHooksPlugin.configs.recommended.rules,
@@ -50,19 +51,18 @@ export default [
       "react/no-unknown-property": "off",
       "react/jsx-key": "off",
       "react/jsx-no-target-blank": "off",
-      "react-hooks/rules-of-hooks": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "react-hooks/refs": "off",
-      "react-hooks/immutability": "off",
-      "react-hooks/set-state-in-effect": "off",
-      "react-hooks/incompatible-library": "off",
-      "react-refresh/only-export-components": "off",
 
       "no-unused-vars": "off",
-      "prefer-const": "off",
 
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": "off",
+      "react-refresh/only-export-components": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "@typescript-eslint/ban-ts-comment": "off",
     },
   },
