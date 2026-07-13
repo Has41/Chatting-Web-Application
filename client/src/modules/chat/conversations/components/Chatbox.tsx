@@ -149,7 +149,6 @@ const Chatbox = () => {
         lastMessage={state.lastMessage}
         conversationId={conversationId}
         setMessages={setMessages}
-        user={user}
         conversationType={"private"}
         userData={state.userData}
         socketMessages={state.messages}

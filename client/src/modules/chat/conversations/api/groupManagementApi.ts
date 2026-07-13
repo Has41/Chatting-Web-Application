@@ -1,6 +1,15 @@
-import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import axiosInstance from "@shared/api/api-client"
+import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
 import type { Conversation } from "@shared/types"
+import type { EditGroupInfoPayload, GroupManagementVariables } from "@chat/conversations/types/profileSidebar"
+
+export const editGroupInfo = async ({ conversationId, groupName, groupInfo }: EditGroupInfoPayload) => {
+  const response = await axiosInstance.patch(`${CONVERSATION_PATHS.EDIT_GROUP_INFO}/${conversationId}`, {
+    groupName,
+    groupInfo
+  })
+  return response.data
+}
 
 export const groupManagementApi = {
   addParticipants: async (conversationId: string, participants: string[]) => {
@@ -42,4 +51,11 @@ export const groupManagementApi = {
     )
     return response.data
   }
+}
+
+export const runGroupManagementAction = ({ conversationId, action, target }: GroupManagementVariables & { conversationId: string }) => {
+  if (action === "remove") return groupManagementApi.removeParticipants(conversationId, [target._id])
+  if (action === "transfer") return groupManagementApi.transferOwnership(conversationId, target._id)
+  if (action === "promote") return groupManagementApi.promoteAdmin(conversationId, target._id)
+  return groupManagementApi.demoteAdmin(conversationId, target._id)
 }

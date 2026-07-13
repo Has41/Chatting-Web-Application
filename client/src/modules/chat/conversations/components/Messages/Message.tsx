@@ -11,35 +11,8 @@ import FileMessagePreview from "@chat/attachments/components/FileMessagePreview"
 import MessageReactions from "@chat/messages/components/MessageReactions"
 import { AlertCircle, Send } from "lucide-react"
 import type { MediaViewerItem } from "@chat/attachments/components/MediaViewerModal"
-import type { MessageReactionItem } from "@chat/messages/components/MessageReactions"
 import type { Dispatch, RefObject, SetStateAction } from "react"
-
-interface SeenUser {
-  _id?: string
-  user: { _id?: string; username?: string; profilePicture?: { url?: string } }
-  seenAt?: string
-}
-
-interface ChatMessage {
-  _id: string
-  sender: string | { _id?: string }
-  content?: string
-  messageType?: string
-  media?: {
-    mediaUrl?: string
-    caption?: string
-    thumbnailUrl?: string
-    mediaType?: string
-    mimeType?: string
-    fileName?: string
-  }
-  clientTempId?: string
-  localStatus?: "sending" | "failed"
-  createdAt: string
-  editedAt?: string
-  seenBy?: SeenUser[]
-  reactions?: MessageReactionItem[]
-}
+import type { ChatMessage, SeenUser } from "@chat/conversations/types/chatMessages"
 
 interface MessageProps {
   isSender: boolean

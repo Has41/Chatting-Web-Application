@@ -1,74 +1,17 @@
-import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
 import SearchDropdown from "@chat/navigation/components/SearchDropdown"
-import axiosInstance from "@shared/api/api-client"
-import { USER_PATHS } from "@shared/constants/apiPaths"
 import useAuth from "@auth/hooks/useAuth"
-import type { ChangeEvent } from "react"
-import type { SearchConversation, SearchFriend } from "@chat/navigation/types/search"
+import { Search } from "lucide-react"
+import { useChatSearch } from "@chat/conversations/hooks/useChatSearch"
 
 const ChatSearch = () => {
   const { user } = useAuth()
-  const queryClient = useQueryClient()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [conversationResults, setConversationResults] = useState<SearchConversation[]>([])
-  const [friendResults, setfriendResults] = useState<SearchFriend[]>([])
-
-  const { mutate } = useMutation({
-    mutationFn: async (data: { dataToSearch: string }) => {
-      return await axiosInstance.get(USER_PATHS.SEARCH_USER_CONVO_DATA, {
-        params: { dataToSearch: data.dataToSearch }
-      })
-    },
-    onSuccess: ({ data }: { data: { conversation?: SearchConversation[]; friendsData?: SearchFriend[] } }) => {
-      console.log("Search results:", data)
-      queryClient.setQueryData(["chatSearch", searchQuery], data)
-      setConversationResults(data.conversation || [])
-      setfriendResults(data.friendsData || [])
-    },
-    onError: (error: unknown) => {
-      setConversationResults([])
-      setfriendResults([])
-      if (import.meta.env.PROD) return
-      console.error(error)
-    }
-  })
-
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchQuery(value)
-    if (value?.length < 3) {
-      setConversationResults([])
-      setfriendResults([])
-      return
-    }
-    mutate({ dataToSearch: value })
-  }
-
-  const handleClearSearch = () => {
-    setSearchQuery("")
-    setConversationResults([])
-    setfriendResults([])
-  }
+  const { conversationResults, friendResults, handleClearSearch, handleSearch, searchQuery } = useChatSearch()
 
   return (
     <div className="relative mx-auto mb-4 w-11/12">
       <div className="relative">
         <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-5 w-5 text-gray-400"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-4.35-4.35m2.7-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0z"
-            />
-          </svg>
+          <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
         </span>
         <input
           type="text"

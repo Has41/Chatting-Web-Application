@@ -1,21 +1,12 @@
-import { useMemo, useState, type ChangeEvent, type ReactNode } from "react"
-import { Crown, Loader2, Shield, ShieldMinus, ShieldPlus, UserMinus } from "lucide-react"
-import { profileInfoData } from "@shared/utils/dynamicData"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import axiosInstance from "@shared/api/api-client"
-import { CONVERSATION_PATHS } from "@shared/constants/apiPaths"
-import useChatList from "@chat/conversations/hooks/useChatList"
-import useAuth from "@auth/hooks/useAuth"
 import ChatInfoFiles from "./ChatInfoFiles"
-import { groupManagementApi } from "../services/groupManagementApi"
+import ProfileSidebarHeader from "./profile-sidebar/ProfileSidebarHeader"
+import ProfileIdentity from "./profile-sidebar/ProfileIdentity"
+import ProfileActionShortcuts from "./profile-sidebar/ProfileActionShortcuts"
+import GroupMembersPanel from "./profile-sidebar/GroupMembersPanel"
+import { useProfileSidebar } from "@chat/conversations/hooks/useProfileSidebar"
 import type { Dispatch, SetStateAction } from "react"
-import type { Conversation, User } from "@shared/types"
-
-interface ProfileSidebarData extends Partial<Conversation>, Partial<User> {
-  groupOwner?: User | string
-  participants?: Array<User | string>
-  admins?: Array<User | string>
-}
+import type { Conversation } from "@shared/types"
+import type { ProfileSidebarData } from "@chat/conversations/types/profileSidebar"
 
 interface ProfileSidebarProps {
   isOpen: boolean
@@ -25,169 +16,15 @@ interface ProfileSidebarProps {
   setData?: Dispatch<SetStateAction<Conversation | null>>
 }
 
-type GroupManagementAction = "remove" | "transfer" | "promote" | "demote"
+const noopSetData: Dispatch<SetStateAction<Conversation | null>> = () => {}
 
-type GroupManagementVariables = {
-  action: GroupManagementAction
-  target: User
-}
-
-const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () => {} }: ProfileSidebarProps) => {
-  const { user } = useAuth()
-  const queryClient = useQueryClient()
-  const { chatList, setChatList } = useChatList()
-  const [isEditing, setIsEditing] = useState(false)
-  const [isEditingInfo, setIsEditingInfo] = useState(false)
-  const [groupName, setGroupName] = useState(data?.groupName || "")
-  const [groupInfo, setGroupInfo] = useState(data?.groupInfo || "")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [pendingAction, setPendingAction] = useState<string | null>(null)
-
-  const { mutate: handleSave, isLoading } = useMutation({
-    mutationFn: async ({ groupName, groupInfo }: { groupName?: string; groupInfo?: string }) => {
-      return await axiosInstance.patch(`${CONVERSATION_PATHS.EDIT_GROUP_INFO}/${data?._id}`, {
-        groupName,
-        groupInfo
-      })
-    },
-    onMutate: async (newData: { groupName?: string; groupInfo?: string }) => {
-      const previousChatList = chatList
-
-      setData((prev: Conversation | null) =>
-        prev
-          ? {
-              ...prev,
-              ...(newData.groupName !== undefined && { groupName: newData.groupName }),
-              ...(newData.groupInfo !== undefined && { groupInfo: newData.groupInfo })
-            }
-          : prev
-      )
-
-      if (newData.groupName !== undefined) {
-        setChatList((prev) =>
-          prev.map((chat) => (chat._id === data?._id ? { ...chat, groupName: newData.groupName } : chat))
-        )
-      }
-
-      return { previousChatList }
-    },
-    onSuccess: () => {
-      setIsEditingInfo(false)
-      setIsEditing(false)
-      queryClient.invalidateQueries({ queryKey: [CONVERSATION_PATHS.GET_CONVERSATIONS_OF_USER] })
-      queryClient.invalidateQueries({ queryKey: ["groupConversation", conversationId] })
-      console.log("Edited successfully!")
-    },
-    onError: (error: unknown) => {
-      setIsEditing(false)
-      setIsEditingInfo(false)
-      console.error(error)
-    }
+const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = noopSetData }: ProfileSidebarProps) => {
+  const { state, derived, status, handlers } = useProfileSidebar({
+    data,
+    conversationId,
+    setData,
+    onClose
   })
-
-  const ownerId = getUserId(data?.groupOwner)
-  const currentUserId = user?._id
-  const adminIds = useMemo(
-    () => new Set((data?.admins || []).flatMap((admin) => (getUserId(admin) ? [getUserId(admin) as string] : []))),
-    [data?.admins]
-  )
-  const currentUserIsOwner = Boolean(currentUserId && ownerId === currentUserId)
-  const currentUserIsAdmin = Boolean(currentUserId && (currentUserIsOwner || adminIds.has(currentUserId)))
-
-  const managementMutation = useMutation({
-    mutationFn: async ({
-      action,
-      target
-    }: {
-      action: "remove" | "transfer" | "promote" | "demote"
-      target: User
-    }) => {
-      if (!conversationId) throw new Error("Conversation id is missing.")
-      setPendingAction(`${action}:${target._id}`)
-
-      if (action === "remove") return groupManagementApi.removeParticipants(conversationId, [target._id])
-      if (action === "transfer") return groupManagementApi.transferOwnership(conversationId, target._id)
-      if (action === "promote") return groupManagementApi.promoteAdmin(conversationId, target._id)
-      return groupManagementApi.demoteAdmin(conversationId, target._id)
-    },
-    onSuccess: (_result: unknown, { action, target }: GroupManagementVariables) => {
-      setData((prev: Conversation | null) => {
-        if (!prev) return prev
-
-        if (action === "remove") {
-          return {
-            ...prev,
-            participants: prev.participants.filter((participant) => getUserId(participant) !== target._id),
-            admins: (prev.admins || []).filter((admin) => getUserId(admin) !== target._id)
-          }
-        }
-
-        if (action === "transfer") {
-          const previousOwner = prev.groupOwner
-          const participantsWithoutNewOwner = prev.participants.filter((participant) => getUserId(participant) !== target._id)
-          const nextParticipants =
-            previousOwner && typeof previousOwner !== "string"
-              ? [...participantsWithoutNewOwner, previousOwner]
-              : participantsWithoutNewOwner
-
-          return {
-            ...prev,
-            groupOwner: target,
-            participants: nextParticipants,
-            admins: [...(prev.admins || []).filter((admin) => getUserId(admin) !== currentUserId), target]
-          }
-        }
-
-        if (action === "promote") {
-          return {
-            ...prev,
-            admins: [...(prev.admins || []).filter((admin) => getUserId(admin) !== target._id), target]
-          }
-        }
-
-        return {
-          ...prev,
-          admins: (prev.admins || []).filter((admin) => getUserId(admin) !== target._id)
-        }
-      })
-
-      queryClient.invalidateQueries({ queryKey: ["groupConversation", conversationId] })
-    },
-    onError: (error: unknown) => {
-      console.error("Group management action failed:", error)
-    },
-    onSettled: () => {
-      setPendingAction(null)
-    }
-  })
-
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-  }
-
-  const ownerUser = data?.groupOwner && typeof data.groupOwner !== "string" ? data.groupOwner : null
-  const memberRows = useMemo(() => {
-    const seenIds = new Set<string>()
-    const rows: User[] = []
-    const addMember = (member?: User | string | null) => {
-      if (!member || typeof member === "string" || seenIds.has(member._id)) return
-      seenIds.add(member._id)
-      rows.push(member)
-    }
-
-    addMember(ownerUser)
-    data?.participants?.forEach(addMember)
-    return rows
-  }, [data?.participants, ownerUser])
-  const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) return memberRows
-    const normalizedQuery = searchQuery.trim().toLowerCase()
-    return memberRows.filter((member) =>
-      `${member.username} ${member.displayName || ""}`.toLowerCase().includes(normalizedQuery)
-    )
-  }, [memberRows, searchQuery])
-  const profilePictureUrl = "profilePicture" in (data ?? {}) ? data?.profilePicture?.url : undefined
-  const aboutText = data?.conversationType ? data?.groupInfo : "bio" in (data ?? {}) ? data?.bio : ""
 
   return (
     <>
@@ -195,11 +32,7 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
         <button
           type="button"
           className="bg-opacity-40 fixed inset-0 z-40"
-          onClick={() => {
-            setIsEditing(false)
-            setIsEditingInfo(false)
-            onClose()
-          }}
+          onClick={handlers.closeSidebar}
           aria-label="Close chat info"
         />
       )}
@@ -209,423 +42,43 @@ const ProfileSidebar = ({ isOpen, onClose, data, conversationId, setData = () =>
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <ProfileSidebarHeader
-          title={data?.conversationType ? "Group Info" : "Chat Info"}
-          onClose={() => {
-            setIsEditingInfo(false)
-            setIsEditing(false)
-            onClose()
-          }}
-        />
+        <ProfileSidebarHeader title={derived.title} onClose={handlers.closeSidebar} />
 
         <ProfileIdentity
           data={data}
-          profilePictureUrl={profilePictureUrl}
-          groupName={groupName}
-          groupInfo={groupInfo}
-          aboutText={aboutText}
-          isEditing={isEditing}
-          isEditingInfo={isEditingInfo}
-          isLoading={isLoading}
-          setGroupName={setGroupName}
-          setGroupInfo={setGroupInfo}
-          setIsEditing={setIsEditing}
-          setIsEditingInfo={setIsEditingInfo}
-          onSave={handleSave}
+          profilePictureUrl={derived.profilePictureUrl}
+          groupName={state.groupName}
+          groupInfo={state.groupInfo}
+          aboutText={derived.aboutText}
+          isEditing={state.isEditing}
+          isEditingInfo={state.isEditingInfo}
+          isLoading={status.isSavingGroupInfo}
+          onGroupNameChange={handlers.setGroupName}
+          onGroupInfoChange={handlers.setGroupInfo}
+          onEditGroupName={() => handlers.setIsEditing(true)}
+          onEditGroupInfo={() => handlers.setIsEditingInfo(true)}
+          onSaveGroupName={handlers.saveGroupName}
+          onSaveGroupInfo={handlers.saveGroupInfo}
         />
+
         <ProfileActionShortcuts />
         <ChatInfoFiles conversationId={conversationId} />
 
         <GroupMembersPanel
           enabled={Boolean(data?.conversationType)}
-          memberCount={memberRows.length}
-          members={filteredMembers}
-          searchQuery={searchQuery}
-          ownerId={ownerId}
-          adminIds={adminIds}
-          currentUserIsOwner={currentUserIsOwner}
-          currentUserIsAdmin={currentUserIsAdmin}
-          pendingAction={pendingAction}
-          onSearchChange={handleSearchChange}
-          onMemberAction={(action, member) => managementMutation.mutate({ action, target: member })}
+          memberCount={derived.memberRows.length}
+          members={derived.filteredMembers}
+          searchQuery={state.searchQuery}
+          ownerId={derived.ownerId}
+          adminIds={derived.adminIds}
+          currentUserIsOwner={derived.currentUserIsOwner}
+          currentUserIsAdmin={derived.currentUserIsAdmin}
+          pendingAction={state.pendingAction}
+          onSearchChange={handlers.handleSearchChange}
+          onMemberAction={handlers.runMemberAction}
         />
       </div>
     </>
-  )
-}
-
-const getUserId = (value?: User | string | null) => (typeof value === "string" ? value : value?._id)
-
-const ProfileSidebarHeader = ({ title, onClose }: { title: string; onClose: () => void }) => (
-  <div className="flex items-center justify-between border-b p-4">
-    <h3 className="text-lg font-semibold">{title}</h3>
-    <button
-      type="button"
-      onClick={onClose}
-      className="text-xl text-gray-500 hover:text-gray-700"
-      aria-label="Close chat info"
-    >
-      ✕
-    </button>
-  </div>
-)
-
-const ProfileIdentity = ({
-  data,
-  profilePictureUrl,
-  groupName,
-  groupInfo,
-  aboutText,
-  isEditing,
-  isEditingInfo,
-  isLoading,
-  setGroupName,
-  setGroupInfo,
-  setIsEditing,
-  setIsEditingInfo,
-  onSave
-}: {
-  data: ProfileSidebarData | null
-  profilePictureUrl?: string
-  groupName: string
-  groupInfo: string
-  aboutText?: string
-  isEditing: boolean
-  isEditingInfo: boolean
-  isLoading: boolean
-  setGroupName: Dispatch<SetStateAction<string>>
-  setGroupInfo: Dispatch<SetStateAction<string>>
-  setIsEditing: Dispatch<SetStateAction<boolean>>
-  setIsEditingInfo: Dispatch<SetStateAction<boolean>>
-  onSave: (payload: { groupName?: string; groupInfo?: string }) => void
-}) => (
-  <div className="p-4 text-center">
-    <ProfileAvatar data={data} profilePictureUrl={profilePictureUrl} />
-    <div className="mt-4 flex items-center justify-center gap-2">
-      {isEditing && data?.conversationType ? (
-        <>
-          <input
-            type="text"
-            value={groupName}
-            onChange={(event) => setGroupName(event.target.value)}
-            className="border-b border-gray-400 text-center text-lg font-bold outline-none"
-            aria-label="Group name"
-            autoFocus
-          />
-          <RoundIconButton onClick={() => onSave({ groupName })} disabled={isLoading} label="Save group name">
-            <SaveIcon strokeWidth={1.5} />
-          </RoundIconButton>
-        </>
-      ) : (
-        <>
-          <h4 className="text-lg font-bold">
-            {("username" in (data ?? {}) ? data?.username : undefined) || data?.groupName || "Unknown"}
-          </h4>
-          {data?.conversationType && (
-            <RoundIconButton onClick={() => setIsEditing(true)} label="Edit group name">
-              <EditInfoIcon />
-            </RoundIconButton>
-          )}
-        </>
-      )}
-    </div>
-    <div className="mt-2 flex items-center justify-center gap-x-2 text-sm text-gray-600">
-      {isEditingInfo ? (
-        <>
-          <input
-            type="text"
-            value={groupInfo}
-            onChange={(event) => setGroupInfo(event.target.value)}
-            className="border-b border-gray-400 text-center text-sm outline-none"
-            aria-label="Group info"
-            autoFocus
-          />
-          <RoundIconButton onClick={() => onSave({ groupInfo })} label="Save group info">
-            <SaveIcon strokeWidth={2} />
-          </RoundIconButton>
-        </>
-      ) : (
-        <div className="flex items-center justify-center gap-2">
-          <p>{aboutText || (data?.conversationType ? "No group info available" : "No bio available")}</p>
-          {data?.conversationType && (
-            <RoundIconButton onClick={() => setIsEditingInfo(true)} label="Edit group info">
-              <EditInfoIcon />
-            </RoundIconButton>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-)
-
-const ProfileAvatar = ({
-  data,
-  profilePictureUrl
-}: {
-  data: ProfileSidebarData | null
-  profilePictureUrl?: string
-}) => {
-  if (data?.conversationType) {
-    return (
-      <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-gray-300 text-xl font-semibold text-white">
-        {data?.groupName?.charAt(0).toUpperCase()}
-      </div>
-    )
-  }
-
-  if (profilePictureUrl) {
-    return <img src={profilePictureUrl} alt="Profile" className="mx-auto h-24 w-24 rounded-full object-cover" />
-  }
-
-  return (
-    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-300 text-xl font-semibold text-white">
-      {("username" in (data ?? {}) ? data?.username?.charAt(0).toUpperCase() : undefined) || "U"}
-    </div>
-  )
-}
-
-const ProfileActionShortcuts = () => (
-  <div className="mt-4 w-full px-6">
-    <div className="flex justify-around">
-      {profileInfoData.map((item) => (
-        <div key={item.name} className="flex cursor-pointer flex-col items-center">
-          <div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-white shadow">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="text-custom-text size-5"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d={item.iconPath} />
-            </svg>
-          </div>
-          <span className="text-sm font-medium text-gray-700">{item.name}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-const GroupMembersPanel = ({
-  enabled,
-  memberCount,
-  members,
-  searchQuery,
-  ownerId,
-  adminIds,
-  currentUserIsOwner,
-  currentUserIsAdmin,
-  pendingAction,
-  onSearchChange,
-  onMemberAction
-}: {
-  enabled: boolean
-  memberCount: number
-  members: User[]
-  searchQuery: string
-  ownerId?: string
-  adminIds: Set<string>
-  currentUserIsOwner: boolean
-  currentUserIsAdmin: boolean
-  pendingAction: string | null
-  onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void
-  onMemberAction: (action: GroupManagementAction, member: User) => void
-}) => {
-  if (!enabled) return null
-
-  return (
-    <div className="mt-6 max-h-[35%] overflow-y-auto border-t px-4 pt-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h4 className="text-md font-semibold">Members ({memberCount})</h4>
-        {currentUserIsAdmin && (
-          <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
-            Admin tools
-          </span>
-        )}
-      </div>
-
-      <MemberSearchInput searchQuery={searchQuery} onSearchChange={onSearchChange} />
-
-      {members.length > 0 ? (
-        <ul className="space-y-2">
-          {members.map((member) => (
-            <GroupMemberRow
-              key={member._id}
-              member={member}
-              isOwner={ownerId === member._id}
-              isAdmin={adminIds.has(member._id) || ownerId === member._id}
-              currentUserIsOwner={currentUserIsOwner}
-              currentUserIsAdmin={currentUserIsAdmin}
-              pendingAction={pendingAction}
-              onAction={(action) => onMemberAction(action, member)}
-            />
-          ))}
-        </ul>
-      ) : (
-        <p className="py-6 text-center text-sm text-gray-500">No members found</p>
-      )}
-    </div>
-  )
-}
-
-const MemberSearchInput = ({
-  searchQuery,
-  onSearchChange
-}: {
-  searchQuery: string
-  onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void
-}) => (
-  <div className="relative mx-auto mb-4 w-full">
-    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-      <SearchIcon />
-    </span>
-    <input
-      value={searchQuery}
-      onChange={onSearchChange}
-      type="text"
-      placeholder="Search members"
-      className="w-full rounded bg-slate-100 p-2 pl-12 placeholder:text-sm placeholder:text-slate-400 focus:ring focus:ring-blue-300 focus:outline-none"
-    />
-  </div>
-)
-
-const RoundIconButton = ({
-  children,
-  onClick,
-  disabled,
-  label
-}: {
-  children: ReactNode
-  onClick: () => void
-  disabled?: boolean
-  label: string
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="bg-custom-green flex size-7 items-center justify-center rounded-full text-gray-500 hover:text-gray-700"
-    disabled={disabled}
-    aria-label={label}
-  >
-    {children}
-  </button>
-)
-
-const SaveIcon = ({ strokeWidth }: { strokeWidth: number }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className="size-4 text-white">
-    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-  </svg>
-)
-
-const EditInfoIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-white">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-    />
-  </svg>
-)
-
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-gray-400">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m2.7-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0z" />
-  </svg>
-)
-
-interface GroupMemberRowProps {
-  member: User
-  isOwner: boolean
-  isAdmin: boolean
-  currentUserIsOwner: boolean
-  currentUserIsAdmin: boolean
-  pendingAction: string | null
-  onAction: (action: GroupManagementAction) => void
-}
-
-const GroupMemberRow = ({
-  member,
-  isOwner,
-  isAdmin,
-  currentUserIsOwner,
-  currentUserIsAdmin,
-  pendingAction,
-  onAction
-}: GroupMemberRowProps) => {
-  const canManage = !isOwner && (currentUserIsOwner || (currentUserIsAdmin && !isAdmin))
-  const isBusy = Boolean(pendingAction?.endsWith(`:${member._id}`))
-  const avatarUrl = member.profilePicture?.url || member.avatar || ""
-
-  return (
-    <li className="flex items-center justify-between gap-3 rounded-lg p-2 transition hover:bg-slate-50">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            (member.displayName || member.username || "U").charAt(0).toUpperCase()
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-800">{member.displayName || member.username}</p>
-          <p className="truncate text-xs text-slate-500">@{member.username}</p>
-        </div>
-      </div>
-
-      <div className="flex shrink-0 items-center gap-1.5">
-        {isOwner ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700">
-            <Crown size={12} />
-            Owner
-          </span>
-        ) : isAdmin ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-[11px] font-semibold text-green-700">
-            <Shield size={12} />
-            Admin
-          </span>
-        ) : null}
-
-        {isBusy && <Loader2 size={16} className="animate-spin text-green-600" />}
-
-        {!isBusy && canManage && (
-          <>
-            {currentUserIsOwner && (
-              <button
-                type="button"
-                onClick={() => onAction("transfer")}
-                className="grid size-8 place-items-center rounded-full text-amber-700 transition hover:bg-amber-50 focus:ring-2 focus:ring-amber-300 focus:outline-none"
-                title="Transfer ownership"
-                aria-label={`Transfer ownership to ${member.username}`}
-              >
-                <Crown size={16} />
-              </button>
-            )}
-            {currentUserIsOwner && (
-              <button
-                type="button"
-                onClick={() => onAction(isAdmin ? "demote" : "promote")}
-                className="grid size-8 place-items-center rounded-full text-green-700 transition hover:bg-green-50 focus:ring-2 focus:ring-green-300 focus:outline-none"
-                title={isAdmin ? "Remove admin" : "Make admin"}
-                aria-label={isAdmin ? `Remove ${member.username} as admin` : `Make ${member.username} an admin`}
-              >
-                {isAdmin ? <ShieldMinus size={16} /> : <ShieldPlus size={16} />}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => onAction("remove")}
-              className="grid size-8 place-items-center rounded-full text-red-600 transition hover:bg-red-50 focus:ring-2 focus:ring-red-200 focus:outline-none"
-              title="Remove member"
-              aria-label={`Remove ${member.username}`}
-            >
-              <UserMinus size={16} />
-            </button>
-          </>
-        )}
-      </div>
-    </li>
   )
 }
 

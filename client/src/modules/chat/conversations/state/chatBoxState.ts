@@ -1,6 +1,8 @@
+import type { ChatMessage } from "@chat/conversations/types/chatMessages"
+
 export interface ChatBoxState {
   userData: any
-  lastMessage: string
+  lastMessage?: ChatMessage
   messageContent: string
   messages: any[]
   isSidebarOpen: boolean
@@ -8,7 +10,7 @@ export interface ChatBoxState {
 
 export type ChatBoxAction =
   | { type: "SET_USER_DATA"; payload: any }
-  | { type: "SET_LAST_MESSAGE"; payload: string }
+  | { type: "SET_LAST_MESSAGE"; payload?: ChatMessage }
   | { type: "SET_MESSAGE_CONTENT"; payload: string }
   | { type: "SET_MESSAGES"; payload: any[] | ((prev: any[]) => any[]) }
   | { type: "TOGGLE_SIDEBAR" }
@@ -16,7 +18,7 @@ export type ChatBoxAction =
 
 export const initialChatBoxState: ChatBoxState = {
   userData: null,
-  lastMessage: "",
+  lastMessage: undefined,
   messageContent: "",
   messages: [],
   isSidebarOpen: false
